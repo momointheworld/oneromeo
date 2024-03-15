@@ -10,8 +10,8 @@ generator client {
 model Post {
   id       String    @id @default(auto()) @map("_id") @db.ObjectId
   date     DateTime
-  slug     String    @unique
   title    String
+  slug     String    @unique
   body     String
 }
 

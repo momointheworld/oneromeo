@@ -22,7 +22,7 @@ export default async function Dashboard() {
         <div>
             <div className="flex justify-between items-center">
                 <h1 className="text-xl font-bold">Posts</h1>
-                <Link href={'/dashbard/new'} className="border p-2 rounded bg-blue-200 hover:bg-blue-600 hover:text-zinc-200 no-underline">Create Post</Link>
+                <Link href={'/dashboard/new'} className="border p-2 rounded bg-blue-200 hover:bg-blue-600 hover:text-zinc-200 no-underline">Create Post</Link>
             </div>
             <div className="flex flex-col gap-2 mt-5">
           {renderPosts}

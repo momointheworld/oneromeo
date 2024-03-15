@@ -25,7 +25,7 @@ const Navbar: React.FC = () => {
               <NavLink href="/contact">Contact</NavLink>
             </div>
           </div>
-          <Image className='justify-self-end pt-3' src={Logo} alt="sparrow logo" width="50" height="50" />
+          <Image className='justify-self-end pt-3' src={Logo} alt="sparrow logo" width="50" />
           {/* Hamburger menu for mobile */}
           <div className="md:hidden">
             <button onClick={toggleMenu} className="text-gray-600 hover:text-gray-900 focus:outline-none">

@@ -1,24 +1,22 @@
 'use server';
 import { db } from "@/db";
 import { redirect } from "next/navigation";
-import { parse, formatISO } from 'date-fns'; 
 
 interface FormDataProps {
-    date: string,
-    slug: string,
+    date: Date,
     title: string,
-    body: string
+    slug: string,
+    body: string,
 }
 
 export async function createPost(formData: FormDataProps) {
     const { date, slug, title, body } = formData;
-    const parsedDate = parse(date, 'yyyyMMdd', new Date()); 
     const post = await db.post.create({
         data: {
-            date: parsedDate,
+            date,
             slug,
             title,
-            body
+            body,
         }
      });
      console.log(post);
