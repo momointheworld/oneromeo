@@ -2,14 +2,20 @@
 import { Editor, EditorContent } from '@tiptap/react'
 import React from 'react'
 
+
 interface MenuBarProps {
   editor: Editor | null; // Define the type of the editor prop
+  onYoutubeClick: () => void;
+  widthRef: React.RefObject<HTMLInputElement>;
+  heightRef: React.RefObject<HTMLInputElement>;
 }
 
-const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
+const MenuBar: React.FC<MenuBarProps> = ({ editor, onYoutubeClick, widthRef, heightRef}) => {
+  
   if (!editor) {
-    return null;
+    return null
   }
+
 
   return (
     <div id='tiptap'>
@@ -77,6 +83,9 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
       >
         unsetColor
       </button>
+      <button type="button" id="add" onClick={onYoutubeClick}>Add YouTube video</button>
+      <input id="width" type="number" min="320" max="1024" ref={widthRef} placeholder="width" />
+      <input id="height" type="number" min="180" max="720" ref={heightRef} placeholder="height" />
     </div>
     <div>
       <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} 
@@ -164,12 +173,15 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
 
 interface EditorProps {
   editor: Editor | null; // Define the type of the editor prop
+  onYoutubeClick: () => void;
+  widthRef: React.RefObject<HTMLInputElement>;
+  heightRef: React.RefObject<HTMLInputElement>;
 }
 
-const TipTap: React.FC<EditorProps> = ({ editor}) => {
+const TipTap: React.FC<EditorProps> = ({ editor, onYoutubeClick, widthRef, heightRef}) => {
   return (
     <div>
-      <MenuBar editor={editor}/>
+      <MenuBar editor={editor} onYoutubeClick={onYoutubeClick} widthRef={widthRef} heightRef={heightRef}/>
       <EditorContent editor={editor} className='p-2 bg-zinc-50 border rounded w-full' />
     </div>
   )

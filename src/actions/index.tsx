@@ -5,16 +5,18 @@ import { redirect } from "next/navigation";
 interface FormDataProps {
     date: Date,
     title: string,
-    slug: string,
+    slug: string,            
+    category: string,
     body: string,
 }
 
 export async function createPost(formData: FormDataProps) {
-    const { date, slug, title, body } = formData;
+    const { date, slug, category, title, body } = formData;
     const post = await db.post.create({
         data: {
             date,
             slug,
+            category,
             title,
             body,
         }

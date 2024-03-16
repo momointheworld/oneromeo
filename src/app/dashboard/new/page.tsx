@@ -87,11 +87,13 @@ import { Color } from '@tiptap/extension-color'
 import ListItem from '@tiptap/extension-list-item'
 import TextStyle from '@tiptap/extension-text-style'
 import TextAlign from '@tiptap/extension-text-align';
+import Youtube from '@tiptap/extension-youtube'
 
 interface FormDataProps {
     date: Date;
     slug: string;
     title: string;
+    category: string;
     body: string;
 }
 
@@ -107,9 +109,11 @@ function createSlug(title: string) {
     return slug;
 }
 
+
 export default function CreatePost() {
     const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
     const [title, setTitle] = useState('');
+    const [category, setCategory] = useState('');
 
     const editor = useEditor({
         extensions: [
@@ -120,7 +124,9 @@ export default function CreatePost() {
           Color.configure({ 
             types: [TextStyle.name, ListItem.name] }),
           TextStyle,
-        
+          Youtube.configure({
+            controls: false,
+          }),
         ],
         content: '',
         // onUpdate({ editor }) {
@@ -129,17 +135,51 @@ export default function CreatePost() {
       })
     const editorContent = editor?.getHTML();
 
+ const widthRef = React.useRef<HTMLInputElement>(null);
+  const heightRef = React.useRef<HTMLInputElement>(null);
+  
+  React.useEffect(() => {
+    if (widthRef.current && heightRef.current) {
+      setWidthAndHeight();
+    }
+  }, [])
+
+  const setWidthAndHeight = () => {
+    widthRef.current!.value = '320';
+    heightRef.current!.value = '180';
+  };
+
+   const addYoutubeVideo = () => {
+    const url = prompt('Enter YouTube URL');
+      
+        if (url) {
+          const widthValue = widthRef.current?.value ? parseInt(widthRef.current.value, 10) : null;
+          const heightValue = heightRef.current?.value ? parseInt(heightRef.current.value, 10) : null;
+      
+          const width = Math.max(320, widthValue || 640);
+          const height = Math.max(180, heightValue || 480);
+      
+          editor?.commands.setYoutubeVideo({
+            src: url,
+            width,
+            height,
+          });
+        }
+      };
+      
+
 const handleSumbit = async (event: React.FormEvent) => {
     event.preventDefault();
     const generatedSlug = createSlug(title); 
     const formData: FormDataProps = {
     date: selectedDate || new Date(),
     title,
+    category,
     slug: generatedSlug,
     body: editorContent ?? '',
 };
-    // console.log(formData);
-    // console.log(editorContent);
+    console.log(formData);
+    console.log(editorContent);
     await action.createPost(formData);
 }
 
@@ -156,6 +196,20 @@ const handleSumbit = async (event: React.FormEvent) => {
                     onChange={(date) => setSelectedDate(date)}  
                     className="border rounded p-2 w-full"  />
                     </div>
+                    <div className="flex gap-4">
+                    <label htmlFor="category" className="w-20">Category</label>
+                    <select
+                        className="border rounded p-2"
+                        onChange={(e) => setCategory(e.target.value)}
+                        name="category"
+                        id="category"
+                    >
+                        <option value="">Select a category</option>
+                        <option value="Thoughts">Thoughts</option>
+                        <option value="Hobby">Hobby</option>
+                        <option value="Work">Work</option>
+                    </select>
+                    </div>
                      <div className="flex gap-4">
                         <label htmlFor="title" className="w-20">Title</label>
                         <input 
@@ -166,9 +220,10 @@ const handleSumbit = async (event: React.FormEvent) => {
                         id="title"
                         />
                     </div>
+
                     <div className="container flex gap-4">
                     <span className="w-20">Date</span>
-                    <TipTap editor={editor} />
+                    <TipTap editor={editor} onYoutubeClick={addYoutubeVideo} widthRef={widthRef} heightRef={heightRef}/>
                     </div>
                     <div className="flex gap-4 justify-end">
                     <button className="rounded bg-blue-500 shadow-md text-zinc-200 hover:text-zinc-900 shadow-stone-600 px-4 py-2">
