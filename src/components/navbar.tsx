@@ -19,10 +19,9 @@ const Navbar: React.FC = () => {
           <div className="flex items-center border-solid border-1 border-zinc-300 rounded-full shadow-lg mt-5 px-5">
             <NavLink href="/"><HomeIcon className="h-6 w-6 text-black-500 btn" /></NavLink>
             <div className="hidden md:flex space-x-4">
-              <NavLink href="/work">Work</NavLink>
-              <NavLink href="/hobby">Hobby</NavLink>
-              <NavLink href="/thoughts">Thoughts</NavLink>
+              <NavLink href="/about">About</NavLink>
               <NavLink href="/contact">Contact</NavLink>
+              <NavLink href="/order">Order Now</NavLink>
             </div>
           </div>
           <Image className='justify-self-end pt-3' src={Logo} alt="sparrow logo" width="50" />
@@ -37,10 +36,9 @@ const Navbar: React.FC = () => {
         {isOpen && (
           <div className="md:hidden">
             <div className="flex flex-col mt-2 space-y-2 border-solid border-3 border-zinc-300 rounded-md shadow-lg mt-5 px-5">
-              <NavLink href="/work">Work</NavLink>
-              <NavLink href="/hobby">Hobby</NavLink>
-              <NavLink href="/thoughts">Thoughts</NavLink>
+              <NavLink href="/about">About</NavLink>
               <NavLink href="/contact">Contact</NavLink>
+              <NavLink href="/order">Order Now</NavLink>
             </div>
           </div>
         )}

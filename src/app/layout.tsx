@@ -7,8 +7,8 @@ import Footer from "@/components/footer";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Slow Sparrow",
-  description: "A slow sparrow wants to get ahead.",
+  title: "One Romeo",
+  description: "I just want to do my part. To leave my footprints in the sand.",
 };
 
 export default function RootLayout({

@@ -36,7 +36,7 @@ function createSlug(title: string) {
 export default function CreatePost() {
     const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
     const [title, setTitle] = useState('');
-    const categories = ['Thoughts', 'Hobby', 'Work'];
+    const categories = ['Thoughts', 'Work'];
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
 
