@@ -23,3 +23,28 @@ model Category {
   postIDs String[] @db.ObjectId
   posts   Post[]   @relation(fields: [postIDs], references: [id])
 }
+
+// Define the Quiz model
+model Quiz {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId // Using MongoDB's default _id field
+  quizName  String
+  questions Question[]
+}
+
+// Define the Question model
+model Question {
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId // Using MongoDB's default _id field
+  text     String
+  answers  Answer[]
+  quiz     Quiz    @relation(fields: [quizId], references: [id])
+  quizId   String
+}
+
+// Define the Answer model
+model Answer {
+  id         String @id @default(auto()) @map("_id") @db.ObjectId // Using MongoDB's default _id field
+  text       String
+  isCorrect  Boolean
+  question   Question @relation(fields: [questionId], references: [id])
+  questionId String
+}

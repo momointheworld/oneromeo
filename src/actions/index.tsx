@@ -49,3 +49,49 @@ export async function editPost() {
     console.log("calling db");
     
 }
+
+// Quiz actions
+interface AnswerDataProps {
+    text: string;
+    isCorrect: boolean;
+  }
+  
+  interface QuestionDataProps {
+    text: string;
+    answers: AnswerDataProps[];
+  }
+  
+  interface QuizDataProps {
+    quizName: string;
+    questions: QuestionDataProps[];
+  }
+  
+  export async function createQuiz(formData: QuizDataProps) {
+    const { quizName, questions } = formData;
+  
+    try {
+      const quiz = await db.quiz.create({
+        data: {
+          quizName,
+          questions: {
+            create: questions.map((question) => ({
+              text: question.text,
+              answers: {
+                create: question.answers.map((answer) => ({
+                  text: answer.text,
+                  isCorrect: answer.isCorrect,
+                })),
+              },
+            })),
+          },
+        },
+      });
+  
+      console.log('Quiz created:', quiz, questions, questions[0].answers);
+      redirect('/dashboard');
+    } catch (error) {
+      console.error('Error creating quiz:', error);
+      // Handle error, such as displaying an error message to the user
+    }
+  }
+  
