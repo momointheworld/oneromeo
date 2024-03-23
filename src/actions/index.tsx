@@ -1,6 +1,6 @@
 'use server';
 import { db } from "@/db";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 interface FormDataProps {
     date: Date,
@@ -42,56 +42,65 @@ export async function createPost(formData: FormDataProps) {
      });
      console.log(post);
      console.log(date);
-     redirect('/dashboard');
+     redirect('/dashboard/posts');
 }
 
-export async function editPost() {
-    console.log("calling db");
-    
+interface GetPostProps {
+  id: string; // Define 'id' directly in the interface
 }
 
-// Quiz actions
+export async function getPost(props: GetPostProps): Promise<any> {
+  const { id } = props;
+  const post = await db.post.findFirst({
+      where: { id }, 
+  });
+  if (!post) {
+      return notFound();
+  }
+  return post;
+}
+ 
+
 interface AnswerDataProps {
-    text: string;
-    isCorrect: boolean;
-  }
-  
-  interface QuestionDataProps {
-    text: string;
-    answers: AnswerDataProps[];
-  }
-  
-  interface QuizDataProps {
-    quizName: string;
-    questions: QuestionDataProps[];
-  }
-  
-  export async function createQuiz(formData: QuizDataProps) {
-    const { quizName, questions } = formData;
-  
-    try {
-      const quiz = await db.quiz.create({
-        data: {
-          quizName,
-          questions: {
-            create: questions.map((question) => ({
-              text: question.text,
-              answers: {
-                create: question.answers.map((answer) => ({
-                  text: answer.text,
-                  isCorrect: answer.isCorrect,
-                })),
-              },
-            })),
-          },
+  text: string;
+  points: number; // New field for points associated with each answer
+}
+
+interface QuestionDataProps {
+  text: string;
+  answers: AnswerDataProps[];
+}
+
+interface QuizDataProps {
+  quizName: string;
+  questions: QuestionDataProps[];
+}
+
+export async function createQuiz(formData: QuizDataProps) {
+  const { quizName, questions } = formData;
+
+  try {
+    const quiz = await db.quiz.create({
+      data: {
+        quizName,
+        questions: {
+          create: questions.map((question) => ({
+            text: question.text,
+            answers: {
+              create: question.answers.map((answer) => ({
+                text: answer.text,
+                points: answer.points, // Include the points field in the answer creation
+              })),
+            },
+          })),
         },
-      });
-  
-      console.log('Quiz created:', quiz, questions, questions[0].answers);
-      redirect('/dashboard');
-    } catch (error) {
-      console.error('Error creating quiz:', error);
-      // Handle error, such as displaying an error message to the user
-    }
+      },
+    });
+
+    console.log('Quiz created:', quiz);
+    redirect('/dashboard/quizzes');
+  } catch (error) {
+    console.error('Error creating quiz:', error);
+    // Handle error, such as displaying an error message to the user
   }
-  
+}

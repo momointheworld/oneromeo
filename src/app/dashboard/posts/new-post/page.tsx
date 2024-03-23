@@ -11,6 +11,7 @@ import ListItem from '@tiptap/extension-list-item'
 import TextStyle from '@tiptap/extension-text-style'
 import TextAlign from '@tiptap/extension-text-align';
 import Youtube from '@tiptap/extension-youtube'
+import Link from 'next/link';
 
 interface FormDataProps {
     date: Date;
@@ -115,8 +116,11 @@ const handleSumbit = async (event: React.FormEvent) => {
 
     return(
         <div>
+             <div className="my-5">
+             <Link href={'/dashboard/'}>Dashboard</Link> {"\u00AB"} <Link href={'/dashboard/posts'}>Posts</Link> {"\u00AB"} New Post
+    </div>
         <form onSubmit={handleSumbit}>
-                   <h3 className="text-center mb-8">Create a new blog</h3>
+                   <h3 className="text-center mb-8">Create a new post</h3>
                 <div className="flex flex-col gap-4 p-5">
                     <div className="flex gap-4">
                     <label htmlFor="date" className="w-20">Date</label>

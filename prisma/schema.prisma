@@ -40,11 +40,11 @@ model Question {
   quizId   String
 }
 
-// Define the Answer model
+// Define the Answer model with the new points field
 model Answer {
-  id         String @id @default(auto()) @map("_id") @db.ObjectId // Using MongoDB's default _id field
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId // Using MongoDB's default _id field
   text       String
-  isCorrect  Boolean
+  points     Int      // New field for points associated with each answer
   question   Question @relation(fields: [questionId], references: [id])
   questionId String
 }

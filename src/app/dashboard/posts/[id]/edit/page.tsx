@@ -1,6 +1,6 @@
 'use client'
 import * as action from '@/actions'
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import TipTap from "@/components/editor";
@@ -11,6 +11,9 @@ import ListItem from '@tiptap/extension-list-item'
 import TextStyle from '@tiptap/extension-text-style'
 import TextAlign from '@tiptap/extension-text-align';
 import Youtube from '@tiptap/extension-youtube'
+import parse from 'html-react-parser';
+import Link from 'next/link';
+import { useParams } from 'next/navigation'
 
 interface FormDataProps {
     date: Date;
@@ -33,12 +36,33 @@ function createSlug(title: string) {
 }
 
 
-export default function CreatePost() {
+export default function ModifyPost() {
+    const params = useParams();
+    const id = params.id?.toString();
     const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
     const [title, setTitle] = useState('');
     const categories = ['Thoughts', 'Work'];
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+    const [editorContent, setEditorContent] = useState('');
 
+      interface getPostProps {
+        id: string;
+    }
+    useEffect(() => {
+        const fetchEditorContent = async () => {
+            try {
+                const content = await action.getPost({ id });
+                setEditorContent(content);
+                console.log(content);
+                console.log(editorContent);
+                
+            } catch (error) {
+                console.error('Error fetching editor content:', error);
+            }
+        };
+
+        fetchEditorContent();
+    }, [id]);
 
     const editor = useEditor({
         extensions: [
@@ -53,21 +77,21 @@ export default function CreatePost() {
             controls: false,
           }),
         ],
-        content: '',
+        content: `${editorContent}`,
         // onUpdate({ editor }) {
-        //     setEditorContent(editor.getHTML());
+        //     setEditorContent(contentHTML);
         //   },
       })
-    const editorContent = editor?.getHTML();
 
-    const widthRef = React.useRef<HTMLInputElement>(null);
-    const heightRef = React.useRef<HTMLInputElement>(null);
-  
-    React.useEffect(() => {
-        if (widthRef.current && heightRef.current) {
-        setWidthAndHeight();
-        }
-    }, [])
+      const widthRef = React.useRef<HTMLInputElement>(null);
+      const heightRef = React.useRef<HTMLInputElement>(null);
+    
+      React.useEffect(() => {
+          if (widthRef.current && heightRef.current) {
+          setWidthAndHeight();
+          }
+      }, [])
+
 
   const setWidthAndHeight = () => {
     widthRef.current!.value = '320';
@@ -115,8 +139,11 @@ const handleSumbit = async (event: React.FormEvent) => {
 
     return(
         <div>
+             <div className="my-5">
+             <Link href={'/dashboard/'}>Dashboard</Link> {"\u00AB"} <Link href={'/dashboard/posts'}>Posts</Link> {"\u00AB"} New Post
+    </div>
         <form onSubmit={handleSumbit}>
-                   <h3 className="text-center mb-8">Create a new blog</h3>
+                   <h3 className="text-center mb-8">Create a new post</h3>
                 <div className="flex flex-col gap-4 p-5">
                     <div className="flex gap-4">
                     <label htmlFor="date" className="w-20">Date</label>
