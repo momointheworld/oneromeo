@@ -1,6 +1,8 @@
 'use server';
 import { db } from "@/db";
 import { notFound, redirect } from "next/navigation";
+import { useRouter } from 'next/router'
+ 
 
 interface FormDataProps {
     date: Date,
@@ -59,7 +61,57 @@ export async function getPost(props: GetPostProps): Promise<any> {
   }
   return post;
 }
- 
+
+
+// Function to update a post with the provided data
+export async function updatePost(id: string, data: FormDataProps): Promise<void> {
+  const { date, slug, categoryNames, title, body } = data;
+
+  try {
+      let categoryIDs: string[] = [];
+
+      if (categoryNames && categoryNames.length > 0) {
+          // Find existing categories by name
+          const categories = await db.category.findMany({
+              where: { name: { in: categoryNames } },
+          });
+
+          // Determine missing category names
+          const missingCategoryNames = categoryNames.filter(name => !categories.some(category => category.name === name));
+
+          // Create missing categories
+          const createdCategories = await Promise.all(
+              missingCategoryNames.map(name => db.category.create({ data: { name } }))
+          );
+
+          // Combine existing and newly created categories
+          const allCategories = [...categories, ...createdCategories];
+
+          // Extract category IDs
+          categoryIDs = allCategories.map(category => category.id);
+      }
+
+      // Update the post with the new data and category IDs
+      await db.post.update({
+          where: { id },
+          data: {
+              date,
+              slug,
+              categoryIDs,
+              title,
+              body,
+          },
+      });
+
+      console.log('Post updated successfully!');
+  } catch (error) {
+      console.error('Error updating post:', error);
+      throw error; // Optionally handle or rethrow the error
+  }
+    redirect(`/dashboard/posts/${id}`)  // redirect needs to be outside of try...catch
+}
+
+// Quiz actions
 
 interface AnswerDataProps {
   text: string;
@@ -98,9 +150,9 @@ export async function createQuiz(formData: QuizDataProps) {
     });
 
     console.log('Quiz created:', quiz);
-    redirect('/dashboard/quizzes');
   } catch (error) {
     console.error('Error creating quiz:', error);
     // Handle error, such as displaying an error message to the user
   }
+  redirect('/dashboard/posts');  // redirect needs to be outside of try...catch
 }

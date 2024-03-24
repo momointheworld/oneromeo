@@ -1,6 +1,6 @@
 export default function PostLoading() {
 
     return(
-        <div>Loading posts...</div>
+        <div>Loading quizzes.</div>
     )
 }

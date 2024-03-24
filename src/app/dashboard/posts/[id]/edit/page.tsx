@@ -11,7 +11,6 @@ import ListItem from '@tiptap/extension-list-item'
 import TextStyle from '@tiptap/extension-text-style'
 import TextAlign from '@tiptap/extension-text-align';
 import Youtube from '@tiptap/extension-youtube'
-import parse from 'html-react-parser';
 import Link from 'next/link';
 import { useParams } from 'next/navigation'
 
@@ -41,28 +40,9 @@ export default function ModifyPost() {
     const id = params.id?.toString();
     const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
     const [title, setTitle] = useState('');
-    const categories = ['Thoughts', 'Work'];
+    const categories = ['Thoughts', 'Work', 'Hobby']; // can change this category or add/remove any
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [editorContent, setEditorContent] = useState('');
-
-      interface getPostProps {
-        id: string;
-    }
-    useEffect(() => {
-        const fetchEditorContent = async () => {
-            try {
-                const content = await action.getPost({ id });
-                setEditorContent(content);
-                console.log(content);
-                console.log(editorContent);
-                
-            } catch (error) {
-                console.error('Error fetching editor content:', error);
-            }
-        };
-
-        fetchEditorContent();
-    }, [id]);
 
     const editor = useEditor({
         extensions: [
@@ -77,11 +57,30 @@ export default function ModifyPost() {
             controls: false,
           }),
         ],
-        content: `${editorContent}`,
-        // onUpdate({ editor }) {
-        //     setEditorContent(contentHTML);
-        //   },
+        content: editorContent,
+        // when eidtor body content is changed, editor will be updated
+        onUpdate({ editor }) {
+            setEditorContent(editor.getHTML());
+          },
       })
+
+
+    useEffect(() => {
+        const fetchEditorContent = async () => {
+            try {
+                const fetchedContent = await action.getPost({ id });
+                setEditorContent(fetchedContent.body); // Extracting and setting body content
+                // After setting editor content, initialize the editor
+                setSelectedCategories(fetchedContent.categories);
+                setTitle(fetchedContent.title);
+                editor?.commands.setContent(fetchedContent.body); // Using body content to set fetched content
+            } catch (error) {
+                console.error('Error fetching editor content:', error);
+            }
+        };
+
+        fetchEditorContent();
+    }, [editor,id]);
 
       const widthRef = React.useRef<HTMLInputElement>(null);
       const heightRef = React.useRef<HTMLInputElement>(null);
@@ -134,16 +133,18 @@ const handleSumbit = async (event: React.FormEvent) => {
 };
     console.log(formData);
     console.log(editorContent);
-    await action.createPost(formData);
-}
+    // Call the updatePost function
+    await action.updatePost(id, formData);
+    console.log('Post updated successfully!');
+} 
 
     return(
         <div>
              <div className="my-5">
-             <Link href={'/dashboard/'}>Dashboard</Link> {"\u00AB"} <Link href={'/dashboard/posts'}>Posts</Link> {"\u00AB"} New Post
+             <Link href={'/dashboard/'}>Dashboard</Link> {"\u00AB"} <Link href={'/dashboard/posts'}>Posts</Link> {"\u00AB"} Edit Post
     </div>
         <form onSubmit={handleSumbit}>
-                   <h3 className="text-center mb-8">Create a new post</h3>
+                   <h3 className="text-center mb-8">Edit Post</h3>
                 <div className="flex flex-col gap-4 p-5">
                     <div className="flex gap-4">
                     <label htmlFor="date" className="w-20">Date</label>
@@ -175,19 +176,23 @@ const handleSumbit = async (event: React.FormEvent) => {
                         <input 
                         className="border rounded p-2 w-full"
                         onChange={(e) => setTitle(e.target.value)}
+                        value={title}
                         name="title"
                         type="text" 
                         id="title"
                         />
                     </div>
-
+                    { editorContent === '' ? (
+                        <div>Loading content...</div>
+                    ) : (
                     <div className="container flex gap-4">
                     <span className="w-20">Date</span>
                     <TipTap editor={editor} onYoutubeClick={addYoutubeVideo} widthRef={widthRef} heightRef={heightRef}/>
                     </div>
-                    <div className="flex gap-4 justify-end">
+                     )}
+                    <div className="flex gap-4 justify-end"> 
                     <button className="rounded bg-blue-500 shadow-md text-zinc-200 hover:text-zinc-900 shadow-stone-600 px-4 py-2">
-                     Submit
+                     Update Post
                     </button>
                     </div>
                 </div>
