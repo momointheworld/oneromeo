@@ -25,10 +25,13 @@ export default async function ShowQuiz(props: ShowQuizProps) {
     if (questionsWithAnswers.length === 0) {
         return notFound();
     }
+
+    const answerOptions = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+
     return (
         <div>
-             <div className="my-5">
-             <Link href={'/dashboard/'}>Dashboard</Link> {"\u00AB"} <Link href={'/dashboard/quizzes'}>quizzes</Link> {"\u00AB"} {quiz.quizName}
+            <div className="my-5">
+                <Link href={'/dashboard/'}>Dashboard</Link> {"\u00AB"} <Link href={'/dashboard/quizzes'}>quizzes</Link> {"\u00AB"} {quiz.quizName}
             </div>
             <h1>{quiz.quizName}</h1>
             <div className="flex justify-between">
@@ -40,13 +43,13 @@ export default async function ShowQuiz(props: ShowQuizProps) {
             <div className="p-2 mt-4">
                 <h2>Questions:</h2>
                 <ul>
-                    {questionsWithAnswers.map((questionWithAnswers) => (
+                    {questionsWithAnswers.map((questionWithAnswers, index) => (
                         <li key={questionWithAnswers.id}>
-                            <p>{questionWithAnswers.text}</p>
+                            <p>{index + 1}: {questionWithAnswers.text}</p>
                             <ul>
-                                {questionWithAnswers.answers.map((answer) => (
+                                {questionWithAnswers.answers.map((answer, ansIndex) => (
                                     <li key={answer.id}>
-                                        <span>{answer.text} {answer.points}</span>
+                                        <span>{answerOptions[ansIndex]}: {answer.text} | {answer.points}</span>
                                     </li>
                                 ))}
                             </ul>

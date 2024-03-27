@@ -154,5 +154,101 @@ export async function createQuiz(formData: QuizDataProps) {
     console.error('Error creating quiz:', error);
     // Handle error, such as displaying an error message to the user
   }
-  redirect('/dashboard/posts');  // redirect needs to be outside of try...catch
+     redirect('/dashboard/quizzes');  // redirect needs to be outside of try...catch
+}
+
+
+interface GetQuizProps {
+  id: string;
+}
+
+export async function getQuiz(props: GetQuizProps): Promise<any> {
+  const { id } = props;
+  const quiz = await db.quiz.findFirst({
+      where: { id }, 
+  });
+  if (!quiz) {
+      return notFound();
+  }
+  return quiz;
+}
+
+export async function getQuestions(quizId: string): Promise<any[]> {
+  const questions = await db.question.findMany({
+    where: { quizId },
+  });
+  return questions;
+}
+
+export async function getAnswers(questionId: string): Promise<any[]> {
+  const answers = await db.answer.findMany({
+    where: { questionId },
+  });
+  return answers;
+}
+ 
+
+interface UpdateQuizProps {
+  quizName: string
+}
+
+export async function updateQuiz(id: string, data: UpdateQuizProps) {
+  const { quizName } = data
+  try {
+    const updatedQuiz = await db.quiz.update({
+      where: { id },
+      data: {
+        quizName
+      }
+    });
+    console.log(`Quiz updated successfully, redirecting...`, updatedQuiz);
+  } catch (error) {
+    console.log(`Error updating quiz: ${error}`);
+  }
+   redirect(`/dashboard/quizzes/${id}`);
+}
+ 
+interface UpdateQuestionProps {
+  quizId: string;
+  text: string;
+}
+
+export async function updateQuestion(id:string, data: UpdateQuestionProps) {
+  const { quizId, text } = data;
+  try {
+    const updatedQuestion = await db.question.update({
+      where: { id },
+      data: {
+        quizId,
+        text,
+      }
+    });
+    return updatedQuestion;
+  } catch (error) {
+    throw new Error(`Error updating question: ${error}`);
+  }
+}
+
+
+interface UpdateAnswerProps {
+  text: string;
+  points: number; 
+  questionId: string;
+}
+
+export async function updateAnswer(id:string, data:UpdateAnswerProps) {
+  const { text, points, questionId } = data;
+  try {
+    const updatedAnswer = await db.answer.update({
+      where: { id },
+      data: {
+        text, 
+        points,
+        questionId
+      }
+    });
+    return updatedAnswer;
+  } catch (error) {
+    throw new Error(`Error updating answer: ${error}`);
+  }
 }
