@@ -8,7 +8,6 @@ interface AnswerDataProps {
     id: string;
     text: string;
     points: number; 
-    questionId: string;
   }
   
   interface QuestionDataProps {
@@ -25,15 +24,16 @@ interface AnswerDataProps {
   }
 
 export default function ModifyQuizzes() {
-    const [quiz, setQuiz] = useState<any | null>(null); // Define type for quiz
-    const [questions, setQuestions] = useState<QuestionDataProps[]>([]); // Define type for questions
-    const [answers, setAnswers] = useState<AnswerDataProps[][]>([]); // Define type for answers
+    const [quiz, setQuiz] = useState<QuizDataProps | null>(null); 
+    const [questions, setQuestions] = useState<QuestionDataProps[]>([]);  
+    const [answers, setAnswers] = useState<AnswerDataProps[][]>([]);  
     const params = useParams();
     const id = params.id?.toString();
 
     useEffect(() => {
         const fetchData = async () => {
             try {
+                if (!id) return;
                 // Get quiz data
                 const fetchedQuiz = await action.getQuiz({ id });
                 setQuiz(fetchedQuiz);
@@ -53,11 +53,8 @@ export default function ModifyQuizzes() {
                 console.error('Error fetching data:', error);
             }
         };
-
-        if (id) {
-            fetchData();
-        }
-    }, [id]);
+        fetchData();
+         }, [id]);
 
     console.log(quiz);
     console.log(questions);
@@ -92,26 +89,26 @@ export default function ModifyQuizzes() {
     };
 
     // Handle form submission (update data)
-    const handleSubmit = async () => {
-        const quizName= quiz.quizName
+    const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
         try {
-            // update quiz
-            await action.updateQuiz(id, quizName);
-            
-            // Update questions
-            for (const question of questions) {
-                await action.updateQuestion(question.id, question);
+            if (!quiz) {
+                throw new Error('Quiz data is not available.');
             }
-            
             // Update answers
             for (let i = 0; i < answers.length; i++) {
                 for (const answer of answers[i]) {
-                   await action.updateAnswer(answer.id, answer);
-              }
+                await action.updateAnswer(answer.id, { text: answer.text, points: answer.points });
             }
-
+            }
+            // Update questions
+            for (const question of questions) {
+                await action.updateQuestion(question.id, { text: question.text });
+                
+            }
+            // Update quiz
+            await action.updateQuiz(id, { quizName: quiz.quizName });
             
-
             console.log('Data updated successfully!');
         } catch (error) {
             console.error('Error updating data:', error);
@@ -146,7 +143,7 @@ export default function ModifyQuizzes() {
                     </ul>
                 </div>
             ))}
-            <button onClick={handleSubmit}>Save Changes</button>
+            <button type="submit" onClick={handleSubmit}>Save Changes</button>
         </div>
     );
 }

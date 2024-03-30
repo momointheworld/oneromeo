@@ -193,12 +193,12 @@ interface UpdateQuizProps {
 }
 
 export async function updateQuiz(id: string, data: UpdateQuizProps) {
-  const { quizName } = data
+  const { quizName} = data
   try {
     const updatedQuiz = await db.quiz.update({
       where: { id },
       data: {
-        quizName
+        quizName,
       }
     });
     console.log(`Quiz updated successfully, redirecting...`, updatedQuiz);
@@ -209,20 +209,20 @@ export async function updateQuiz(id: string, data: UpdateQuizProps) {
 }
  
 interface UpdateQuestionProps {
-  quizId: string;
   text: string;
 }
 
 export async function updateQuestion(id:string, data: UpdateQuestionProps) {
-  const { quizId, text } = data;
+  const { text } = data;
   try {
     const updatedQuestion = await db.question.update({
-      where: { id },
+      where: {  id },
       data: {
-        quizId,
         text,
       }
     });
+    console.log(updatedQuestion);
+    
     return updatedQuestion;
   } catch (error) {
     throw new Error(`Error updating question: ${error}`);
@@ -233,20 +233,19 @@ export async function updateQuestion(id:string, data: UpdateQuestionProps) {
 interface UpdateAnswerProps {
   text: string;
   points: number; 
-  questionId: string;
 }
 
 export async function updateAnswer(id:string, data:UpdateAnswerProps) {
-  const { text, points, questionId } = data;
+  const { text, points} = data;
   try {
     const updatedAnswer = await db.answer.update({
       where: { id },
       data: {
         text, 
         points,
-        questionId
       }
     });
+    console.log(updatedAnswer);
     return updatedAnswer;
   } catch (error) {
     throw new Error(`Error updating answer: ${error}`);
