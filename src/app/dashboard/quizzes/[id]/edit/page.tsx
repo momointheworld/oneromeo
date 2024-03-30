@@ -26,6 +26,7 @@ interface AnswerDataProps {
 export default function ModifyQuizzes() {
     const [quiz, setQuiz] = useState<QuizDataProps | null>(null); 
     const [questions, setQuestions] = useState<QuestionDataProps[]>([]);  
+    // const [addQuestion, setAddQuestion] = useState<boolean>(false);
     const [answers, setAnswers] = useState<AnswerDataProps[][]>([]);  
     const params = useParams();
     const id = params.id?.toString();
@@ -88,6 +89,37 @@ export default function ModifyQuizzes() {
         setAnswers(updatedAnswers);
     };
 
+    const handleAddQuestion = async () => {
+        try {
+          // Create a new question on the server
+          const newQuestionData = await action.createQuestion({
+            quizId: quiz?.id || '', // Use optional chaining to access quiz.id safely
+            text: '',
+            answers: [
+              { text: '', points: 0 },
+              { text: '', points: 0 },
+              { text: '', points: 0 },
+              { text: '', points: 0 },
+            ],
+          });
+      
+          // Update the local state with the newly created question
+          setQuestions((prevQuestions) => [...prevQuestions, newQuestionData]);
+          
+          // Reset the answers state to empty arrays
+          setAnswers((prevAnswers) => [...prevAnswers, newQuestionData.answers]);
+        } catch (error) {
+          console.error('Error adding question:', error);
+        }
+      };
+      
+
+      const handleRemoveQuestion = async() => {
+        console.log(questions);
+        
+      }
+      
+
     // Handle form submission (update data)
     const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
@@ -143,6 +175,16 @@ export default function ModifyQuizzes() {
                     </ul>
                 </div>
             ))}
+             <button type="button" 
+                onClick={handleAddQuestion} 
+                className="rounded bg-blue-500 shadow-md text-zinc-200 hover:text-zinc-900 shadow-stone-600 px-4 py-2 mx-2">
+                Add Question
+            </button>
+            <button type="button" 
+                onClick={handleRemoveQuestion} 
+                className="rounded bg-blue-500 shadow-md text-zinc-200 hover:text-zinc-900 shadow-stone-600 px-4 py-2 mx-2">
+                Remove Last Question
+            </button>
             <button type="submit" onClick={handleSubmit}>Save Changes</button>
         </div>
     );
