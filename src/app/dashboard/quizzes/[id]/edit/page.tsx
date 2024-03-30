@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import * as action from "@/actions";
+import Link from "next/link";
 
 
 interface AnswerDataProps {
@@ -148,44 +149,74 @@ export default function ModifyQuizzes() {
     };
 
     return (
-        <div>
+    <>
+    <div className="my-5">
+        <Link href={'/dashboard/'}>Dashboard</Link> {"\u00AB"} <Link href={'/dashboard/quizzes'}>quizzes</Link> {"\u00AB"} Edit Quiz
+        </div>
+        <div className='flex justify-center'>
+        <div className='flex flex-col justify-center'>
             {quiz && (
-                <div>
-                    <label>Quiz Name:</label>
-                    <input type="text" value={quiz.quizName} onChange={handleQuizNameChange} />
+                <div className="flex flex-row">
+                    <label className='text-nowrap'>Quiz Name:</label>
+                    <input 
+                    type="text" 
+                    value={quiz.quizName} 
+                    className="border rounded p-2 mx-5 w-full"
+                    onChange={handleQuizNameChange} />
                 </div>
             )}
             {questions.map((question, questionIndex) => (
-                <div key={question.id}>
-                    <label>Question {questionIndex + 1}:</label>
-                    <input type="text" value={question.text} onChange={(e) => handleQuestionTextChange(questionIndex, e)} />
-                    <ul>
+                <div key={question.id} className="flex flex-col justify-between my-5 p-3 bg-slate-300 rounded border">
+                      <div className="flex">
+                    <label className='text-nowrap px-2'>Question {questionIndex + 1}:</label>
+                    <input type="text" 
+                        value={question.text} 
+                        className="border rounded p-2 mx-5 w-full"
+                        onChange={(e) => handleQuestionTextChange(questionIndex, e)}
+                    />
+                </div>
                         {answers[questionIndex]?.map((answer, answerIndex) => (
-                            <li key={answer.id}>
-                                <label>Answer {String.fromCharCode(65 + answerIndex)}:</label>
-                                <input type="text" value={answer.text} onChange={(e) => handleAnswerTextChange(questionIndex, answerIndex, e)} />
-                                <select value={answer.points} onChange={(e) => handleAnswerPointsChange(questionIndex, answerIndex, e)}>
+                            <div key={answer.id} className='flex flex-row my-2 p-3 bg-slate-200 rounded border'>
+                                <label className='text-nowrap px-2'>Answer {String.fromCharCode(65 + answerIndex)}:</label>
+                                <input type="text" 
+                                value={answer.text} 
+                                className="border rounded p-2 w-full"
+                                onChange={(e) => handleAnswerTextChange(questionIndex, answerIndex, e)} />
+                                <select 
+                                value={answer.points} 
+                                className="border rounded p-2"
+                                onChange={(e) => handleAnswerPointsChange(questionIndex, answerIndex, e)}>
                                  {[answer.points, ...[0, 5, 10, 15].filter(option => option !== answer.points)].map((option, index) => (
-                                 <option key={index} value={option}>{option}</option>
+                                 <option 
+                                 key={index} 
+                                 value={option}>{option}
+                                 </option>
                                  ))}
                                 </select>
-
-                            </li>
+                            </div>
                         ))}
-                    </ul>
                 </div>
             ))}
-             <button type="button" 
-                onClick={handleAddQuestion} 
-                className="rounded bg-blue-500 shadow-md text-zinc-200 hover:text-zinc-900 shadow-stone-600 px-4 py-2 mx-2">
-                Add Question
-            </button>
-            <button type="button" 
-                onClick={handleRemoveQuestion} 
-                className="rounded bg-blue-500 shadow-md text-zinc-200 hover:text-zinc-900 shadow-stone-600 px-4 py-2 mx-2">
-                Remove Last Question
-            </button>
-            <button type="submit" onClick={handleSubmit}>Save Changes</button>
+            <div className="flex gap-4 justify-end">
+                <button type="button" 
+                    onClick={handleAddQuestion} 
+                    className="rounded bg-blue-500 shadow-md text-zinc-200 hover:text-zinc-900 shadow-stone-600 px-4 py-2 mx-2">
+                    Add Question
+                </button>
+                <button type="button" 
+                    onClick={handleRemoveQuestion} 
+                    className="rounded bg-blue-500 shadow-md text-zinc-200 hover:text-zinc-900 shadow-stone-600 px-4 py-2 mx-2">
+                    Remove Last Question
+                </button>
+                <button 
+                    type="submit" 
+                    className="rounded bg-blue-500 shadow-md text-zinc-200 hover:text-zinc-900 shadow-stone-600 px-4 py-2 mx-2"
+                    onClick={handleSubmit}>
+                    Save Changes
+                </button>
+            </div>
         </div>
+    </div>
+    </>
     );
 }
