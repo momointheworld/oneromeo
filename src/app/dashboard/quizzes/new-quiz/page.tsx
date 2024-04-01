@@ -106,8 +106,9 @@ export default function NewQuiz() {
     <div className='flex flex-col lg:w-1/2 md:w-full'>
       <h1>New Quiz</h1>
       <form onSubmit={handleSubmit}>
-        <div className="flex flex-row">
-          <label className='text-nowrap' htmlFor="quizName">Quiz Name:</label>
+        <div className="flex flex-row font-bold">
+          {/* quiz title */}
+          <label className='text-nowrap self-center' htmlFor="quizName">Quiz Name:</label>
           <input
             type="text"
             id="quizName"
@@ -118,10 +119,11 @@ export default function NewQuiz() {
             required
           />
         </div>
+        {/* questions */}
         {questions.map((question, questionIndex) => (
-          <div key={questionIndex} className="flex flex-col justify-between my-5 p-3 bg-slate-300 rounded border">
-             <div className="flex">
-            <label className='text-nowrap px-2' htmlFor={`question${questionIndex}`}>Question {questionIndex + 1}:</label>
+          <div key={questionIndex} className="flex flex-col justify-between my-5 p-3 bg-slate-200 rounded border">
+             <div className="flex font-bold">
+            <label className='text-nowrap px-2 self-center' htmlFor={`question${questionIndex}`}>Question {questionIndex + 1}:</label>
             <input
               type="text"
               id={`question${questionIndex}`}
@@ -132,10 +134,11 @@ export default function NewQuiz() {
               required
             />
             </div>
+            {/* answers */}
             {question.answers.map((answer, answerIndex) => (
-              <div key={answerIndex} className='flex flex-row my-2 p-3 bg-slate-200 rounded border'>  
-                <label className='text-nowrap px-2' htmlFor={`answer${questionIndex}${answerIndex}`}>
-                  Answer {String.fromCharCode(65 + answerIndex)}:
+              <div key={answerIndex} className='flex flex-row my-2 p-3 rounded'>  
+                <label className='text-nowrap px-2 self-center' htmlFor={`answer${questionIndex}${answerIndex}`}>
+                  {String.fromCharCode(65 + answerIndex)}:
                 </label>
                 <input
                   type="text"

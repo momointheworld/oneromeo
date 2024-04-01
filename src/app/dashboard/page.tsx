@@ -1,24 +1,29 @@
 import { format } from 'date-fns';
 import Link from "next/link";
-import { db } from "@/db"
+import { db } from "@/db";
+import DisplayPostsByCategory from '@/components/categoryPosts';
+import * as action from '@/actions';
 
 export default async function Dashboard() {
-    const posts = await db.post.findMany();
-    const latestPosts = posts.slice(0, 5); // Get the latest 5 posts
-    const renderPosts = latestPosts.map((post)=> {
-      const formattedDate = format(new Date(post.date), 'MMMM d, yyyy');
-        return(
-          <Link 
-          key={post.id}
-          href={`/dashboard/posts/${post.id}`}
-          className="flex justify-between items-center p-2 border rounded hover:bg-stone-50 no-underline"
-          >
-            <div className='text-zinc-500'>{formattedDate} | {post.title}</div> 
-            <div>view</div>
-          </Link>
-        )
-    })
+    // const posts = await db.post.findMany();
+    // const latestPosts = posts.slice(0, 5); // Get the latest 5 posts
+    // const renderPosts = latestPosts.map((post)=> {
+    //   const formattedDate = format(new Date(post.date), 'MMMM d, yyyy');
+    //     return(
+    //       <Link 
+    //       key={post.id}
+    //       href={`/dashboard/posts/${post.id}`}
+    //       className="flex justify-between items-center p-2 border rounded hover:bg-stone-50 no-underline"
+    //       >
+    //         <div className='text-zinc-500'>{formattedDate} | {post.title}</div> 
+    //         <div>{post.categoryIDs}</div>
+    //         <div>view</div>
+    //       </Link>
+    //     )
+    // })
 
+
+    
     const quizzes = await db.quiz.findMany();
     const latestQuizzes = quizzes.slice(0, 5); // Get the latest 5 quizzes
     const renderQuizzes = latestQuizzes.map((quiz)=> {
@@ -47,7 +52,7 @@ export default async function Dashboard() {
                 </div>
             </div>
             <div className="flex flex-col gap-2 mt-5">
-                {renderPosts}
+            {/* {DisplayPostsByCategory} */}
             </div>
             <div className="flex justify-between items-center mt-10">
                 <h1 className="text-xl font-bold">Latest Quizzes</h1>

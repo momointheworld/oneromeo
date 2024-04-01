@@ -3,6 +3,7 @@ import parse from 'html-react-parser';
 import { notFound } from "next/navigation";
 import { format } from 'date-fns';
 import { db } from "@/db";
+import * as action from '@/actions';
 
 interface ShowPostProps {
     params: {
@@ -19,6 +20,9 @@ export default async function ShowPost(props: ShowPostProps) {
     if (!post) {
         return notFound();
     }
+
+      const deletePostAction =  action.deletePost.bind(null, postId);
+
     return(
         <div>
             <div className="p-3 my-5">
@@ -28,7 +32,9 @@ export default async function ShowPost(props: ShowPostProps) {
         <div className="flex justify-between">
             <div className="flex gap-x-5">
             <Link href={`/dashboard/posts/${postId}/edit`} className="p-3 border rounded border-blue-400 no-underline hover:bg-blue-400">Edit</Link>
-            <Link  href={`/dashboard/posts/${postId}/delete`} className="p-3 border rounded border-red-400 no-underline hover:bg-red-200">Delete</Link>
+            <form action={deletePostAction} className="p-3 border rounded border-red-400 no-underline hover:bg-red-200">
+              <button> Delete</button>
+                </form>
             </div>
             <div className="self-end">{format(new Date(post.date), 'MMMM d, yyyy')}</div>
         </div>

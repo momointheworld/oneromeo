@@ -115,9 +115,14 @@ export default function ModifyQuizzes() {
       };
       
 
-      const handleRemoveQuestion = async() => {
-        console.log(questions);
-        
+      const handleDeleteQuestion = async (id: string) => {
+         try {
+             await action.deleteQuestion(id);
+              // Update the local state with the newly created question
+             setQuestions((prevQuestions) => prevQuestions.filter(question => question.id !== id));
+         } catch (error) {
+            console.error('Error deleting a question:', error);
+         }
       }
       
 
@@ -154,10 +159,11 @@ export default function ModifyQuizzes() {
         <Link href={'/dashboard/'}>Dashboard</Link> {"\u00AB"} <Link href={'/dashboard/quizzes'}>quizzes</Link> {"\u00AB"} Edit Quiz
         </div>
         <div className='flex justify-center'>
-        <div className='flex flex-col justify-center'>
+        <div className='flex flex-col justify-center lg:w-2/3 md:w-full content-evenly'>
+            {/* quiz title */}
             {quiz && (
                 <div className="flex flex-row">
-                    <label className='text-nowrap'>Quiz Name:</label>
+                    <label className='text-nowrap self-center'>Quiz Name:</label>
                     <input 
                     type="text" 
                     value={quiz.quizName} 
@@ -165,19 +171,21 @@ export default function ModifyQuizzes() {
                     onChange={handleQuizNameChange} />
                 </div>
             )}
+            {/* questions */}
             {questions.map((question, questionIndex) => (
-                <div key={question.id} className="flex flex-col justify-between my-5 p-3 bg-slate-300 rounded border">
-                      <div className="flex">
-                    <label className='text-nowrap px-2'>Question {questionIndex + 1}:</label>
-                    <input type="text" 
-                        value={question.text} 
-                        className="border rounded p-2 mx-5 w-full"
-                        onChange={(e) => handleQuestionTextChange(questionIndex, e)}
-                    />
-                </div>
+                <div key={question.id} className="flex flex-col justify-between my-5 p-5 border-slate-300 bg-slate-200 rounded">
+                    <div className="flex font-bold">
+                        <label className='text-nowrap px-2 self-center'>Question {questionIndex + 1}:</label>
+                        <input type="text" 
+                            value={question.text} 
+                            className="border rounded p-2 mx-5 w-full"
+                            onChange={(e) => handleQuestionTextChange(questionIndex, e)}
+                        />
+                     </div>
+                     {/* answers */}
                         {answers[questionIndex]?.map((answer, answerIndex) => (
-                            <div key={answer.id} className='flex flex-row my-2 p-3 bg-slate-200 rounded border'>
-                                <label className='text-nowrap px-2'>Answer {String.fromCharCode(65 + answerIndex)}:</label>
+                            <div key={answer.id} className='flex flex-row my-2 p-3 rounded '>
+                                <label className='text-nowrap px-2 content-evenly'>{String.fromCharCode(65 + answerIndex)}:</label>
                                 <input type="text" 
                                 value={answer.text} 
                                 className="border rounded p-2 w-full"
@@ -195,18 +203,18 @@ export default function ModifyQuizzes() {
                                 </select>
                             </div>
                         ))}
+                        {/* delete question button */}
+                        <button 
+                            type="button" 
+                            className="rounded bg-red-400 text-white px-3 py-1 my-2"
+                            onClick={() => handleDeleteQuestion(question.id)}>Delete Question</button>
                 </div>
             ))}
-            <div className="flex gap-4 justify-end">
+            <div className="flex gap-4 justify-center">
                 <button type="button" 
                     onClick={handleAddQuestion} 
                     className="rounded bg-blue-500 shadow-md text-zinc-200 hover:text-zinc-900 shadow-stone-600 px-4 py-2 mx-2">
                     Add Question
-                </button>
-                <button type="button" 
-                    onClick={handleRemoveQuestion} 
-                    className="rounded bg-blue-500 shadow-md text-zinc-200 hover:text-zinc-900 shadow-stone-600 px-4 py-2 mx-2">
-                    Remove Last Question
                 </button>
                 <button 
                     type="submit" 

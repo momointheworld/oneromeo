@@ -1,7 +1,6 @@
 'use server';
 import { db } from "@/db";
 import { notFound, redirect } from "next/navigation";
-import { useRouter } from 'next/router'
  
 
 interface FormDataProps {
@@ -62,6 +61,47 @@ export async function getPost(props: GetPostProps): Promise<any> {
   return post;
 }
 
+// get posts based on the category
+
+interface Post {
+  id: string;
+  date: Date;
+  title: string;
+  categoryIDs: string[];
+}
+
+export async function fetchAndGroupPostsByCategory(): Promise<{ [key: string]: Post[] } | null> {
+  try {
+    const posts = await db.post.findMany();
+    const latestPosts = posts.slice(0, 5); // Get the latest 5 posts
+
+    const groupedPosts: { [key: string]: Post[] } = {};
+    latestPosts.forEach((post) => {
+      post.categoryIDs.forEach((categoryId) => {
+        if (!groupedPosts[categoryId]) {
+          groupedPosts[categoryId] = [];
+        }
+        groupedPosts[categoryId].push(post);
+      });
+    });
+
+    return groupedPosts;
+  } catch (error) {
+    console.error('Error fetching and grouping posts by category:', error);
+    return null;
+  }
+}
+
+
+// Delete Post
+
+export async function deletePost(id: string) {
+  await db.post.delete({
+    where: { id }
+  });
+  console.log(`Post ${id} is deleted`);
+  redirect(`/dashboard/posts`)
+}
 
 // Function to update a post with the provided data
 export async function updatePost(id: string, data: FormDataProps): Promise<void> {
@@ -110,6 +150,8 @@ export async function updatePost(id: string, data: FormDataProps): Promise<void>
   }
     redirect(`/dashboard/posts/${id}`)  // redirect needs to be outside of try...catch
 }
+
+
 
 // Quiz actions
 
@@ -227,6 +269,7 @@ export async function getAnswers(questionId: string): Promise<any[]> {
   return answers;
 }
  
+// update quiz, questions and answers
 
 interface UpdateQuizProps {
   quizName: string
@@ -290,4 +333,35 @@ export async function updateAnswer(id:string, data:UpdateAnswerProps) {
   } catch (error) {
     throw new Error(`Error updating answer: ${error}`);
   }
+}
+
+// delete quiz, questions and answers
+
+export async function deleteQuestion(id: string) {
+  try {
+    // Fetch the question and its associated answers
+    const question = await db.question.findUnique({
+      where: { id },
+      include: {
+        answers: true,
+      },
+    });
+
+    if (!question) {
+      throw new Error(`Question ${id} not found.`);
+    }
+
+    // Delete the associated answers first
+    await Promise.all(question.answers.map(async (answer) => {
+      await db.answer.delete({ where: { id: answer.id } });
+      console.log(`Answer ${answer.id} deleted for question ${id}.`);
+    }));
+
+    // Now delete the question itself
+    await db.question.delete({ where: { id } });
+    console.log(`Question ${id} is deleted.`);
+  } catch (error) {
+    console.error(`Error deleting question: ${error}`);
+  } 
+  
 }

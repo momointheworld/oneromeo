@@ -28,34 +28,36 @@ export default async function ShowQuiz(props: ShowQuizProps) {
 
     const answerOptions = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
 
+
     return (
         <div>
             <div className="my-5">
                 <Link href={'/dashboard/'}>Dashboard</Link> {"\u00AB"} <Link href={'/dashboard/quizzes'}>quizzes</Link> {"\u00AB"} {quiz.quizName}
             </div>
+            <div className="flex flex-col items-center">
             <h1>{quiz.quizName}</h1>
             <div className="flex justify-between">
                 <div className="flex gap-x-5">
                     <Link href={`/dashboard/quizzes/${quizId}/edit`} className="p-3 border rounded border-blue-400 no-underline hover:bg-blue-400">Edit</Link>
-                    <Link href={`/dashboard/quizzes/${quizId}/delete`} className="p-3 border rounded border-red-400 no-underline hover:bg-red-200">Delete</Link>
                 </div>
             </div>
             <div className="p-2 mt-4">
                 <h2>Questions:</h2>
-                <ul>
+                <div>
                     {questionsWithAnswers.map((questionWithAnswers, index) => (
-                        <li key={questionWithAnswers.id}>
-                            <p>{index + 1}: {questionWithAnswers.text}</p>
-                            <ul>
+                        <div key={questionWithAnswers.id}>
+                            <p className="font-bold">{index + 1}: {questionWithAnswers.text}</p>
+                            <div>
                                 {questionWithAnswers.answers.map((answer, ansIndex) => (
-                                    <li key={answer.id}>
+                                    <div key={answer.id}>
                                         <span>{answerOptions[ansIndex]}: {answer.text} | {answer.points}</span>
-                                    </li>
+                                    </div>
                                 ))}
-                            </ul>
-                        </li>
+                            </div>
+                        </div>
                     ))}
-                </ul>
+                </div>
+            </div>
             </div>
         </div>
     )
