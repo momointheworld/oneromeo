@@ -1,8 +1,8 @@
-
 'use client'
 import React, { useState } from 'react';
-import { createQuiz } from '@/actions';
+import { useFormState } from 'react-dom';
 import Link from 'next/link';
+import * as action from '@/actions';
 
 interface AnswerDataProps {
   text: string;
@@ -70,8 +70,9 @@ export default function NewQuiz() {
       questions,
     };
 
-    await createQuiz(formDataForQuiz);
+    await action.createQuiz(formDataForQuiz);
   };
+
 
   const handleQuestionChange = (index: number, value: string) => {
     setQuestions((prevQuestions) => {

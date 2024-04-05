@@ -1,6 +1,7 @@
-'use client'
-import * as action from '@/actions'
-import React, { useState } from "react";
+'use client';
+import { createPost } from '@/actions';
+import { useRouter } from 'next/navigation';
+import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import TipTap from "@/components/editor";
@@ -12,6 +13,7 @@ import TextStyle from '@tiptap/extension-text-style'
 import TextAlign from '@tiptap/extension-text-align';
 import Youtube from '@tiptap/extension-youtube'
 import Link from 'next/link';
+import { useFormState } from 'react-dom';
 
 interface FormDataProps {
     date: Date;
@@ -39,8 +41,28 @@ export default function CreatePost() {
     const [title, setTitle] = useState('');
     const categories = ['Thoughts', 'Work'];
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+    const [messageVisible, setMessageVisible] = useState(false);  
+    const [message, setMessage] = useState(''); 
+    // get the formState and set the initial error message
+    const [formState, action] = useFormState(createPost, { message: ''});
+  
+   // Effect to handle message visibility and close button visibility
+   useEffect(() => {
+    if (formState.message) {
+        setMessage(formState.message); // Set the message
+        setMessageVisible(true); // Show the message
+    } else {
+        setMessage(''); // Clear the message if there's no message to display
+        setMessageVisible(false); // Hide the message
+    }
+}, [formState.message]);
 
-
+// Function to handle closing the message
+const closeMessage = () => {
+    setMessage(''); // Clear the message
+    setMessageVisible(false); // Hide the message
+};
+    // Editor config
     const editor = useEditor({
         extensions: [
           StarterKit,
@@ -94,14 +116,38 @@ export default function CreatePost() {
       };
       
 
+      // form input
 const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedOptions = Array.from(e.target.selectedOptions, (option) => option.value);
         setSelectedCategories(selectedOptions);
     };
 
-const handleSumbit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    const generatedSlug = createSlug(title); 
+    // const generatedSlug = createSlug(title); 
+    // const formData: FormDataProps = {
+    //     date: selectedDate || new Date(),
+    //     title,
+    //     categoryNames: selectedCategories,
+    //     slug: generatedSlug,
+    //     body: editorContent ?? '',
+    // };
+     
+
+// const formAction = async (event: React.FormEvent) => {
+//     event.preventDefault();
+//     const generatedSlug = createSlug(title); 
+//     const formData: FormDataProps = {
+//     date: selectedDate || new Date(),
+//     title,
+//     categoryNames: selectedCategories,
+//     slug: generatedSlug,
+//     body: editorContent ?? '',
+// };
+//     console.log(formData);
+//     console.log(editorContent);
+//     await action.createPost(formData);
+// }
+
+const generatedSlug = createSlug(title); 
     const formData: FormDataProps = {
     date: selectedDate || new Date(),
     title,
@@ -109,17 +155,27 @@ const handleSumbit = async (event: React.FormEvent) => {
     slug: generatedSlug,
     body: editorContent ?? '',
 };
-    console.log(formData);
-    console.log(editorContent);
-    await action.createPost(formData);
-}
+
 
     return(
         <div>
              <div className="my-5">
              <Link href={'/dashboard/'}>Dashboard</Link> {"\u00AB"} <Link href={'/dashboard/posts'}>Posts</Link> {"\u00AB"} New Post
-    </div>
-        <form onSubmit={handleSumbit}>
+            </div>
+           {/* formState error message */}
+            {messageVisible && (
+                <div className='bg-red-200 text-gray-700 px-5 rounded flex flex-row justify-between'>
+                 <p className='self-center'> {formState.message} </p>
+                    <button 
+                        className="font-bold hover:text-gray-700"
+                        onClick={closeMessage}
+                    >
+                        &times;
+                    </button>
+                </div>
+            )}
+            {/* Form input */}
+        <form action={(event) => action(formData)}>
                    <h3 className="text-center mb-8">Create a new post</h3>
                 <div className="flex flex-col gap-4 p-5">
                     <div className="flex gap-4">

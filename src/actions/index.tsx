@@ -1,5 +1,7 @@
 'use server';
 import { db } from "@/db";
+import { log } from "console";
+import { sendResponse } from "next/dist/server/image-optimizer";
 import { notFound, redirect } from "next/navigation";
  
 
@@ -11,14 +13,23 @@ interface FormDataProps {
     body: string,
 }
 
-export async function createPost(formData: FormDataProps) {
+type FormState = {
+  message: string;
+}
+
+export async function createPost(formState: FormState, formData: FormDataProps):  Promise<FormState>{
     const { date, slug, categoryNames, title, body } = formData;
 
+    // Check if title and body are empty
+    if (!title || !body) {
+      return {
+          message: 'Please fill out the Title and Body',
+      };
+  }
     // Find existing categories by name
     const categories = await db.category.findMany({
         where: { name: { in: categoryNames } },
     });
-
     // Determine missing category names
     const missingCategoryNames = categoryNames.filter(name => !categories.some(category => category.name === name));
 
@@ -42,9 +53,9 @@ export async function createPost(formData: FormDataProps) {
         }
      });
      console.log(post);
-     console.log(date);
-     redirect('/dashboard/posts');
-}
+     console.log(date); 
+     redirect(`/dashboard/posts/${post.id}`);
+ }
 
 interface GetPostProps {
   id: string; // Define 'id' directly in the interface
