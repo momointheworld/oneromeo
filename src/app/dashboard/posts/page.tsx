@@ -82,26 +82,26 @@ export default function AllPosts(): JSX.Element {
       }
 
       return categories.map(category => (
-          <div key={category.id}>
+        <div key={category.id}>
             <h2>
-                    <Link href={`/dashboard/posts/categories/${category.id}`}>{category.name}</Link>
-                </h2>
-              {groupedPosts[category.id]?.map(post => (
-                  <Link
-                      key={post.id}
-                      href={`/dashboard/posts/${post.id}`}
-                      className="flex justify-between items-center p-2 border rounded no-underline"
-                  >
-                      <div className="text-zinc-500">
-                          {format(new Date(post.date), 'MMMM d, yyyy')} | {post.title}
-                      </div>
-                      <div>view</div>
-                  </Link>
-              ))}
-          </div>
-      ));
-  };
-
+                <Link href={`/dashboard/posts/categories/${category.id}`}>{category.name}</Link>
+            </h2>
+            {/* Slice the posts array to display only 15 posts */}
+            {groupedPosts[category.id]?.slice(0, 6).map(post => (
+                <Link
+                    key={post.id}
+                    href={`/dashboard/posts/${post.id}`}
+                    className="flex justify-between items-center p-2 border rounded no-underline"
+                >
+                    <div className="text-zinc-500">
+                        {format(new Date(post.date), 'MMMM d, yyyy')} | {post.title}
+                    </div>
+                    <div>view</div>
+                </Link>
+            ))}
+        </div>
+    ));
+};
 
     return (
         <div className="flex flex-col">

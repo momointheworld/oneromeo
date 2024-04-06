@@ -1,6 +1,5 @@
 'use client';
 import { createPost } from '@/actions';
-import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";

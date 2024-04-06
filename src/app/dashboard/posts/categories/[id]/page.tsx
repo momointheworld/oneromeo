@@ -59,7 +59,7 @@ export default function CategoryPosts(props: CategoryProps ): JSX.Element {
     return (
         <div>
             <div className="p-3 my-5">
-            <Link href={'/dashboard/'}>Dashboard</Link> {"\u00AB"} <Link href={'/dashboard/posts/'}>Posts</Link>{"\u00AB"} <Link href={'/dashboard/posts/categories'}>Categories</Link> {"\u00AB"} {categoryName}
+            <Link href={'/dashboard/'}>Dashboard</Link> {"\u00AB"} <Link href={'/dashboard/posts/'}>Posts</Link> {"\u00AB"} <Link href={'/dashboard/posts/categories'}>Categories</Link> {"\u00AB"} {categoryName}
             </div>
             <h2>Posts for {categoryName}</h2>
             {posts ? (

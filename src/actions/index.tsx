@@ -1,7 +1,5 @@
 'use server';
 import { db } from "@/db";
-import { log } from "console";
-import { sendResponse } from "next/dist/server/image-optimizer";
 import { notFound, redirect } from "next/navigation";
  
 
