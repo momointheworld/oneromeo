@@ -40,7 +40,7 @@ export default function CreatePost() {
     const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
     const [title, setTitle] = useState('');
     const categories = ['Thoughts', 'Work'];
-    const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+    const [selectedCategories, setSelectedCategories] = useState<string[]>(['Work']); // Set default category to 'Work'
     const [messageVisible, setMessageVisible] = useState(false);  
     const [message, setMessage] = useState(''); 
     // get the formState and set the initial error message

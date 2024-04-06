@@ -52,11 +52,11 @@ export async function createPost(formState: FormState, formData: FormDataProps):
             body,
         }
      });
-     console.log(post);
-     console.log(date); 
      redirect(`/dashboard/posts/${post.id}`);
  }
 
+
+ // get a single post
 interface GetPostProps {
   id: string; // Define 'id' directly in the interface
 }
@@ -83,26 +83,62 @@ interface Post {
 
 export async function fetchAndGroupPostsByCategory(): Promise<{ [key: string]: Post[] } | null> {
   try {
-    const posts = await db.post.findMany();
-    const latestPosts = posts.slice(0, 5); // Get the latest 5 posts
+    const posts = await db.post.findMany({
+      include: { categories: true },
+    });
 
     const groupedPosts: { [key: string]: Post[] } = {};
-    latestPosts.forEach((post) => {
-      post.categoryIDs.forEach((categoryId) => {
+    posts.forEach((post) => {
+      post.categories.forEach((category) => {
+        const categoryId = category.id;
+        const categoryName = category.name;
         if (!groupedPosts[categoryId]) {
           groupedPosts[categoryId] = [];
         }
-        groupedPosts[categoryId].push(post);
+        // Add the category name to each post object
+        const postWithCategoryName = { ...post, categoryName };
+        groupedPosts[categoryId].push(postWithCategoryName);
       });
     });
-
+    
     return groupedPosts;
   } catch (error) {
     console.error('Error fetching and grouping posts by category:', error);
     return null;
   }
 }
+export async function getCategoryPosts(categoryId: string) {
+  try {
+    // Find the posts associated with the category ID
+    const posts = await db.post.findMany({
+      where: {
+        categoryIDs: {
+          has: categoryId,
+        },
+      },
+    });
 
+    return posts; // Return the posts associated with the category
+  } catch (error) {
+    console.error('Error fetching category posts:', error);
+    return null;
+  }
+}
+
+
+export async function getAllCategories() {
+  try {
+      const categories = await db.category.findMany({
+          include: {
+              posts: true,
+          },
+      });
+      return categories;
+  } catch (error) {
+      console.error('Error fetching all categories with posts:', error);
+      return null;
+  }
+}
 
 // Delete Post
 

@@ -21,7 +21,22 @@ export default async function ShowPost(props: ShowPostProps) {
         return notFound();
     }
 
-      const deletePostAction =  action.deletePost.bind(null, postId);
+// Fetch the categories associated with the post
+const categoryIds = post.categoryIDs || [];
+const categories = await Promise.all(categoryIds.map(async (categoryId) => {
+    return await db.category.findFirst({
+        where: { id: { equals: categoryId } }
+    });
+}));
+
+if (!categories.every(Boolean)) {
+    return notFound(); // Handle the case where any category is not found
+}
+
+// Extract category names from fetched categories
+const categoryNames = categories.map(category => category?.name);
+
+    const deletePostAction =  action.deletePost.bind(null, postId);
 
     return(
         <div>
@@ -36,7 +51,7 @@ export default async function ShowPost(props: ShowPostProps) {
               <button> Delete</button>
                 </form>
             </div>
-            <div className="self-end">{format(new Date(post.date), 'MMMM d, yyyy')}</div>
+            <div className="self-end">Categories: {categoryNames.join(', ')} | {format(new Date(post.date), 'MMMM d, yyyy')}</div> 
         </div>
         <div className="p-2 mt-4">
             { parse(post.body)}
