@@ -17,7 +17,8 @@ type FormState = {
 
 export async function createPost(formState: FormState, formData: FormDataProps):  Promise<FormState>{
     const { date, slug, categoryNames, title, body } = formData;
-
+    let postId: string | null = null;
+try {
     // Check if title and body are empty
     if (!title || !body) {
       return {
@@ -47,10 +48,19 @@ export async function createPost(formState: FormState, formData: FormDataProps):
             slug,
             categoryIDs,
             title,
-            body,
-        }
+            body,        
+          }
      });
-     redirect(`/dashboard/posts/${post.id}`);
+     postId = post.id;
+
+    } catch (error) {
+      // Catch any errors that occur during post creation
+      return {
+          message: error instanceof Error ? error.message : 'Something went wrong, try again later.'
+      };
+  }
+    redirect(`/dashboard/posts/${postId}`);
+      
  }
 
 

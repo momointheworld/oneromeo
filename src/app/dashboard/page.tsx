@@ -5,8 +5,8 @@ import DisplayPostsByCategory from '@/components/categoryPosts';
 import * as action from '@/actions';
 
 export default async function Dashboard() {
-    const posts = await db.post.findMany();
-    const latestPosts = posts.slice(0, 5); // Get the latest 5 posts
+  const posts = await db.post.findMany({ orderBy: { date: 'desc' } }); // Ordering posts by date in descending order
+  const latestPosts = posts.slice(0, 5); // Get the latest 5 posts
     const renderPosts = latestPosts.map((post)=> {
       const formattedDate = format(new Date(post.date), 'MMMM d, yyyy');
         return(
