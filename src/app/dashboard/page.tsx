@@ -1,8 +1,7 @@
 import { format } from 'date-fns';
 import Link from "next/link";
 import { db } from "@/db";
-import DisplayPostsByCategory from '@/components/categoryPosts';
-import * as action from '@/actions';
+
 
 export default async function Dashboard() {
   const posts = await db.post.findMany({ orderBy: { date: 'desc' } }); // Ordering posts by date in descending order
@@ -23,16 +22,17 @@ export default async function Dashboard() {
     })
 
     
-    const quizzes = await db.quiz.findMany();
+    const quizzes = await db.quiz.findMany({ orderBy: { date: 'desc' } });
     const latestQuizzes = quizzes.slice(0, 5); // Get the latest 5 quizzes
     const renderQuizzes = latestQuizzes.map((quiz)=> {
+    const formattedDate = format(new Date(quiz.date), 'MMMM d, yyyy');
         return(
           <Link 
           key={quiz.id}
           href={`/dashboard/quizzes/${quiz.id}`}
           className="flex justify-between items-center p-2 border rounded hover:bg-stone-50 no-underline"
           >
-            <div className='text-zinc-500'> {quiz.quizName}</div> 
+            <div className='text-zinc-500'>{formattedDate} | {quiz.quizName}</div> 
             <div>view</div>
           </Link>
         )

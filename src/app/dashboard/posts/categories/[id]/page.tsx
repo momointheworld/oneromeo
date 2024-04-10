@@ -1,6 +1,6 @@
 // pages/dashboard/posts/category/[categoryId].tsx
 'use client';
-import React, { use, useEffect, useState } from 'react';
+import React, {useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import Link from 'next/link';
 import { getAllCategories, getCategoryPosts } from '@/actions';
@@ -30,7 +30,7 @@ export default function CategoryPosts(props: CategoryProps ): JSX.Element {
         async function fetchData() {
             // Get the category ID from the route query parameters
           const categoryId = props.params.id
-          console.log(categoryId);
+        //   console.log(categoryId);
             const postsData = await getCategoryPosts(categoryId);
             setPosts(postsData || []);
         }

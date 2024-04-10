@@ -1,9 +1,11 @@
+'use client';
 import Link from "next/link";
 import parse from 'html-react-parser';
 import { notFound } from "next/navigation";
 import { format } from 'date-fns';
-import { db } from "@/db";
-import * as action from '@/actions';
+import { deletePost, getAllCategories, getPost } from '@/actions';
+import { useFormState } from "react-dom";
+import { useEffect, useState } from "react";
 
 interface ShowPostProps {
     params: {
@@ -11,23 +13,40 @@ interface ShowPostProps {
     }
 }
 
-export default async function ShowPost(props: ShowPostProps) {
-    // In MongoDB the ID is an object
-    const postId = props.params.id;
-    const post = await db.post.findFirst({
-        where: { id: postId }
-    })
-    if (!post) {
-        return notFound();
+export default function ShowPost(props: ShowPostProps) {
+// In MongoDB the ID is an object
+const postId = props.params.id;
+const [post, setPost] = useState<any>(null);
+const [message, setMessage] = useState('');
+const [messageVisible, setMessageVisible] = useState(false);  
+const [formState, action] = useFormState(deletePost, { message: '' });
+const [categories, setCategories] = useState<any[]>([]);
+
+   // Effect to handle message visibility and close button visibility
+   useEffect(() => {
+    if (formState.message) {
+        setMessage(formState.message); // Set the message
+        setMessageVisible(true); // Show the message
+    } else {
+        setMessage(''); // Clear the message if there's no message to display
+        setMessageVisible(false); // Hide the message
+    }
+}, [formState.message]);
+
+useEffect(() => {
+    async function fetchData() {
+        const fetchedPost = await getPost({ id: postId });
+        setPost(fetchedPost);
+        const fetchedCategories = await getAllCategories();
+        setCategories(fetchedCategories);
     }
 
-// Fetch the categories associated with the post
-const categoryIds = post.categoryIDs || [];
-const categories = await Promise.all(categoryIds.map(async (categoryId) => {
-    return await db.category.findFirst({
-        where: { id: { equals: categoryId } }
-    });
-}));
+    fetchData();
+}, [postId]); // Run the effect whenever postId changes
+
+if (!post) {
+    return <div>Loading...</div>;
+}
 
 if (!categories.every(Boolean)) {
     return notFound(); // Handle the case where any category is not found
@@ -36,7 +55,11 @@ if (!categories.every(Boolean)) {
 // Extract category names from fetched categories
 const categoryNames = categories.map(category => category?.name);
 
-    const deletePostAction =  action.deletePost.bind(null, postId);
+// Function to handle closing the message
+const closeMessage = () => {
+    setMessage(''); // Clear the message
+    setMessageVisible(false); // Hide the message
+};
 
     return(
         <div>
@@ -44,10 +67,22 @@ const categoryNames = categories.map(category => category?.name);
             <Link href={'/dashboard/'}>Dashboard</Link> {"\u00AB"} <Link href={'/dashboard/posts'}>posts</Link> {"\u00AB"} {post.title}
             </div>
             <h1>{post.title}</h1>
+            {/* formState error message */}
+            {messageVisible && (
+                <div className='bg-red-200 text-gray-700 px-5 rounded flex flex-row justify-between'>
+                 <p className='self-center'> {formState.message} </p>
+                    <button 
+                        className="font-bold hover:text-gray-700"
+                        onClick={closeMessage}
+                    >
+                        &times;
+                    </button>
+                </div>
+            )}
         <div className="flex justify-between">
             <div className="flex gap-x-5">
             <Link href={`/dashboard/posts/${postId}/edit`} className="p-3 border rounded border-blue-400 no-underline hover:bg-blue-400">Edit</Link>
-            <form action={deletePostAction} className="p-3 border rounded border-red-400 no-underline hover:bg-red-200">
+            <form action={(e)=> {action(postId)}} className="p-3 border rounded border-red-400 no-underline hover:bg-red-200">
               <button> Delete</button>
                 </form>
             </div>

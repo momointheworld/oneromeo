@@ -1,17 +1,19 @@
 import Link from "next/link";
+import { format } from 'date-fns';
 import { db } from "@/db"
 
-export default async function Dashboard() {
+export default async function RenderAllQuizzes() {
     
-    const quizzes = await db.quiz.findMany();
+    const quizzes = await db.quiz.findMany({ orderBy: { date: 'desc' } });
     const renderQuizzes = quizzes.map((quiz)=> {
+      const formattedDate = format(new Date(quiz.date), 'MMMM d, yyyy');
         return(
           <Link 
           key={quiz.id}
           href={`/dashboard/quizzes/${quiz.id}`}
           className="flex justify-between items-center p-2 border rounded no-underline"
           >
-            <div className='text-zinc-500'> {quiz.quizName}</div> 
+            <div className='text-zinc-500'> {formattedDate} | {quiz.quizName}</div> 
             <div>view</div>
           </Link>
         )

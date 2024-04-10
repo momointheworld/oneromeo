@@ -51,6 +51,8 @@ try {
             body,        
           }
      });
+     console.log('Post created successfully.', post.title);
+     
      postId = post.id;
 
     } catch (error) {
@@ -93,6 +95,7 @@ export async function fetchAndGroupPostsByCategory(): Promise<{ [key: string]: P
   try {
     const posts = await db.post.findMany({
       include: { categories: true },
+      orderBy: { date: 'desc' }, 
     });
 
     const groupedPosts: { [key: string]: Post[] } = {};
@@ -112,7 +115,7 @@ export async function fetchAndGroupPostsByCategory(): Promise<{ [key: string]: P
     return groupedPosts;
   } catch (error) {
     console.error('Error fetching and grouping posts by category:', error);
-    return null;
+    return notFound();
   }
 }
 export async function getCategoryPosts(categoryId: string) {
@@ -124,12 +127,15 @@ export async function getCategoryPosts(categoryId: string) {
           has: categoryId,
         },
       },
+      orderBy: {
+        date: 'desc', 
+      },
     });
 
     return posts; // Return the posts associated with the category
   } catch (error) {
     console.error('Error fetching category posts:', error);
-    return null;
+    return notFound();
   }
 }
 
@@ -144,19 +150,26 @@ export async function getAllCategories() {
       return categories;
   } catch (error) {
       console.error('Error fetching all categories with posts:', error);
-      return null;
+      return notFound();
   }
 }
 
 // Delete Post
 
-export async function deletePost(id: string) {
+export async function deletePost(formState:FormState, id: string) {
+  try {
   await db.post.delete({
     where: { id }
   });
   console.log(`Post ${id} is deleted`);
-  redirect(`/dashboard/posts`)
+} catch (error) {
+  // Catch any errors that occur during post creation
+  return {
+      message: error instanceof Error ? error.message : 'Something went wrong, try again later.'
+  };
 }
+    redirect(`/dashboard/posts/`)
+} 
 
 // Function to update a post with the provided data
 export async function updatePost(id: string, data: FormDataProps): Promise<void> {
@@ -201,7 +214,6 @@ export async function updatePost(id: string, data: FormDataProps): Promise<void>
       console.log('Post updated successfully!');
   } catch (error) {
       console.error('Error updating post:', error);
-      throw error; // Optionally handle or rethrow the error
   }
     redirect(`/dashboard/posts/${id}`)  // redirect needs to be outside of try...catch
 }
@@ -221,16 +233,18 @@ interface QuestionDataProps {
 }
 
 interface QuizDataProps {
+  date: Date
   quizName: string;
   questions: QuestionDataProps[];
 }
 
 export async function createQuiz(formData: QuizDataProps) {
-  const { quizName, questions } = formData;
+  const { date, quizName, questions } = formData;
 
   try {
     const quiz = await db.quiz.create({
       data: {
+        date,
         quizName,
         questions: {
           create: questions.map((question) => ({

@@ -1,6 +1,6 @@
 'use client';
 import { createPost } from '@/actions';
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import TipTap from "@/components/editor";
@@ -13,6 +13,7 @@ import TextAlign from '@tiptap/extension-text-align';
 import Youtube from '@tiptap/extension-youtube'
 import Link from 'next/link';
 import { useFormState } from 'react-dom';
+import DisplayMessage from '@/components/message';
 
 interface FormDataProps {
     date: Date;
@@ -34,33 +35,15 @@ function createSlug(title: string) {
     return slug;
 }
 
-
 export default function CreatePost() {
     const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
     const [title, setTitle] = useState('');
-    const categories = ['Thoughts', 'Work'];
+    const categories = ['Thoughts', 'Work', 'Hobby'];
     const [selectedCategories, setSelectedCategories] = useState<string[]>(['Work']); // Set default category to 'Work'
-    const [messageVisible, setMessageVisible] = useState(false);  
-    const [message, setMessage] = useState(''); 
-    // get the formState and set the initial error message
-    const [formState, action] = useFormState(createPost, { message: ''});
+    const [formState, action] = useFormState(createPost, {message: ''});
+    const formStateMessage = formState.message
+    const actions = createPost
   
-   // Effect to handle message visibility and close button visibility
-   useEffect(() => {
-    if (formState.message) {
-        setMessage(formState.message); // Set the message
-        setMessageVisible(true); // Show the message
-    } else {
-        setMessage(''); // Clear the message if there's no message to display
-        setMessageVisible(false); // Hide the message
-    }
-}, [formState.message]);
-
-// Function to handle closing the message
-const closeMessage = () => {
-    setMessage(''); // Clear the message
-    setMessageVisible(false); // Hide the message
-};
     // Editor config
     const editor = useEditor({
         extensions: [
@@ -121,31 +104,6 @@ const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setSelectedCategories(selectedOptions);
     };
 
-    // const generatedSlug = createSlug(title); 
-    // const formData: FormDataProps = {
-    //     date: selectedDate || new Date(),
-    //     title,
-    //     categoryNames: selectedCategories,
-    //     slug: generatedSlug,
-    //     body: editorContent ?? '',
-    // };
-     
-
-// const formAction = async (event: React.FormEvent) => {
-//     event.preventDefault();
-//     const generatedSlug = createSlug(title); 
-//     const formData: FormDataProps = {
-//     date: selectedDate || new Date(),
-//     title,
-//     categoryNames: selectedCategories,
-//     slug: generatedSlug,
-//     body: editorContent ?? '',
-// };
-//     console.log(formData);
-//     console.log(editorContent);
-//     await action.createPost(formData);
-// }
-
 const generatedSlug = createSlug(title); 
     const formData: FormDataProps = {
     date: selectedDate || new Date(),
@@ -155,24 +113,13 @@ const generatedSlug = createSlug(title);
     body: editorContent ?? '',
 };
 
-
     return(
         <div>
              <div className="my-5">
              <Link href={'/dashboard/'}>Dashboard</Link> {"\u00AB"} <Link href={'/dashboard/posts'}>Posts</Link> {"\u00AB"} New Post
             </div>
            {/* formState error message */}
-            {messageVisible && (
-                <div className='bg-red-200 text-gray-700 px-5 rounded flex flex-row justify-between'>
-                 <p className='self-center'> {formState.message} </p>
-                    <button 
-                        className="font-bold hover:text-gray-700"
-                        onClick={closeMessage}
-                    >
-                        &times;
-                    </button>
-                </div>
-            )}
+            <DisplayMessage actions={actions} formStateMessage={formStateMessage} />
             {/* Form input */}
         <form action={(event) => action(formData)}>
                    <h3 className="text-center mb-8">Create a new post</h3>

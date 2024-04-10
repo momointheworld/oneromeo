@@ -1,6 +1,8 @@
 'use client'
 import React, { useState } from 'react';
 import { useFormState } from 'react-dom';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import Link from 'next/link';
 import * as action from '@/actions';
 
@@ -15,11 +17,13 @@ interface QuestionDataProps {
 }
 
 interface QuizDataProps {
+  date: Date;
   quizName: string;
   questions: QuestionDataProps[];
 }
 
 export default function NewQuiz() {
+  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [quizName, setQuizName] = useState('');
   const [questions, setQuestions] = useState<QuestionDataProps[]>([
     {
@@ -62,16 +66,23 @@ export default function NewQuiz() {
   };
   
   
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    const formDataForQuiz: QuizDataProps = {
-      quizName,
-      questions,
-    };
-
-    await action.createQuiz(formDataForQuiz);
-  };
+//   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+//     e.preventDefault();
+//      const formDataForQuiz: QuizDataProps = {
+//       date: selectedDate || new Date(),
+//       quizName,
+//       questions,
+//     };
+//  console.log(formDataForQuiz);
+ 
+//     await action.createQuiz(formDataForQuiz);
+//   };
+const formDataForQuiz: QuizDataProps = {
+        date: selectedDate || new Date(),
+        quizName,
+        questions,
+      };
+const createQuizAction = action.createQuiz.bind(null, formDataForQuiz);
 
 
   const handleQuestionChange = (index: number, value: string) => {
@@ -103,12 +114,21 @@ export default function NewQuiz() {
     <div className="my-5">
              <Link href={'/dashboard/'}>Dashboard</Link> {"\u00AB"} <Link href={'/dashboard/quizzes'}>quizzes</Link> {"\u00AB"} New Quiz
     </div>
-    <div className='flex justify-center'>
+    <div className='flex justify-center text-center'>
     <div className='flex flex-col lg:w-1/2 md:w-full'>
       <h1>New Quiz</h1>
-      <form onSubmit={handleSubmit}>
-        <div className="flex flex-row font-bold">
-          {/* quiz title */}
+      <form action={createQuizAction}>
+        <div className="flex flex-col gap-4 font-bold">
+          {/* Datepicker */}
+            <div>
+             <label htmlFor="date" className='text-nowrap self-center'>Date: </label>
+                    <DatePicker 
+                    id="date"
+                    selected={selectedDate} 
+                    onChange={(date) => setSelectedDate(date)}  
+                    className="border rounded p-2 w-full"  />
+             </div>
+          <div className='flex flex-row'>
           <label className='text-nowrap self-center' htmlFor="quizName">Quiz Name:</label>
           <input
             type="text"
@@ -119,6 +139,7 @@ export default function NewQuiz() {
             onChange={(e) => setQuizName(e.target.value)}
             required
           />
+          </div>
         </div>
         {/* questions */}
         {questions.map((question, questionIndex) => (

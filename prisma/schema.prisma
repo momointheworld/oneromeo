@@ -27,6 +27,7 @@ model Category {
 // Define the Quiz model
 model Quiz {
   id        String  @id @default(auto()) @map("_id") @db.ObjectId // Using MongoDB's default _id field
+  date      DateTime
   quizName  String
   questions Question[]
 }
