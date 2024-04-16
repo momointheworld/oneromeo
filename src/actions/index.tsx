@@ -25,6 +25,7 @@ try {
           message: 'Please fill out the Title and Body',
       };
   }
+
     // Find existing categories by name
     const categories = await db.category.findMany({
         where: { name: { in: categoryNames } },
@@ -172,8 +173,16 @@ export async function deletePost(formState:FormState, id: string) {
 } 
 
 // Function to update a post with the provided data
-export async function updatePost(id: string, data: FormDataProps): Promise<void> {
-  const { date, slug, categoryNames, title, body } = data;
+interface UpdateFormDataProps {
+  date: Date,
+  title: string,
+  slug: string,            
+  categoryNames: string[]; 
+  body: string,
+  id: string,
+}
+export async function updatePost(formState: FormState, data: UpdateFormDataProps): Promise<FormState> {
+  const { date, slug, categoryNames, title, body, id } = data;
 
   try {
       let categoryIDs: string[] = [];
@@ -210,12 +219,14 @@ export async function updatePost(id: string, data: FormDataProps): Promise<void>
               body,
           },
       });
-
       console.log('Post updated successfully!');
   } catch (error) {
-      console.error('Error updating post:', error);
+    return {
+      message: error instanceof Error ? error.message : 'Something went wrong, try again later.'
+  };
   }
     redirect(`/dashboard/posts/${id}`)  // redirect needs to be outside of try...catch
+
 }
 
 

@@ -1,5 +1,5 @@
 'use client'
-import * as action from '@/actions'
+import {updatePost, getPost, createPost} from '@/actions';
 import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -13,13 +13,20 @@ import TextAlign from '@tiptap/extension-text-align';
 import Youtube from '@tiptap/extension-youtube'
 import Link from 'next/link';
 import { useParams } from 'next/navigation'
+import { useFormState } from 'react-dom';
+import DisplayPostMessage from '@/components/postMessage';
 
+interface FormState {
+    message: string;
+    // Other properties related to your form state
+}
 interface FormDataProps {
     date: Date;
     slug: string;
     title: string;
     categoryNames: string[];
     body: string;
+    id: string;
 }
 
 function createSlug(title: string) {
@@ -43,6 +50,8 @@ export default function ModifyPost() {
     const categories = ['Thoughts', 'Work', 'Hobby']; // can change this category or add/remove any
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [editorContent, setEditorContent] = useState('');
+    const [formState, action] = useFormState(updatePost, {message: ''});
+    const formStateMessage = formState.message;
 
     const editor = useEditor({
         extensions: [
@@ -68,7 +77,7 @@ export default function ModifyPost() {
     useEffect(() => {
         const fetchEditorContent = async () => {
             try {
-                const fetchedContent = await action.getPost({ id });
+                const fetchedContent = await getPost({ id });
                 setEditorContent(fetchedContent.body); // Extracting and setting body content
                 // After setting editor content, initialize the editor
                 setSelectedCategories(fetchedContent.categories);
@@ -121,29 +130,25 @@ const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setSelectedCategories(selectedOptions);
     };
 
-const handleSumbit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    const generatedSlug = createSlug(title); 
+
+const generatedSlug = createSlug(title); 
     const formData: FormDataProps = {
     date: selectedDate || new Date(),
     title,
     categoryNames: selectedCategories,
     slug: generatedSlug,
     body: editorContent ?? '',
+    id: id,
 };
-    console.log(formData);
-    console.log(editorContent);
-    // Call the updatePost function
-    await action.updatePost(id, formData);
-    console.log('Post updated successfully!');
-} 
 
     return(
         <div>
              <div className="my-5">
              <Link href={'/dashboard/'}>Dashboard</Link> {"\u00AB"} <Link href={'/dashboard/posts'}>Posts</Link> {"\u00AB"} Edit Post
     </div>
-        <form onSubmit={handleSumbit}>
+    {/* formState error message */}
+    <DisplayPostMessage formStateMessage={formStateMessage} />
+        <form action={() => action(formData)}>
                    <h3 className="text-center mb-8">Edit Post</h3>
                 <div className="flex flex-col gap-4 p-5">
                     <div className="flex gap-4">

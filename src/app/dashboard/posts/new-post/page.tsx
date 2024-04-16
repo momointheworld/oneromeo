@@ -13,8 +13,12 @@ import TextAlign from '@tiptap/extension-text-align';
 import Youtube from '@tiptap/extension-youtube'
 import Link from 'next/link';
 import { useFormState } from 'react-dom';
-import DisplayMessage from '@/components/message';
+import DisplayPostMessage from '@/components/postMessage';
 
+interface FormState {
+  message: string;
+  // Other properties related to your form state
+}
 interface FormDataProps {
     date: Date;
     slug: string;
@@ -41,8 +45,7 @@ export default function CreatePost() {
     const categories = ['Thoughts', 'Work', 'Hobby'];
     const [selectedCategories, setSelectedCategories] = useState<string[]>(['Work']); // Set default category to 'Work'
     const [formState, action] = useFormState(createPost, {message: ''});
-    const formStateMessage = formState.message
-    const actions = createPost
+    const formStateMessage = formState.message;
   
     // Editor config
     const editor = useEditor({
@@ -104,25 +107,25 @@ const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setSelectedCategories(selectedOptions);
     };
 
-const generatedSlug = createSlug(title); 
+    const generatedSlug = createSlug(title); 
     const formData: FormDataProps = {
     date: selectedDate || new Date(),
     title,
     categoryNames: selectedCategories,
     slug: generatedSlug,
     body: editorContent ?? '',
-};
-
-    return(
+}
+    
+return(
         <div>
              <div className="my-5">
              <Link href={'/dashboard/'}>Dashboard</Link> {"\u00AB"} <Link href={'/dashboard/posts'}>Posts</Link> {"\u00AB"} New Post
             </div>
-           {/* formState error message */}
-            <DisplayMessage actions={actions} formStateMessage={formStateMessage} />
+          {/* formState error message */}
+          <DisplayPostMessage formStateMessage={formStateMessage} />
             {/* Form input */}
         <form action={(event) => action(formData)}>
-                   <h3 className="text-center mb-8">Create a new post</h3>
+         <h3 className="text-center mb-8">Create a new post</h3>
                 <div className="flex flex-col gap-4 p-5">
                     <div className="flex gap-4">
                     <label htmlFor="date" className="w-20">Date</label>
