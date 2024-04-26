@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 import { deletePost, getAllCategories, getPost } from '@/actions';
 import { useFormState } from "react-dom";
 import { useEffect, useState } from "react";
+import { db } from "@/db";
 
 interface ShowPostProps {
     params: {
@@ -13,7 +14,7 @@ interface ShowPostProps {
     }
 }
 
-export default function ShowPost(props: ShowPostProps) {
+export default function ShowSinglePost(props: ShowPostProps) {
 // In MongoDB the ID is an object
 const postId = props.params.id;
 const [post, setPost] = useState<any>(null);
@@ -38,11 +39,15 @@ useEffect(() => {
         const fetchedPost = await getPost({ id: postId });
         setPost(fetchedPost);
         const fetchedCategories = await getAllCategories();
-        setCategories(fetchedCategories);
+        // filter the category by the category ID existing
+        const filteredCategories = fetchedCategories.filter(category => fetchedPost.categoryIDs.includes(category.id));
+        setCategories(filteredCategories);
     }
 
     fetchData();
 }, [postId]); // Run the effect whenever postId changes
+
+
 
 if (!post) {
     return <div>Loading...</div>;
@@ -51,6 +56,7 @@ if (!post) {
 if (!categories.every(Boolean)) {
     return notFound(); // Handle the case where any category is not found
 }
+
 
 // Extract category names from fetched categories
 const categoryNames = categories.map(category => category?.name);
@@ -64,7 +70,7 @@ const closeMessage = () => {
     return(
         <div>
             <div className="p-3 my-5">
-            <Link href={'/dashboard/'}>Dashboard</Link> {"\u00AB"} <Link href={'/dashboard/posts'}>posts</Link> {"\u00AB"} {post.title}
+            <Link href={'/dashboard/'}>Dashboard</Link> {"\u00AB"} <Link href={'/dashboard/posts'}>Posts</Link> {"\u00AB"} {post.title}
             </div>
             <h1>{post.title}</h1>
             {/* formState error message */}

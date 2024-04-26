@@ -33,7 +33,7 @@ export default function CategoryPosts(): JSX.Element {
     return (
         <div>
               <div className="p-3 my-5">
-            <Link href={'/dashboard/'}>Dashboard</Link> {"\u00AB"} <Link href={'/dashboard/posts/'}>Posts</Link> {"\u00AB"} categories
+            <Link href={'/dashboard/'}>Dashboard</Link> {"\u00AB"} <Link href={'/dashboard/posts/'}>Posts</Link> {"\u00AB"} Categories
             </div>
             <h2>All Categories</h2>
             <div className="flex flex-row gap-4 justify-start">

@@ -1,5 +1,5 @@
 'use client'
-import {updatePost, getPost, createPost} from '@/actions';
+import {updatePost, getPost, createPost, getAllCategories} from '@/actions';
 import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -42,13 +42,13 @@ function createSlug(title: string) {
 }
 
 
-export default function ModifyPost() {
+export default function UpdatePostPage() {
     const params = useParams();
     const id = params.id?.toString();
     const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
     const [title, setTitle] = useState('');
     const categories = ['Thoughts', 'Work', 'Hobby']; // can change this category or add/remove any
-    const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+    const [selectedCategories, setSelectedCategories] = useState<any[]>([]);
     const [editorContent, setEditorContent] = useState('');
     const [formState, action] = useFormState(updatePost, {message: ''});
     const formStateMessage = formState.message;
@@ -80,7 +80,10 @@ export default function ModifyPost() {
                 const fetchedContent = await getPost({ id });
                 setEditorContent(fetchedContent.body); // Extracting and setting body content
                 // After setting editor content, initialize the editor
-                setSelectedCategories(fetchedContent.categories);
+                const fetchedCategories = await getAllCategories();
+                // filter the category by the category ID existing
+                const filteredCategories = fetchedCategories.filter(category => fetchedContent.categoryIDs.includes(category.id));
+                setSelectedCategories(filteredCategories);
                 setTitle(fetchedContent.title);
                 editor?.commands.setContent(fetchedContent.body); // Using body content to set fetched content
             } catch (error) {

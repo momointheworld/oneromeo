@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import * as action from "@/actions";
 import Link from "next/link";
+import DisplayMessage from "@/components/message";
 
 
 interface AnswerDataProps {
@@ -31,6 +32,7 @@ export default function ModifyQuizzes() {
     const [answers, setAnswers] = useState<AnswerDataProps[][]>([]);  
     const params = useParams();
     const id = params.id?.toString();
+    const [formStateMessage, setFormStateMessage] = useState('');
 
     useEffect(() => {
         const fetchData = async () => {
@@ -53,6 +55,7 @@ export default function ModifyQuizzes() {
                 setAnswers(allAnswers);
             } catch (error) {
                 console.error('Error fetching data:', error);
+                setFormStateMessage(`Error fetching data: ${error}`);
             }
         };
         fetchData();
@@ -91,6 +94,7 @@ export default function ModifyQuizzes() {
     };
 
     const handleAddQuestion = async () => {
+        setFormStateMessage('Adding question...')
         try {
           // Create a new question on the server
           const newQuestionData = await action.createQuestion({
@@ -103,25 +107,31 @@ export default function ModifyQuizzes() {
               { text: '', points: 0 },
             ],
           });
-      
+          setFormStateMessage('Question added successfully.')
           // Update the local state with the newly created question
           setQuestions((prevQuestions) => [...prevQuestions, newQuestionData]);
-          
           // Reset the answers state to empty arrays
           setAnswers((prevAnswers) => [...prevAnswers, newQuestionData.answers]);
         } catch (error) {
-          console.error('Error adding question:', error);
+            if (error instanceof Error) {
+                setFormStateMessage(error.message);
+              } else {
+                setFormStateMessage('Something went wrong, try again later.');
+              }
         }
       };
       
 
       const handleDeleteQuestion = async (id: string) => {
+        setFormStateMessage('Loading...')
          try {
              await action.deleteQuestion(id);
               // Update the local state with the newly created question
              setQuestions((prevQuestions) => prevQuestions.filter(question => question.id !== id));
+             setFormStateMessage('Question deleted successfully.')
          } catch (error) {
             console.error('Error deleting a question:', error);
+            setFormStateMessage(`Error deleting a question ${error}`)
          }
       }
       
@@ -129,35 +139,42 @@ export default function ModifyQuizzes() {
     // Handle form submission (update data)
     const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
+        setFormStateMessage('Updating quiz...')
         try {
             if (!quiz) {
+                setFormStateMessage('Quiz data is not available.');
                 throw new Error('Quiz data is not available.');
             }
             // Update answers
             for (let i = 0; i < answers.length; i++) {
                 for (const answer of answers[i]) {
                 await action.updateAnswer(answer.id, { text: answer.text, points: answer.points });
+                setFormStateMessage('Answers updated successfully');
             }
             }
             // Update questions
             for (const question of questions) {
                 await action.updateQuestion(question.id, { text: question.text });
-                
+                setFormStateMessage('Questions updated successfully');
             }
             // Update quiz
             await action.updateQuiz(id, { quizName: quiz.quizName });
-            
             console.log('Data updated successfully!');
+            setFormStateMessage('Quiz data updated successfully...reloading');
         } catch (error) {
             console.error('Error updating data:', error);
+            setFormStateMessage('Failed to update quiz data, try again later.');
         }
     };
 
     return (
     <>
     <div className="my-5">
-        <Link href={'/dashboard/'}>Dashboard</Link> {"\u00AB"} <Link href={'/dashboard/quizzes'}>quizzes</Link> {"\u00AB"} Edit Quiz
+        <Link href={'/dashboard/'}>Dashboard</Link> {"\u00AB"} <Link href={'/dashboard/quizzes'}>Quizzes</Link> {"\u00AB"} Edit Quiz
         </div>
+        <DisplayMessage formStateMessage={formStateMessage} actions={function (): Promise<FormData> {
+                throw new Error("Function not implemented.");
+            } } />
         <div className='flex justify-center'>
         <div className='flex flex-col justify-center lg:w-2/3 md:w-full content-evenly'>
             {/* quiz title */}

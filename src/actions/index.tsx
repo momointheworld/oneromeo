@@ -1,6 +1,8 @@
 'use server';
 import { db } from "@/db";
+import { log } from "console";
 import { notFound, redirect } from "next/navigation";
+import { revalidatePath } from 'next/cache'
  
 
 interface FormDataProps {
@@ -230,7 +232,8 @@ export async function updatePost(formState: FormState, data: UpdateFormDataProps
 }
 
 
-
+// **************************************************************************************************
+// **************************************************************************************************
 // Quiz actions
 
 interface AnswerDataProps {
@@ -385,7 +388,6 @@ export async function updateQuestion(id:string, data: UpdateQuestionProps) {
       }
     });
     console.log(updatedQuestion);
-    
     return updatedQuestion;
   } catch (error) {
     throw new Error(`Error updating question: ${error}`);
@@ -411,13 +413,16 @@ export async function updateAnswer(id:string, data:UpdateAnswerProps) {
     console.log(updatedAnswer);
     return updatedAnswer;
   } catch (error) {
-    throw new Error(`Error updating answer: ${error}`);
+   redirect('/dashboard/quizzes')
   }
 }
+
+
 
 // delete quiz, questions and answers
 
 export async function deleteQuestion(id: string) {
+  let questionQuizId: string; 
   try {
     // Fetch the question and its associated answers
     const question = await db.question.findUnique({
@@ -426,22 +431,29 @@ export async function deleteQuestion(id: string) {
         answers: true,
       },
     });
-
     if (!question) {
       throw new Error(`Question ${id} not found.`);
     }
-
+    questionQuizId = question.quizId; // Store the questionQuizId
     // Delete the associated answers first
     await Promise.all(question.answers.map(async (answer) => {
       await db.answer.delete({ where: { id: answer.id } });
       console.log(`Answer ${answer.id} deleted for question ${id}.`);
     }));
-
     // Now delete the question itself
     await db.question.delete({ where: { id } });
+    const questionQuiz = await db.question.findFirst({
+      where: {
+      quizId: questionQuizId
+      }
+    })  // if this quiz ID can not be found in the questions, that means the last question was deleted,
+    //  proceed to delete the quiz
+    if (!questionQuiz) {
+      await db.quiz.delete({where: {id: questionQuizId}});
+      console.log(`Quiz ${questionQuizId} is deleted`);
+    }
     console.log(`Question ${id} is deleted.`);
   } catch (error) {
     console.error(`Error deleting question: ${error}`);
   } 
-  
 }

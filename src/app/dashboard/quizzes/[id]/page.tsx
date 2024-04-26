@@ -32,7 +32,7 @@ export default async function ShowQuiz(props: ShowQuizProps) {
     return (
         <div>
             <div className="my-5">
-                <Link href={'/dashboard/'}>Dashboard</Link> {"\u00AB"} <Link href={'/dashboard/quizzes'}>quizzes</Link> {"\u00AB"} {quiz.quizName}
+                <Link href={'/dashboard/'}>Dashboard</Link> {"\u00AB"} <Link href={'/dashboard/quizzes'}>Quizzes</Link> {"\u00AB"} {quiz.quizName}
             </div>
             <div className="flex flex-col items-center">
             <h1>{quiz.quizName}</h1>

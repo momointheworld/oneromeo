@@ -1,10 +1,10 @@
 'use client'
 import React, { useState } from 'react';
-import { useFormState } from 'react-dom';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Link from 'next/link';
 import * as action from '@/actions';
+import DisplayMessage from '@/components/message';
 
 interface AnswerDataProps {
   text: string;
@@ -25,6 +25,7 @@ interface QuizDataProps {
 export default function NewQuiz() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [quizName, setQuizName] = useState('');
+  const [formStateMessage, setFormStateMessage] = useState('');
   const [questions, setQuestions] = useState<QuestionDataProps[]>([
     {
       text: '',
@@ -38,6 +39,7 @@ export default function NewQuiz() {
   ]);
 
   const handleAddQuestion = () => {
+    try {
     setQuestions((prevQuestions) => [
       ...prevQuestions,
       {
@@ -49,8 +51,17 @@ export default function NewQuiz() {
           { text: '', points: 0 },
         ],
       },
-    ]);
+    ]
+  ) }
+    catch (error){
+      if (error instanceof Error) {
+       setFormStateMessage(error.message) 
+      } else {
+        setFormStateMessage('Something went wrong, try again later.');
+      }
   };
+}
+
   const handleCancelQuestion = () => {
     setQuestions((prevQuestions) => {
       // Check if there are more than one question
@@ -66,23 +77,32 @@ export default function NewQuiz() {
   };
   
   
-//   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-//     e.preventDefault();
-//      const formDataForQuiz: QuizDataProps = {
-//       date: selectedDate || new Date(),
-//       quizName,
-//       questions,
-//     };
-//  console.log(formDataForQuiz);
- 
-//     await action.createQuiz(formDataForQuiz);
-//   };
-const formDataForQuiz: QuizDataProps = {
-        date: selectedDate || new Date(),
-        quizName,
-        questions,
-      };
-const createQuizAction = action.createQuiz.bind(null, formDataForQuiz);
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setFormStateMessage('Adding quiz...')
+    try {
+     const formDataForQuiz: QuizDataProps = {
+      date: selectedDate || new Date(),
+      quizName,
+      questions,
+    };
+ console.log(formDataForQuiz);
+    await action.createQuiz(formDataForQuiz);
+    setFormStateMessage('Quiz created successfully, redirecting...')
+  } catch (error) {
+    if (error instanceof Error) {
+      setFormStateMessage(error.message);
+    } else {
+      setFormStateMessage('Something went wrong, try again later.');
+    }
+}
+  }
+// const formDataForQuiz: QuizDataProps = {
+//         date: selectedDate || new Date(),
+//         quizName,
+//         questions,
+//       };
+// const createQuizAction = action.createQuiz.bind(null, formDataForQuiz);
 
 
   const handleQuestionChange = (index: number, value: string) => {
@@ -112,12 +132,15 @@ const createQuizAction = action.createQuiz.bind(null, formDataForQuiz);
   return (
     <>
     <div className="my-5">
-             <Link href={'/dashboard/'}>Dashboard</Link> {"\u00AB"} <Link href={'/dashboard/quizzes'}>quizzes</Link> {"\u00AB"} New Quiz
+    <DisplayMessage formStateMessage={formStateMessage} actions={function (): Promise<FormData> {
+                throw new Error("Function not implemented.");
+            } } />        
+    <Link href={'/dashboard/'}>Dashboard</Link> {"\u00AB"} <Link href={'/dashboard/quizzes'}>quizzes</Link> {"\u00AB"} New Quiz
     </div>
     <div className='flex justify-center text-center'>
     <div className='flex flex-col lg:w-1/2 md:w-full'>
       <h1>New Quiz</h1>
-      <form action={createQuizAction}>
+      <form onSubmit={handleSubmit}>
         <div className="flex flex-col gap-4 font-bold">
           {/* Datepicker */}
             <div>
@@ -191,7 +214,7 @@ const createQuizAction = action.createQuiz.bind(null, formDataForQuiz);
           <div className="flex gap-4 justify-end">
         <button type="button" 
         onClick={handleAddQuestion} 
-        className="rounded bg-blue-500 shadow-md text-zinc-200 hover:text-zinc-900 shadow-stone-600 px-4 py-2 mx-2">
+        className="rounded bg-blue-500 shadow-md text-zinc-200 shadow-stone-600 px-4 py-2 mx-2">
           Add Question
         </button>
         <button type="button" 
@@ -199,9 +222,9 @@ const createQuizAction = action.createQuiz.bind(null, formDataForQuiz);
         className="rounded bg-blue-500 shadow-md text-zinc-200 hover:text-zinc-900 shadow-stone-600 px-4 py-2 mx-2">
           Cancel adding Question
         </button>
-        <button 
+      <button 
         type="submit"
-        className="rounded bg-blue-500 shadow-md text-zinc-200 hover:text-zinc-900 shadow-stone-600 px-4 py-2">
+        className="rounded bg-blue-500 shadow-md text-zinc-200 shadow-stone-600 px-4 py-2 disabled:bg-transparent">
           Submit</button>
           </div>
       </form>
