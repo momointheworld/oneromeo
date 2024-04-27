@@ -12,16 +12,19 @@ interface Post {
 }
 
 interface CategoryProps {
-    params: any;
-    id: string;
-    name: string;
-  }
+    params: { slug: string };
+    // id: string;
+    // name: string;
+    // postIDs: string[];
+    // posts: Post[];
+}
+
 interface Category {
     id: string;
     name: string;
   }
 
-export default function CategoryPosts(props: CategoryProps ): JSX.Element {
+export default function CategoryPosts({params}: CategoryProps ){
     const [posts, setPosts] = useState<Post[] | null>(null);
     const [categoryName, setCategoryName] = useState<string | null>(null);
     const [categories, setCategories] = useState<Category[] | null>(null);
@@ -29,13 +32,13 @@ export default function CategoryPosts(props: CategoryProps ): JSX.Element {
     useEffect(() => {
         async function fetchData() {
             // Get the category ID from the route query parameters
-          const categoryId = props.params.id
+          const categoryId = params.slug
         //   console.log(categoryId);
             const postsData = await getCategoryPosts(categoryId);
             setPosts(postsData || []);
         }
         fetchData();
-    }, [props.params.id]);
+    }, [params.slug]);
     
     useEffect(() => {
         async function fetchCategories() {
@@ -47,13 +50,13 @@ export default function CategoryPosts(props: CategoryProps ): JSX.Element {
 
     useEffect(() => {
         if (categories) {
-            const categoryId = props.params.id;
+            const categoryId = params.slug;
             const foundCategory = categories.find(category => category.id === categoryId);
             if (foundCategory) {
                 setCategoryName(foundCategory.name);
             }
         }
-    }, [props.params.id, categories]);
+    }, [params.slug, categories]);
 
 
     return (

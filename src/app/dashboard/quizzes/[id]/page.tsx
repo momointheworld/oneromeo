@@ -8,9 +8,17 @@ interface ShowQuizProps {
     }
 }
 
-export default async function ShowQuiz(props: ShowQuizProps) {
+export async function generateStaticParams() {
+    const quizzes = await db.quiz.findMany();
+    return quizzes.map((quiz) => ({
+       id: quiz.id
+        })
+    )
+  }
+
+export default async function SingleQuizPage({params}: ShowQuizProps) {
     // In MongoDB the ID is an object
-    const quizId = props.params.id;
+    const quizId = params.id;
     const quiz = await db.quiz.findFirst({
         where: { id: quizId }
     })
@@ -62,3 +70,5 @@ export default async function ShowQuiz(props: ShowQuizProps) {
         </div>
     )
 }
+
+

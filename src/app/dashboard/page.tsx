@@ -2,7 +2,7 @@ import { format } from 'date-fns';
 import Link from "next/link";
 import { db } from "@/db";
 
-
+export const revalidate = 3; // re-render in every 3 seconds
 export default async function Dashboard() {
   const posts = await db.post.findMany({ orderBy: { date: 'desc' } }); // Ordering posts by date in descending order
   const latestPosts = posts.slice(0, 5); // Get the latest 5 posts

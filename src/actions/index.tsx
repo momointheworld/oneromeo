@@ -1,6 +1,5 @@
 'use server';
 import { db } from "@/db";
-import { log } from "console";
 import { notFound, redirect } from "next/navigation";
 import { revalidatePath } from 'next/cache'
  
@@ -64,6 +63,7 @@ try {
           message: error instanceof Error ? error.message : 'Something went wrong, try again later.'
       };
   }
+    revalidatePath(`/dashboard/posts/${postId}`);
     redirect(`/dashboard/posts/${postId}`);
       
  }
@@ -171,6 +171,7 @@ export async function deletePost(formState:FormState, id: string) {
       message: error instanceof Error ? error.message : 'Something went wrong, try again later.'
   };
 }
+    revalidatePath('/dashboard/posts/');
     redirect(`/dashboard/posts/`)
 } 
 
@@ -227,6 +228,7 @@ export async function updatePost(formState: FormState, data: UpdateFormDataProps
       message: error instanceof Error ? error.message : 'Something went wrong, try again later.'
   };
   }
+    revalidatePath(`/dashboard/posts/${id}`);
     redirect(`/dashboard/posts/${id}`)  // redirect needs to be outside of try...catch
 
 }
@@ -279,6 +281,7 @@ export async function createQuiz(formData: QuizDataProps) {
     console.error('Error creating quiz:', error);
     // Handle error, such as displaying an error message to the user
   }
+     revalidatePath('/dashboard/quizzes'); 
      redirect('/dashboard/quizzes');  // redirect needs to be outside of try...catch
 }
 
@@ -313,7 +316,6 @@ export async function createQuestion(formData: CreateQuestionProps) {
         answers: true, // Include answers in the response
       },
     });
-
     return newQuestion; // Return the newly created question with answers
   } catch (error) {
     console.error('Error creating question:', error);
@@ -323,9 +325,16 @@ export async function createQuestion(formData: CreateQuestionProps) {
 
 // Get Quiz, questions and answers
 
+
+
 interface GetQuizProps {
   id: string;
 }
+
+// export async function getAllQuizzes(props: GetQuizProps): Promise<any> {
+//  const allQuizzes = await db.quiz.findMany();
+//  return allQuizzes;
+// }
 
 export async function getQuiz(props: GetQuizProps): Promise<any> {
   const { id } = props;
@@ -371,6 +380,7 @@ export async function updateQuiz(id: string, data: UpdateQuizProps) {
   } catch (error) {
     console.log(`Error updating quiz: ${error}`);
   }
+   revalidatePath(`/dashboard/quizzes/${id}`);
    redirect(`/dashboard/quizzes/${id}`);
 }
  
@@ -413,7 +423,7 @@ export async function updateAnswer(id:string, data:UpdateAnswerProps) {
     console.log(updatedAnswer);
     return updatedAnswer;
   } catch (error) {
-   redirect('/dashboard/quizzes')
+    throw new Error(`Error updating question: ${error}`);
   }
 }
 
@@ -432,7 +442,7 @@ export async function deleteQuestion(id: string) {
       },
     });
     if (!question) {
-      throw new Error(`Question ${id} not found.`);
+      redirect('/dashboard/quizzes/')
     }
     questionQuizId = question.quizId; // Store the questionQuizId
     // Delete the associated answers first
@@ -446,11 +456,15 @@ export async function deleteQuestion(id: string) {
       where: {
       quizId: questionQuizId
       }
-    })  // if this quiz ID can not be found in the questions, that means the last question was deleted,
+    })  
+    revalidatePath(`/dashboard/quizzes/${questionQuizId}`)
+    // if this quiz ID can not be found in the questions, that means the last question was deleted,
     //  proceed to delete the quiz
     if (!questionQuiz) {
       await db.quiz.delete({where: {id: questionQuizId}});
       console.log(`Quiz ${questionQuizId} is deleted`);
+      revalidatePath('/dashboard/quizzes');
+      redirect('/dashboard/quizzes');
     }
     console.log(`Question ${id} is deleted.`);
   } catch (error) {

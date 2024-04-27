@@ -2,8 +2,7 @@ import Link from "next/link";
 import { format } from 'date-fns';
 import { db } from "@/db"
 
-export default async function RenderAllQuizzes() {
-    
+export default async function RenderAllQuizzesPage() {
     const quizzes = await db.quiz.findMany({ orderBy: { date: 'desc' } });
     const renderQuizzes = quizzes.map((quiz)=> {
       const formattedDate = format(new Date(quiz.date), 'MMMM d, yyyy');
@@ -18,7 +17,6 @@ export default async function RenderAllQuizzes() {
           </Link>
         )
     })
-
 
     return(
         <div className='flex flex-col'>
