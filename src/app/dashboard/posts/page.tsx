@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import Link from 'next/link';
 import { fetchAndGroupPostsByCategory, getAllCategories } from '@/actions';
+import Profile from '@/components/profile';
 
 interface Post {
     id: string;

@@ -1,7 +1,8 @@
 'use server';
 import { db } from "@/db";
 import { notFound, redirect } from "next/navigation";
-import { revalidatePath } from 'next/cache'
+import { revalidatePath } from 'next/cache';
+import * as auth from '@/auth';
  
 
 interface FormDataProps {
@@ -36,7 +37,7 @@ try {
 
     // Create missing categories
     const createdCategories = await Promise.all(
-        missingCategoryNames.map(name => db.category.create({ data: { name } }))
+        missingCategoryNames.map(name => db.category.create({ data: { name, date: new Date()} }))
     );
 
     // Combine existing and newly created categories
@@ -125,12 +126,12 @@ export async function getCategoryPosts(categoryId: string) {
   try {
     // Find the posts associated with the category ID
     const posts = await db.post.findMany({
-      where: {
-        categoryIDs: {
-          has: categoryId,
+        where: {
+          categoryIDs: {
+            has:categoryId,
+          },
         },
-      },
-      orderBy: {
+       orderBy: {
         date: 'desc', 
       },
     });
@@ -201,7 +202,7 @@ export async function updatePost(formState: FormState, data: UpdateFormDataProps
 
           // Create missing categories
           const createdCategories = await Promise.all(
-              missingCategoryNames.map(name => db.category.create({ data: { name } }))
+              missingCategoryNames.map(name => db.category.create({ data: { name, date: new Date() } }))
           );
 
           // Combine existing and newly created categories
@@ -470,4 +471,14 @@ export async function deleteQuestion(id: string) {
   } catch (error) {
     console.error(`Error deleting question: ${error}`);
   } 
+}
+
+// ****************** auth actions ******************
+
+export async function signIn() {
+  return auth.signIn('github');
+}
+
+export async function signOut() {
+  return auth.signOut();
 }

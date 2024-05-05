@@ -12,11 +12,10 @@ interface Post {
 }
 
 interface CategoryProps {
-    params: { slug: string };
-    // id: string;
-    // name: string;
-    // postIDs: string[];
-    // posts: Post[];
+    params: { slug: string, id: string };
+    name: string;
+    postIDs: string[];
+    posts: Post[];
 }
 
 interface Category {
@@ -32,13 +31,13 @@ export default function CategoryPosts({params}: CategoryProps ){
     useEffect(() => {
         async function fetchData() {
             // Get the category ID from the route query parameters
-          const categoryId = params.slug
+          const categoryId = params.id
         //   console.log(categoryId);
             const postsData = await getCategoryPosts(categoryId);
             setPosts(postsData || []);
         }
         fetchData();
-    }, [params.slug]);
+    }, [params.id]);
     
     useEffect(() => {
         async function fetchCategories() {

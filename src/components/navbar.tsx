@@ -4,6 +4,8 @@ import { HomeIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/solid';
 import NavLink from '@/components/navlinks';
 import Image from "next/image";
 import Logo from "/public/sparrow.svg";
+import SignIn from './signin';
+import Profile from './profile';
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -24,7 +26,10 @@ const Navbar: React.FC = () => {
               <NavLink href="/order">Order Now</NavLink>
             </div>
           </div>
-          <Image className='justify-self-end pt-3' src={Logo} alt="sparrow logo" width="50" />
+          <div className='hidden lg:flex items-center'>
+          <Profile />
+          <Image className='justify-self-end pt-3 mx-5' src={Logo} alt="sparrow logo" width="50" />
+          </div>
           {/* Hamburger menu for mobile */}
           <div className="md:hidden">
             <button onClick={toggleMenu} className="text-gray-600 hover:text-gray-900 focus:outline-none">
@@ -39,6 +44,7 @@ const Navbar: React.FC = () => {
               <NavLink href="/about">About</NavLink>
               <NavLink href="/contact">Contact</NavLink>
               <NavLink href="/order">Order Now</NavLink>
+              <Profile />
             </div>
           </div>
         )}

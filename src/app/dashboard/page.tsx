@@ -1,6 +1,7 @@
 import { format } from 'date-fns';
 import Link from "next/link";
 import { db } from "@/db";
+import Profile from '@/components/profile';
 
 export const revalidate = 3; // re-render in every 3 seconds
 export default async function Dashboard() {
@@ -41,6 +42,7 @@ export default async function Dashboard() {
 
     return(
         <div className='flex flex-col'>
+           <Profile />
             <div className="flex justify-between items-center">
                 <h1 className="text-xl font-bold">Latest Posts</h1>
                 <div>
