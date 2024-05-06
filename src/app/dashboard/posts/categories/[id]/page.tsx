@@ -49,13 +49,13 @@ export default function CategoryPosts({params}: CategoryProps ){
 
     useEffect(() => {
         if (categories) {
-            const categoryId = params.slug;
+            const categoryId = params.id;
             const foundCategory = categories.find(category => category.id === categoryId);
             if (foundCategory) {
                 setCategoryName(foundCategory.name);
             }
         }
-    }, [params.slug, categories]);
+    }, [params.id, categories]);
 
 
     return (

@@ -6,11 +6,10 @@ import { format } from 'date-fns';
 import { deletePost, getAllCategories, getPost } from '@/actions';
 import { useFormState } from "react-dom";
 import { useEffect, useState } from "react";
-import { db } from "@/db";
 
 interface ShowPostProps {
     params: {
-        id: string
+        id: string,
     }
 }
 
@@ -18,6 +17,7 @@ export default function ShowSinglePost(props: ShowPostProps) {
 // In MongoDB the ID is an object
 const postId = props.params.id;
 const [post, setPost] = useState<any>(null);
+// const [postSlug, setPostSlug] = useState<any>(null);
 const [message, setMessage] = useState('');
 const [messageVisible, setMessageVisible] = useState(false);  
 const [formState, action] = useFormState(deletePost, { message: '' });
@@ -36,8 +36,9 @@ const [categories, setCategories] = useState<any[]>([]);
 
 useEffect(() => {
     async function fetchData() {
-        const fetchedPost = await getPost({ id: postId });
+        const fetchedPost = await getPost({ id: postId});
         setPost(fetchedPost);
+        // setPostSlug(post.slug);
         const fetchedCategories = await getAllCategories();
         // filter the category by the category ID existing
         const filteredCategories = fetchedCategories.filter(category => fetchedPost.categoryIDs.includes(category.id));
