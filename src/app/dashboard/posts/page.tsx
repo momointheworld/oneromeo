@@ -4,6 +4,9 @@ import { format } from 'date-fns';
 import Link from 'next/link';
 import { fetchAndGroupPostsByCategory, getAllCategories } from '@/actions';
 import Profile from '@/components/profile';
+import { BreadcrumbItem, Breadcrumbs } from '@nextui-org/react';
+import paths from '@/components/paths';
+import PageBreadcrumbs from '@/components/common/breadcrumbs';
 
 interface Post {
     id: string;
@@ -19,10 +22,20 @@ interface Category {
   name: string;
   posts: Post[];
 }
+
+interface Breadcrumb {
+    href: string;
+    text: string;
+  }
+  
  
 export default function RenderAllPosts(): JSX.Element {
     const [groupedPosts, setGroupedPosts] = useState<GroupedPosts | null>(null);
     const [categories, setCategories] = useState<Category[] | null>(null);
+    const breadcrumbs: Breadcrumb[] = [
+        { href: paths.dashboard(), text: 'Dashboard' },
+        { href: paths.showAllPosts(), text: 'Posts' },
+    ];
 
     useEffect(() => {
         async function fetchData() {
@@ -69,9 +82,7 @@ export default function RenderAllPosts(): JSX.Element {
 
     return (
         <div className="flex flex-col">
-            <div className="my-5">
-                <Link href={'/dashboard/'}>Dashboard</Link> {'\u00AB'} Posts
-            </div>
+            <PageBreadcrumbs items={breadcrumbs} />
             <div className="flex justify-between items-center">
                 <h1 className="text-xl font-bold">Posts</h1>
                 <div>

@@ -4,6 +4,8 @@ import React, {useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import Link from 'next/link';
 import { getAllCategories, getCategoryPosts } from '@/actions';
+import paths from '@/components/paths';
+import PageBreadcrumbs from '@/components/common/breadcrumbs';
 
 interface Post {
     id: string;
@@ -13,9 +15,6 @@ interface Post {
 
 interface CategoryProps {
     params: { slug: string, id: string };
-    name: string;
-    postIDs: string[];
-    posts: Post[];
 }
 
 interface Category {
@@ -23,11 +22,22 @@ interface Category {
     name: string;
   }
 
+  interface Breadcrumb {
+    href: string;
+    text: string;
+  }
+
+
 export default function CategoryPosts({params}: CategoryProps ){
     const [posts, setPosts] = useState<Post[] | null>(null);
     const [categoryName, setCategoryName] = useState<string | null>(null);
     const [categories, setCategories] = useState<Category[] | null>(null);
-
+    const breadcrumbs: Breadcrumb[] = [
+        { href: paths.dashboard(), text: 'Dashboard' },
+        { href: paths.showAllPosts(), text: 'Posts' },
+        { href: paths.showAllCategories(), text: 'Categories' },
+        { href: paths.showCategoryPosts(params.id), text: `${categoryName}` },
+    ];
     useEffect(() => {
         async function fetchData() {
             // Get the category ID from the route query parameters
@@ -60,9 +70,7 @@ export default function CategoryPosts({params}: CategoryProps ){
 
     return (
         <div>
-            <div className="p-3 my-5">
-            <Link href={'/dashboard/'}>Dashboard</Link> {"\u00AB"} <Link href={'/dashboard/posts/'}>Posts</Link> {"\u00AB"} <Link href={'/dashboard/posts/categories'}>Categories</Link> {"\u00AB"} {categoryName}
-            </div>
+             <PageBreadcrumbs items={breadcrumbs} />
             <h2>Posts for {categoryName}</h2>
             {posts ? (
                 <div className="flex flex-col gap-2 mt-5">

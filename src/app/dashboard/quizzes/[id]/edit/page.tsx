@@ -3,7 +3,10 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import * as action from "@/actions";
 import Link from "next/link";
-import DisplayMessage from "@/components/message";
+import DisplayMessage from "@/components/common/message";
+import { BreadcrumbItem, Breadcrumbs } from "@nextui-org/react";
+import paths from "@/components/paths";
+import PageBreadcrumbs from "@/components/common/breadcrumbs";
 
 
 interface AnswerDataProps {
@@ -25,6 +28,12 @@ interface AnswerDataProps {
     questions: QuestionDataProps[];
   }
 
+  interface Breadcrumb {
+    href: string;
+    text: string;
+  }
+  
+
 export default function ModifyQuizzes() {
     const [quiz, setQuiz] = useState<QuizDataProps | null>(null); 
     const [questions, setQuestions] = useState<QuestionDataProps[]>([]);  
@@ -33,6 +42,11 @@ export default function ModifyQuizzes() {
     const params = useParams();
     const id = params.id?.toString();
     const [formStateMessage, setFormStateMessage] = useState('');
+    const breadcrumbs: Breadcrumb[] = [
+        { href: paths.dashboard(), text: 'Dashboard' },
+        { href: paths.showAllQuizzes(), text: 'Quizzes' },
+        { href: paths.editQuiz(id), text: 'Edit Quiz' },
+    ];
 
     useEffect(() => {
         const fetchData = async () => {
@@ -107,7 +121,7 @@ export default function ModifyQuizzes() {
               { text: '', points: 0 },
             ],
           });
-          setFormStateMessage('Question added successfully.')
+          setFormStateMessage('Question added successfully. Close to continue')
           // Update the local state with the newly created question
           setQuestions((prevQuestions) => [...prevQuestions, newQuestionData]);
           // Reset the answers state to empty arrays
@@ -128,7 +142,7 @@ export default function ModifyQuizzes() {
              await action.deleteQuestion(id);
               // Update the local state with the newly created question
              setQuestions((prevQuestions) => prevQuestions.filter(question => question.id !== id));
-             setFormStateMessage('Question deleted successfully.')
+             setFormStateMessage('Question deleted successfully. Close to continue.')
          } catch (error) {
             console.error('Error deleting a question:', error);
             setFormStateMessage(`Error deleting a question ${error}`)
@@ -149,13 +163,13 @@ export default function ModifyQuizzes() {
             for (let i = 0; i < answers.length; i++) {
                 for (const answer of answers[i]) {
                 await action.updateAnswer(answer.id, { text: answer.text, points: answer.points });
-                setFormStateMessage('Answers updated successfully');
+                setFormStateMessage('Answers updated successfully, please hold.');
             }
             }
             // Update questions
             for (const question of questions) {
                 await action.updateQuestion(question.id, { text: question.text });
-                setFormStateMessage('Questions updated successfully');
+                setFormStateMessage('Questions updated successfully, please hold.');
             }
             // Update quiz
             await action.updateQuiz(id, { quizName: quiz.quizName });
@@ -169,9 +183,7 @@ export default function ModifyQuizzes() {
 
     return (
     <>
-    <div className="my-5">
-        <Link href={'/dashboard/'}>Dashboard</Link> {"\u00AB"} <Link href={'/dashboard/quizzes'}>Quizzes</Link> {"\u00AB"} Edit Quiz
-        </div>
+       <PageBreadcrumbs items={breadcrumbs} />
         <DisplayMessage formStateMessage={formStateMessage} actions={function (): Promise<FormData> {
                 throw new Error("Function not implemented.");
             } } />

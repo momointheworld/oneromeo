@@ -2,6 +2,7 @@
 import { db } from "@/db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import paths from "@/components/paths";
 
 interface AnswerDataProps {
     text: string;
@@ -44,9 +45,8 @@ interface AnswerDataProps {
       console.log('Quiz created:', quiz);
     } catch (error) {
       console.error('Error creating quiz:', error);
-      // Handle error, such as displaying an error message to the user
     }
-       revalidatePath('/dashboard/quizzes'); 
-       redirect('/dashboard/quizzes');  // redirect needs to be outside of try...catch
+       revalidatePath(paths.showAllQuizzes()); 
+       redirect(paths.showAllQuizzes());  // redirect needs to be outside of try...catch
   }
   

@@ -4,7 +4,10 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Link from 'next/link';
 import * as action from '@/actions';
-import DisplayMessage from '@/components/message';
+import DisplayMessage from '@/components/common/message';
+import { BreadcrumbItem, Breadcrumbs } from '@nextui-org/react';
+import paths from '@/components/paths';
+import PageBreadcrumbs from '@/components/common/breadcrumbs';
 
 interface AnswerDataProps {
   text: string;
@@ -22,6 +25,12 @@ interface QuizDataProps {
   questions: QuestionDataProps[];
 }
 
+interface Breadcrumb {
+  href: string;
+  text: string;
+}
+
+
 export default function NewQuiz() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [quizName, setQuizName] = useState('');
@@ -37,6 +46,12 @@ export default function NewQuiz() {
       ],
     },
   ]);
+
+  const breadcrumbs: Breadcrumb[] = [
+    { href: paths.dashboard(), text: 'Dashboard' },
+    { href: paths.showAllQuizzes(), text: 'Quizzes' },
+    { href: paths.createNewQuiz(), text: `New Quiz` },
+];
 
   const handleAddQuestion = () => {
     try {
@@ -131,11 +146,11 @@ export default function NewQuiz() {
 
   return (
     <>
+      <PageBreadcrumbs items={breadcrumbs} />
     <div className="my-5">
     <DisplayMessage formStateMessage={formStateMessage} actions={function (): Promise<FormData> {
                 throw new Error("Function not implemented.");
             } } />        
-    <Link href={'/dashboard/'}>Dashboard</Link> {"\u00AB"} <Link href={'/dashboard/quizzes'}>quizzes</Link> {"\u00AB"} New Quiz
     </div>
     <div className='flex justify-center text-center'>
     <div className='flex flex-col lg:w-1/2 md:w-full'>

@@ -3,7 +3,7 @@ import { createPost } from '@/actions';
 import React, { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import TipTap from "@/components/editor";
+import TipTap from "@/components/posts/editor";
 import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { Color } from '@tiptap/extension-color'
@@ -13,7 +13,10 @@ import TextAlign from '@tiptap/extension-text-align';
 import Youtube from '@tiptap/extension-youtube'
 import Link from 'next/link';
 import { useFormState } from 'react-dom';
-import DisplayPostMessage from '@/components/postMessage';
+import DisplayPostMessage from '@/components/posts/postMessage';
+import { BreadcrumbItem, Breadcrumbs, Checkbox, Select, SelectItem } from '@nextui-org/react';
+import paths from '@/components/paths';
+import PageBreadcrumbs from '@/components/common/breadcrumbs';
 
 interface FormState {
   message: string;
@@ -26,6 +29,12 @@ interface FormDataProps {
     categoryNames: string[];
     body: string;
 }
+
+interface Breadcrumb {
+  href: string;
+  text: string;
+}
+
 
 function createSlug(title: string) {
     // Convert title to lowercase
@@ -46,6 +55,11 @@ export default function CreatePost() {
     const [selectedCategories, setSelectedCategories] = useState<string[]>(['Work']); // Set default category to 'Work'
     const [formState, action] = useFormState(createPost, {message: ''});
     const formStateMessage = formState.message;
+    const breadcrumbs: Breadcrumb[] = [
+      { href: paths.dashboard(), text: 'Dashboard' },
+      { href: paths.showAllPosts(), text: 'Posts' },
+      { href: paths.createNewPost(), text: 'New Post' },
+  ];
   
     // Editor config
     const editor = useEditor({
@@ -102,7 +116,7 @@ export default function CreatePost() {
       
 
       // form input
-const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedOptions = Array.from(e.target.selectedOptions, (option) => option.value);
         setSelectedCategories(selectedOptions);
     };
@@ -118,9 +132,7 @@ const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     
 return(
         <div>
-             <div className="my-5">
-             <Link href={'/dashboard/'}>Dashboard</Link> {"\u00AB"} <Link href={'/dashboard/posts'}>Posts</Link> {"\u00AB"} New Post
-            </div>
+             <PageBreadcrumbs items={breadcrumbs} />
           {/* formState error message */}
           <DisplayPostMessage formStateMessage={formStateMessage} />
             {/* Form input */}
@@ -152,6 +164,7 @@ return(
                         ))}
                     </select>
                     </div>
+
                      <div className="flex gap-4">
                         <label htmlFor="title" className="w-20">Title</label>
                         <input 
@@ -161,7 +174,7 @@ return(
                         type="text" 
                         id="title"
                         />
-                    </div>
+                     </div>
 
                     <div className="container flex gap-4">
                     <span className="w-20">Date</span>

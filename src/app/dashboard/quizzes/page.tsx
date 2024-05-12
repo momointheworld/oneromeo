@@ -1,9 +1,21 @@
 import Link from "next/link";
 import { format } from 'date-fns';
 import { db } from "@/db"
+import paths from "@/components/paths";
+import PageBreadCrumbs from "@/components/common/breadcrumbs";
+
+
+interface Breadcrumb {
+  href: string;
+  text: string;
+}
 
 export default async function RenderAllQuizzesPage() {
     const quizzes = await db.quiz.findMany({ orderBy: { date: 'desc' } });
+    const breadcrumbs: Breadcrumb[] = [
+      { href: paths.dashboard(), text: 'Dashboard' },
+      { href: paths.showAllQuizzes(), text: 'Quizzes' },
+  ];
     const renderQuizzes = quizzes.map((quiz)=> {
       const formattedDate = format(new Date(quiz.date), 'MMMM d, yyyy');
         return(
@@ -19,10 +31,9 @@ export default async function RenderAllQuizzesPage() {
     })
 
     return(
+      <div>
+            <PageBreadCrumbs items={breadcrumbs}/>
         <div className='flex flex-col'>
-            <div className="my-5">
-            <Link href={'/dashboard/'}>Dashboard</Link> {"\u00AB"} Quizzes
-            </div>
           <div className="flex justify-between items-center">
                 <h1 className="text-xl font-bold">Quizzes</h1>
                 <div>
@@ -33,6 +44,7 @@ export default async function RenderAllQuizzesPage() {
           {renderQuizzes}
           </div>
         </div>
+      </div>
     )
 }
 

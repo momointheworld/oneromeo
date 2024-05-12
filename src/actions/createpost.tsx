@@ -1,6 +1,8 @@
 'use server';
+import { db } from "@/db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import paths from "@/components/paths";
 
 interface FormDataProps {
     date: Date,
@@ -61,7 +63,7 @@ try {
           message: error instanceof Error ? error.message : 'Something went wrong, try again later.'
       };
   }
-    revalidatePath(`/dashboard/posts/${postId}`);
-    redirect(`/dashboard/posts/${postId}`);
+    revalidatePath(paths.showSinglePost(postId));
+    redirect(paths.showSinglePost(postId));
       
  }

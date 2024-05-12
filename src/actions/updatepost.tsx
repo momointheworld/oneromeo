@@ -2,6 +2,7 @@
 import { db } from "@/db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import paths from "@/components/paths";
 
 interface FormState {
     message: string;
@@ -59,8 +60,10 @@ interface UpdateFormDataProps {
         message: error instanceof Error ? error.message : 'Something went wrong, try again later.'
     };
     }
-      revalidatePath(`/dashboard/posts/${id}`);
-      redirect(`/dashboard/posts/${id}`)  // redirect needs to be outside of try...catch
+    //   revalidatePath(`/dashboard/posts/${id}`);
+    //   redirect(`/dashboard/posts/${id}`)  // redirect needs to be outside of try...catch
+      revalidatePath(paths.showSinglePost(id));
+      redirect(paths.showSinglePost(id))  // redirect needs to be outside of try...catch
   
   }
   

@@ -21,9 +21,18 @@ const paths =  {
     showAllQuizzes(){
         return '/dashboard/quizzes'
     },
+    showSingleQuiz(quizId: string){
+        return `/dashboard/quizzes/${quizId}`
+    },
     createNewQuiz(){
         return '/dashboard/quizzes/new-quiz'
     },
-}
+    editPost(postId:string) {
+        return `/dashboard/posts/${postId}/edit`
+    },
+    editQuiz(quizId:string) {
+        return `/dashboard/quizzes/${quizId}/edit`
+    },
+    }
 
 export default paths;

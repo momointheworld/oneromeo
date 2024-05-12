@@ -6,6 +6,8 @@ import { format } from 'date-fns';
 import { deletePost, getAllCategories, getPost } from '@/actions';
 import { useFormState } from "react-dom";
 import { useEffect, useState } from "react";
+import paths from "@/components/paths";
+import PageBreadcrumbs from "@/components/common/breadcrumbs";
 
 interface ShowPostProps {
     params: {
@@ -13,10 +15,20 @@ interface ShowPostProps {
     }
 }
 
+interface Breadcrumb {
+    href: string;
+    text: string;
+  }
+
 export default function ShowSinglePost(props: ShowPostProps) {
 // In MongoDB the ID is an object
 const postId = props.params.id;
 const [post, setPost] = useState<any>(null);
+const breadcrumbs: Breadcrumb[] = [
+    { href: paths.dashboard(), text: 'Dashboard' },
+    { href: paths.showAllPosts(), text: 'Posts' },
+    { href: paths.showSinglePost(postId), text: post?.title },
+];
 // const [postSlug, setPostSlug] = useState<any>(null);
 const [message, setMessage] = useState('');
 const [messageVisible, setMessageVisible] = useState(false);  
@@ -70,9 +82,7 @@ const closeMessage = () => {
 
     return(
         <div>
-            <div className="p-3 my-5">
-            <Link href={'/dashboard/'}>Dashboard</Link> {"\u00AB"} <Link href={'/dashboard/posts'}>Posts</Link> {"\u00AB"} {post.title}
-            </div>
+             <PageBreadcrumbs items={breadcrumbs}/>
             <h1>{post.title}</h1>
             {/* formState error message */}
             {messageVisible && (

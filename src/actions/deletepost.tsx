@@ -2,7 +2,7 @@
 import { db } from "@/db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-
+import paths from "@/components/paths";
 
 interface FormState {
     message: string;
@@ -21,7 +21,7 @@ export async function deletePost(formState:FormState, id: string) {
         message: error instanceof Error ? error.message : 'Something went wrong, try again later.'
     };
   }
-      revalidatePath('/dashboard/posts/');
-      redirect(`/dashboard/posts/`)
+      revalidatePath(paths.showAllPosts());
+      redirect(paths.showAllPosts());
   } 
   

@@ -2,6 +2,9 @@
 import { useEffect, useState } from "react";
 import Link from 'next/link';
 import { getAllCategories } from "@/actions";
+import { BreadcrumbItem, Breadcrumbs } from "@nextui-org/react";
+import paths from "@/components/paths";
+import PageBreadcrumbs from "@/components/common/breadcrumbs";
 
 interface Post {
     id: string;
@@ -15,8 +18,19 @@ interface Category {
     posts: Post[];
 }
 
+interface Breadcrumb {
+    href: string;
+    text: string;
+  }
+
+
 export default function CategoryPosts(): JSX.Element {
     const [categories, setCategories] = useState<Category[] | null>(null);
+    const breadcrumbs: Breadcrumb[] = [
+        { href: paths.dashboard(), text: 'Dashboard' },
+        { href: paths.showAllPosts(), text: 'Posts' },
+        { href: paths.showAllCategories(), text: 'Categories' },
+    ];
 
     useEffect(() => {
         async function fetchCategories() {
@@ -32,9 +46,7 @@ export default function CategoryPosts(): JSX.Element {
 
     return (
         <div>
-              <div className="p-3 my-5">
-            <Link href={'/dashboard/'}>Dashboard</Link> {"\u00AB"} <Link href={'/dashboard/posts/'}>Posts</Link> {"\u00AB"} Categories
-            </div>
+            <PageBreadcrumbs items={breadcrumbs} />
             <h2>All Categories</h2>
             <div className="flex flex-row gap-4 justify-start">
             {categories ? (

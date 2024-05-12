@@ -3,7 +3,7 @@ import {updatePost, getPost, createPost, getAllCategories} from '@/actions';
 import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import TipTap from "@/components/editor";
+import TipTap from "@/components/posts/editor";
 import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { Color } from '@tiptap/extension-color'
@@ -11,10 +11,11 @@ import ListItem from '@tiptap/extension-list-item'
 import TextStyle from '@tiptap/extension-text-style'
 import TextAlign from '@tiptap/extension-text-align';
 import Youtube from '@tiptap/extension-youtube'
-import Link from 'next/link';
 import { useParams } from 'next/navigation'
 import { useFormState } from 'react-dom';
-import DisplayPostMessage from '@/components/postMessage';
+import DisplayPostMessage from '@/components/posts/postMessage';
+import paths from '@/components/paths';
+import PageBreadcrumbs from '@/components/common/breadcrumbs';
 
 interface FormState {
     message: string;
@@ -28,6 +29,11 @@ interface FormDataProps {
     body: string;
     id: string;
 }
+
+interface Breadcrumb {
+    href: string;
+    text: string;
+  }
 
 function createSlug(title: string) {
     // Convert title to lowercase
@@ -45,6 +51,11 @@ function createSlug(title: string) {
 export default function UpdatePostPage() {
     const params = useParams();
     const id = params.id?.toString();
+    const breadcrumbs: Breadcrumb[] = [
+        { href: paths.dashboard(), text: 'Dashboard' },
+        { href: paths.showAllPosts(), text: 'Posts' },
+        { href: paths.editPost(id), text: 'Edit Post' },
+    ];
     const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
     const [title, setTitle] = useState('');
     const categories = ['Thoughts', 'Work', 'Hobby']; // can change this category or add/remove any
@@ -146,9 +157,7 @@ const generatedSlug = createSlug(title);
 
     return(
         <div>
-             <div className="my-5">
-             <Link href={'/dashboard/'}>Dashboard</Link> {"\u00AB"} <Link href={'/dashboard/posts'}>Posts</Link> {"\u00AB"} Edit Post
-    </div>
+             <PageBreadcrumbs items={breadcrumbs}/>
     {/* formState error message */}
     <DisplayPostMessage formStateMessage={formStateMessage} />
         <form action={() => action(formData)}>

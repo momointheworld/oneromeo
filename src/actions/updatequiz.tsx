@@ -2,6 +2,7 @@
 import { db } from "@/db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import paths from "@/components/paths";
 
 interface UpdateQuizProps {
     quizName: string
@@ -20,7 +21,9 @@ interface UpdateQuizProps {
     } catch (error) {
       console.log(`Error updating quiz: ${error}`);
     }
-     revalidatePath(`/dashboard/quizzes/${id}`);
-     redirect(`/dashboard/quizzes/${id}`);
+    //  revalidatePath(`/dashboard/quizzes/${id}`);
+    //  redirect(`/dashboard/quizzes/${id}`);
+     revalidatePath(paths.showSingleQuiz(id));
+     redirect(paths.showSingleQuiz(id));
   }
    

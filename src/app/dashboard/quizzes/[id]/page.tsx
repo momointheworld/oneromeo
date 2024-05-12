@@ -1,12 +1,21 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/db";
+import { BreadcrumbItem, Breadcrumbs } from "@nextui-org/react";
+import paths from "@/components/paths";
+import PageBreadcrumbs from "@/components/common/breadcrumbs";
 
 interface ShowQuizProps {
     params: {
         id: string
     }
 }
+
+interface Breadcrumb {
+    href: string;
+    text: string;
+  }
+  
 
 export async function generateStaticParams() {
     const quizzes = await db.quiz.findMany();
@@ -36,17 +45,20 @@ export default async function SingleQuizPage({params}: ShowQuizProps) {
 
     const answerOptions = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
 
+    const breadcrumbs: Breadcrumb[] = [
+        { href: paths.dashboard(), text: 'Dashboard' },
+        { href: paths.showAllQuizzes(), text: 'Quizzes' },
+        { href: paths.showSingleQuiz(quiz.id), text: `${quiz.quizName}` },
+    ];
 
     return (
         <div>
-            <div className="my-5">
-                <Link href={'/dashboard/'}>Dashboard</Link> {"\u00AB"} <Link href={'/dashboard/quizzes'}>Quizzes</Link> {"\u00AB"} {quiz.quizName}
-            </div>
+            <PageBreadcrumbs items={breadcrumbs} />
             <div className="flex flex-col items-center">
             <h1>{quiz.quizName}</h1>
             <div className="flex justify-between">
                 <div className="flex gap-x-5">
-                    <Link href={`/dashboard/quizzes/${quizId}/edit`} className="p-3 border rounded border-blue-400 no-underline hover:bg-blue-400">Edit</Link>
+                    <Link href={paths.editQuiz(quizId)} className="p-3 border rounded border-blue-400 no-underline hover:bg-blue-400">Edit</Link>
                 </div>
             </div>
             <div className="p-2 mt-4">

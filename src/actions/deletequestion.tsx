@@ -2,6 +2,7 @@
 import { db } from "@/db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import paths from "@/components/paths";
 
 export async function deleteQuestion(id: string) {
     let questionQuizId: string; 
@@ -14,7 +15,7 @@ export async function deleteQuestion(id: string) {
         },
       });
       if (!question) {
-        redirect('/dashboard/quizzes/')
+        redirect(paths.showAllQuizzes())
       }
       questionQuizId = question.quizId; // Store the questionQuizId
       // Delete the associated answers first
@@ -29,14 +30,17 @@ export async function deleteQuestion(id: string) {
         quizId: questionQuizId
         }
       })  
-      revalidatePath(`/dashboard/quizzes/${questionQuizId}`)
+      // revalidatePath(`/dashboard/quizzes/${questionQuizId}`)
+      revalidatePath(paths.showSingleQuiz(questionQuizId))
       // if this quiz ID can not be found in the questions, that means the last question was deleted,
       //  proceed to delete the quiz
       if (!questionQuiz) {
         await db.quiz.delete({where: {id: questionQuizId}});
         console.log(`Quiz ${questionQuizId} is deleted`);
-        revalidatePath('/dashboard/quizzes');
-        redirect('/dashboard/quizzes');
+        // revalidatePath('/dashboard/quizzes');
+        // redirect('/dashboard/quizzes');
+        revalidatePath(paths.showAllQuizzes());
+        redirect(paths.showAllQuizzes());
       }
       console.log(`Question ${id} is deleted.`);
     } catch (error) {
