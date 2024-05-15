@@ -13,7 +13,7 @@ import TextAlign from '@tiptap/extension-text-align';
 import Youtube from '@tiptap/extension-youtube'
 import { useParams } from 'next/navigation'
 import { useFormState } from 'react-dom';
-import DisplayPostMessage from '@/components/posts/postMessage';
+import DisplayPostMessage from '@/components/posts/post-message';
 import paths from '@/components/paths';
 import PageBreadcrumbs from '@/components/common/breadcrumbs';
 import FormButton from '@/components/common/formbutton';

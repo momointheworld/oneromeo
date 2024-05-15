@@ -67,5 +67,5 @@ export default async function Dashboard() {
                 {renderQuizzes}
             </div>
         </div>
-    )
+            )
 }

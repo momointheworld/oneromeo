@@ -1,5 +1,9 @@
-export default function Login() {
+import Profile from "@/components/profile";
+
+export default function LoginPage() {
     return(
-        <div>this is the Login page</div>
+        <div>
+        <Profile />
+        </div>
     )
 }

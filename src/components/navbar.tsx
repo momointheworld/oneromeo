@@ -16,7 +16,6 @@ const menuItems = [
   { title: "Home", href: '/' },
   { title: "About", href: '/about' },
   { title: "Contact", href: '/contact' },
-  { title: "Dashboard", href: '/dashboard' },
 ];
 
 interface ItemProps {
