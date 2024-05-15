@@ -17,6 +17,7 @@ import DisplayPostMessage from '@/components/posts/postMessage';
 import { BreadcrumbItem, Breadcrumbs, Checkbox, Select, SelectItem } from '@nextui-org/react';
 import paths from '@/components/paths';
 import PageBreadcrumbs from '@/components/common/breadcrumbs';
+import FormButton from '@/components/common/formbutton';
 
 interface FormState {
   message: string;
@@ -181,9 +182,9 @@ return(
                     <TipTap editor={editor} onYoutubeClick={addYoutubeVideo} widthRef={widthRef} heightRef={heightRef}/>
                     </div>
                     <div className="flex gap-4 justify-end">
-                    <button className="rounded bg-blue-500 shadow-md text-zinc-200 hover:text-zinc-900 shadow-stone-600 px-4 py-2">
-                     Submit
-                    </button>
+                    <FormButton>
+                      Suhmit
+                    </FormButton>
                     </div>
                 </div>
                 </form> 

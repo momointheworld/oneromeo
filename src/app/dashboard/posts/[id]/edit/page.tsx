@@ -16,6 +16,7 @@ import { useFormState } from 'react-dom';
 import DisplayPostMessage from '@/components/posts/postMessage';
 import paths from '@/components/paths';
 import PageBreadcrumbs from '@/components/common/breadcrumbs';
+import FormButton from '@/components/common/formbutton';
 
 interface FormState {
     message: string;
@@ -208,9 +209,9 @@ const generatedSlug = createSlug(title);
                     </div>
                      )}
                     <div className="flex gap-4 justify-end"> 
-                    <button className="rounded bg-blue-500 shadow-md text-zinc-200 hover:text-zinc-900 shadow-stone-600 px-4 py-2">
-                     Update Post
-                    </button>
+                    <FormButton>
+                        Update Post
+                    </FormButton>
                     </div>
                 </div>
                 </form> 

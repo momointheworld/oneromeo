@@ -1,12 +1,13 @@
 'use client';
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import * as action from "@/actions";
+import * as actions from "@/actions";
 import Link from "next/link";
 import DisplayMessage from "@/components/common/message";
 import { BreadcrumbItem, Breadcrumbs } from "@nextui-org/react";
 import paths from "@/components/paths";
 import PageBreadcrumbs from "@/components/common/breadcrumbs";
+import FormButton from "@/components/common/formbutton";
 
 
 interface AnswerDataProps {
@@ -53,17 +54,17 @@ export default function ModifyQuizzes() {
             try {
                 if (!id) return;
                 // Get quiz data
-                const fetchedQuiz = await action.getQuiz({ id });
+                const fetchedQuiz = await actions.getQuiz({ id });
                 setQuiz(fetchedQuiz);
                 
                 // Get questions data
-                const fetchedQuestions = await action.getQuestions(id);
+                const fetchedQuestions = await actions.getQuestions(id);
                 setQuestions(fetchedQuestions);
                 
                 // Loop through questions to get answers for each question
                 const allAnswers: AnswerDataProps[][] = [];
                 for (const question of fetchedQuestions) {
-                    const fetchedAnswers = await action.getAnswers(question.id);
+                    const fetchedAnswers = await actions.getAnswers(question.id);
                     allAnswers.push(fetchedAnswers);
                 }
                 setAnswers(allAnswers);
@@ -111,7 +112,7 @@ export default function ModifyQuizzes() {
         setFormStateMessage('Adding question...')
         try {
           // Create a new question on the server
-          const newQuestionData = await action.createQuestion({
+          const newQuestionData = await actions.createQuestion({
             quizId: quiz?.id || '', // Use optional chaining to access quiz.id safely
             text: '',
             answers: [
@@ -139,7 +140,7 @@ export default function ModifyQuizzes() {
       const handleDeleteQuestion = async (id: string) => {
         setFormStateMessage('Loading...')
          try {
-             await action.deleteQuestion(id);
+             await actions.deleteQuestion(id);
               // Update the local state with the newly created question
              setQuestions((prevQuestions) => prevQuestions.filter(question => question.id !== id));
              setFormStateMessage('Question deleted successfully. Close to continue.')
@@ -162,17 +163,24 @@ export default function ModifyQuizzes() {
             // Update answers
             for (let i = 0; i < answers.length; i++) {
                 for (const answer of answers[i]) {
-                await action.updateAnswer(answer.id, { text: answer.text, points: answer.points });
+                await actions.updateAnswer(answer.id, { text: answer.text, points: answer.points });
                 setFormStateMessage('Answers updated successfully, please hold.');
             }
             }
+
             // Update questions
             for (const question of questions) {
-                await action.updateQuestion(question.id, { text: question.text });
-                setFormStateMessage('Questions updated successfully, please hold.');
+                // Check if the question exists before updating it
+                const existingQuestion = questions.find(q => q.id === question.id);
+                if (existingQuestion) {
+                    await actions.updateQuestion(question.id, { text: question.text });
+                    setFormStateMessage('Questions updated successfully, please hold.');
+                }
             }
+            const fetchedQuiz = await actions.getQuiz({ id });
+            setQuiz(fetchedQuiz);
             // Update quiz
-            await action.updateQuiz(id, { quizName: quiz.quizName });
+            await actions.updateQuiz(id, { quizName: quiz.quizName });
             console.log('Data updated successfully!');
             setFormStateMessage('Quiz data updated successfully...reloading');
         } catch (error) {
@@ -233,24 +241,18 @@ export default function ModifyQuizzes() {
                             </div>
                         ))}
                         {/* delete question button */}
-                        <button 
-                            type="button" 
-                            className="rounded bg-red-400 text-white px-3 py-1 my-2"
-                            onClick={() => handleDeleteQuestion(question.id)}>Delete Question</button>
+                        <FormButton  onClick={() => handleDeleteQuestion(question.id)} color="danger">
+                          Delete Question
+                        </FormButton>
                 </div>
             ))}
             <div className="flex gap-4 justify-center">
-                <button type="button" 
-                    onClick={handleAddQuestion} 
-                    className="rounded bg-blue-500 shadow-md text-zinc-200 hover:text-zinc-900 shadow-stone-600 px-4 py-2 mx-2">
+                <FormButton onClick={handleAddQuestion} > 
                     Add Question
-                </button>
-                <button 
-                    type="submit" 
-                    className="rounded bg-blue-500 shadow-md text-zinc-200 hover:text-zinc-900 shadow-stone-600 px-4 py-2 mx-2"
-                    onClick={handleSubmit}>
+                </FormButton>
+                <FormButton onClick={handleSubmit}>
                     Save Changes
-                </button>
+                </FormButton>
             </div>
         </div>
     </div>

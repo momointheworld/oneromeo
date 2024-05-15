@@ -1,56 +1,94 @@
 "use client";
-import { useState } from 'react';
-import { HomeIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/solid'; 
-import NavLink from '@/components/navlinks';
-import Image from "next/image";
+import { useState, useEffect } from 'react';
+import { usePathname } from "next/navigation";
+import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Link, NavbarMenu, NavbarMenuItem, NavbarMenuToggle } from '@nextui-org/react';
+import Image from 'next/image';
 import Logo from "/public/sparrow.svg";
-import SignIn from './signin';
 import Profile from './profile';
 
-const Navbar: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(false);
+const MenuLogo = () => {
+  return (
+    <Image className='hidden md:flex justify-self-end pt-3 mx-5' src={Logo} alt="sparrow logo" width="50" />
+  )
+}
 
-  const toggleMenu = () => {
-    setIsOpen(!isOpen);
+const menuItems = [
+  { title: "Home", href: '/' },
+  { title: "About", href: '/about' },
+  { title: "Contact", href: '/contact' },
+  { title: "Dashboard", href: '/dashboard' },
+];
+
+interface ItemProps {
+  title: string;
+  href: string;
+}
+
+const NavbarComp = () => {
+  const pathName = usePathname();
+  const [activeMenuItem, setActiveMenuItem] = useState<ItemProps | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const activeItem = menuItems.find(item => {
+      if (item.href === "/") {
+        return pathName === "/";
+      }
+      return pathName.startsWith(item.href);
+    });
+    setActiveMenuItem(activeItem || null);
+  }, [pathName]);
+
+  const handleMenuItemClick = (item: ItemProps) => {
+    setActiveMenuItem(item);
+    setIsMenuOpen(false);
   };
 
   return (
-    <nav>
-      <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center border-solid border-1 border-zinc-300 rounded-full shadow-lg mt-5 px-5">
-            <NavLink href="/"><HomeIcon className="h-6 w-6 text-black-500 btn" /></NavLink>
-            <div className="hidden md:flex space-x-4">
-              <NavLink href="/about">About</NavLink>
-              <NavLink href="/contact">Contact</NavLink>
-              <NavLink href="/order">Order Now</NavLink>
-            </div>
-          </div>
-          <div className='hidden lg:flex items-center'>
-          <Profile />
-          <Image className='justify-self-end pt-3 mx-5' src={Logo} alt="sparrow logo" width="50" />
-          </div>
-          {/* Hamburger menu for mobile */}
-          <div className="md:hidden">
-            <button onClick={toggleMenu} className="text-gray-600 hover:text-gray-900 focus:outline-none">
-              {isOpen ? <XMarkIcon className="h-6 w-6" /> : <Bars3Icon className="h-6 w-6" />}
-            </button>
-          </div>
-        </div>
-        {/* Mobile menu */}
-        {isOpen && (
-          <div className="md:hidden">
-            <div className="flex flex-col mt-2 space-y-2 border-solid border-3 border-zinc-300 rounded-md shadow-lg mt-5 px-5">
-              <NavLink href="/about">About</NavLink>
-              <NavLink href="/contact">Contact</NavLink>
-              <NavLink href="/order">Order Now</NavLink>
-              <Profile />
-            </div>
-          </div>
-        )}
-      </div>
-    </nav>
+    <Navbar onMenuOpenChange={setIsMenuOpen}>
+      <NavbarContent>
+        <NavbarMenuToggle
+          aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+          className="sm:hidden"
+        />
+        <NavbarBrand>
+          <p className="font-bold text-inherit">One Romeo</p>
+          <MenuLogo />
+        </NavbarBrand>
+      </NavbarContent>
+      <NavbarContent className="hidden sm:flex gap-4" justify="center">
+        {menuItems.map((item, index) => (
+          <NavbarItem key={index} isActive={item === activeMenuItem}>
+            <Link
+              color={item === activeMenuItem ? "primary" : "foreground"} 
+              href={item.href}
+              onClick={() => handleMenuItemClick(item)}
+            >
+              {item.title}
+            </Link>
+          </NavbarItem>
+        ))}
+      </NavbarContent>
+      <NavbarContent justify="end">
+        <Profile />
+      </NavbarContent>
+      <NavbarMenu>
+        {menuItems.map((item, index) => (
+          <NavbarMenuItem key={`${item}-${index}`}>
+            <Link
+              color={item === activeMenuItem ? "primary" : "foreground"}
+              className="w-full"
+              href={item.href}
+              size="lg"
+              onClick={() => handleMenuItemClick(item)}
+            >
+              {item.title}
+            </Link>
+          </NavbarMenuItem>
+        ))}
+      </NavbarMenu>
+    </Navbar>
   );
-};
+}
 
-export default Navbar;
+export default NavbarComp;

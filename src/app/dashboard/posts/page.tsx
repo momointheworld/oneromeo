@@ -3,10 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import Link from 'next/link';
 import { fetchAndGroupPostsByCategory, getAllCategories } from '@/actions';
-import Profile from '@/components/profile';
-import { BreadcrumbItem, Breadcrumbs } from '@nextui-org/react';
 import paths from '@/components/paths';
 import PageBreadcrumbs from '@/components/common/breadcrumbs';
+import { Button } from '@nextui-org/react';
 
 interface Post {
     id: string;
@@ -86,12 +85,14 @@ export default function RenderAllPosts(): JSX.Element {
             <div className="flex justify-between items-center">
                 <h1 className="text-xl font-bold">Posts</h1>
                 <div>
+                    <Button variant='bordered' color='primary'>
                     <Link
                         href={'/dashboard/posts/new-post'}
-                        className="border p-2 mx-1 rounded bg-blue-200 hover:bg-blue-600 hover:text-zinc-200 no-underline"
+                        className="no-underline"
                     >
                         Create Post
                     </Link>
+                    </Button>
                 </div>
             </div>
             <div className="flex flex-col gap-2 mt-5">{renderPosts()}</div>

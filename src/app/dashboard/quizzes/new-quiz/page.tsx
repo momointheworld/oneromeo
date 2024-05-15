@@ -5,9 +5,10 @@ import "react-datepicker/dist/react-datepicker.css";
 import Link from 'next/link';
 import * as action from '@/actions';
 import DisplayMessage from '@/components/common/message';
-import { BreadcrumbItem, Breadcrumbs } from '@nextui-org/react';
+import { BreadcrumbItem, Breadcrumbs, Button } from '@nextui-org/react';
 import paths from '@/components/paths';
 import PageBreadcrumbs from '@/components/common/breadcrumbs';
+import FormButton from '@/components/common/formbutton';
 
 interface AnswerDataProps {
   text: string;
@@ -94,7 +95,7 @@ export default function NewQuiz() {
   
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setFormStateMessage('Adding quiz...')
+    setFormStateMessage('Quiz is being added, you will be redirected, please hold on...')
     try {
      const formDataForQuiz: QuizDataProps = {
       date: selectedDate || new Date(),
@@ -155,7 +156,6 @@ export default function NewQuiz() {
     <div className='flex justify-center text-center'>
     <div className='flex flex-col lg:w-1/2 md:w-full'>
       <h1>New Quiz</h1>
-      <form onSubmit={handleSubmit}>
         <div className="flex flex-col gap-4 font-bold">
           {/* Datepicker */}
             <div>
@@ -227,22 +227,26 @@ export default function NewQuiz() {
           </div>
         ))}
           <div className="flex gap-4 justify-end">
-        <button type="button" 
-        onClick={handleAddQuestion} 
-        className="rounded bg-blue-500 shadow-md text-zinc-200 shadow-stone-600 px-4 py-2 mx-2">
+        <Button type="button"
+         color="warning"
+        onClick={handleAddQuestion} >
           Add Question
-        </button>
-        <button type="button" 
-        onClick={handleCancelQuestion} 
-        className="rounded bg-blue-500 shadow-md text-zinc-200 hover:text-zinc-900 shadow-stone-600 px-4 py-2 mx-2">
+        </Button>
+        <Button type="button" 
+               color="default"
+        onClick={handleCancelQuestion}>
           Cancel adding Question
-        </button>
-      <button 
+        </Button>
+        <form onSubmit={handleSubmit}>
+          <FormButton>
+            Submit
+            </FormButton>
+        </form>
+        </div>
+      {/* <button 
         type="submit"
         className="rounded bg-blue-500 shadow-md text-zinc-200 shadow-stone-600 px-4 py-2 disabled:bg-transparent">
-          Submit</button>
-          </div>
-      </form>
+          Submit</button> */}
     </div>
     </div>
     </>

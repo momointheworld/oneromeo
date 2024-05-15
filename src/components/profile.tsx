@@ -12,7 +12,6 @@ export default function Profile() {
       authContent = (
         <div>
             <div className="flex flex-row items-center">
-                <div className="mx-3 text-orange-800">Welcome, {session.data.user.name}</div>
                 <SignOut />
             </div>
         </div> )

@@ -5,7 +5,7 @@ export default function SignOut() {
    
     return(
         <form action={signOut}>
-        <Button type="submit">Sign Out</Button>
+           <Button color="danger" variant="ghost" type="submit">Sign Out</Button>
         </form>
     )
 }

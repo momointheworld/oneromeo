@@ -39,12 +39,12 @@ export async function deleteQuestion(id: string) {
         console.log(`Quiz ${questionQuizId} is deleted`);
         // revalidatePath('/dashboard/quizzes');
         // redirect('/dashboard/quizzes');
-        revalidatePath(paths.showAllQuizzes());
-        redirect(paths.showAllQuizzes());
+        // redirect(paths.showAllQuizzes());
       }
       console.log(`Question ${id} is deleted.`);
     } catch (error) {
       console.error(`Error deleting question: ${error}`);
     } 
+    revalidatePath(paths.showAllQuizzes());
   }
   

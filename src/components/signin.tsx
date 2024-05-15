@@ -5,7 +5,7 @@ export default function SignIn() {
    
     return(
         <form action={signIn}>
-        <Button type="submit">Sign In</Button>
+         <Button color="primary" variant="ghost" type="submit">Sign In</Button>
         </form>
     )
 }

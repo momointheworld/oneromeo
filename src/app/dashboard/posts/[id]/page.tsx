@@ -8,6 +8,8 @@ import { useFormState } from "react-dom";
 import { useEffect, useState } from "react";
 import paths from "@/components/paths";
 import PageBreadcrumbs from "@/components/common/breadcrumbs";
+import FormButton from "@/components/common/formbutton";
+import { Button } from "@nextui-org/react";
 
 interface ShowPostProps {
     params: {
@@ -96,11 +98,15 @@ const closeMessage = () => {
                     </button>
                 </div>
             )}
-        <div className="flex justify-between">
+        <div className="flex flex-col justify-between sm:flex-row">
             <div className="flex gap-x-5">
-            <Link href={`/dashboard/posts/${postId}/edit`} className="p-3 border rounded border-blue-400 no-underline hover:bg-blue-400">Edit</Link>
-            <form action={(e)=> {action(postId)}} className="p-3 border rounded border-red-400 no-underline hover:bg-red-200">
-              <button> Delete</button>
+            <Button>
+            <Link className="text-none" href={`/dashboard/posts/${postId}/edit`}>Edit</Link>
+            </Button>
+            <form action={(e)=> {action(postId)}}>
+              <FormButton color="danger">
+                Delete
+              </FormButton>
                 </form>
             </div>
             <div className="self-end">Categories: {categoryNames.join(', ')} | {format(new Date(post.date), 'MMMM d, yyyy')}</div> 

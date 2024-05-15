@@ -14,7 +14,7 @@ interface Post {
 }
 
 interface CategoryProps {
-    params: { slug: string, id: string };
+    params: {id: string };
 }
 
 interface Category {
@@ -29,6 +29,7 @@ interface Category {
 
 
 export default function CategoryPosts({params}: CategoryProps ){
+    const { id } = params;
     const [posts, setPosts] = useState<Post[] | null>(null);
     const [categoryName, setCategoryName] = useState<string | null>(null);
     const [categories, setCategories] = useState<Category[] | null>(null);
@@ -36,18 +37,18 @@ export default function CategoryPosts({params}: CategoryProps ){
         { href: paths.dashboard(), text: 'Dashboard' },
         { href: paths.showAllPosts(), text: 'Posts' },
         { href: paths.showAllCategories(), text: 'Categories' },
-        { href: paths.showCategoryPosts(params.id), text: `${categoryName}` },
+        { href: paths.showCategoryPosts(id), text: `${categoryName}` },
     ];
     useEffect(() => {
         async function fetchData() {
             // Get the category ID from the route query parameters
-          const categoryId = params.id
+        //   const categoryId = params.id
         //   console.log(categoryId);
-            const postsData = await getCategoryPosts(categoryId);
+            const postsData = await getCategoryPosts(id);
             setPosts(postsData || []);
         }
         fetchData();
-    }, [params.id]);
+    }, [id]);
     
     useEffect(() => {
         async function fetchCategories() {
