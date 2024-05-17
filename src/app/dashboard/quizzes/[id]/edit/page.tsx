@@ -144,6 +144,7 @@ export default function ModifyQuizzes() {
               // Update the local state with the newly created question
              setQuestions((prevQuestions) => prevQuestions.filter(question => question.id !== id));
              setFormStateMessage('Question deleted successfully. Close to continue.')
+ 
          } catch (error) {
             console.error('Error deleting a question:', error);
             setFormStateMessage(`Error deleting a question ${error}`)
@@ -177,8 +178,7 @@ export default function ModifyQuizzes() {
                     setFormStateMessage('Questions updated successfully, please hold.');
                 }
             }
-            const fetchedQuiz = await actions.getQuiz({ id });
-            setQuiz(fetchedQuiz);
+           
             // Update quiz
             await actions.updateQuiz(id, { quizName: quiz.quizName });
             console.log('Data updated successfully!');

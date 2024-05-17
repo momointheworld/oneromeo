@@ -5,7 +5,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import Link from 'next/link';
 import * as action from '@/actions';
 import DisplayMessage from '@/components/common/message';
-import { BreadcrumbItem, Breadcrumbs, Button } from '@nextui-org/react';
+import { BreadcrumbItem, Breadcrumbs, Button, Select, SelectItem } from '@nextui-org/react';
 import paths from '@/components/paths';
 import PageBreadcrumbs from '@/components/common/breadcrumbs';
 import FormButton from '@/components/common/formbutton';
@@ -209,19 +209,24 @@ export default function NewQuiz() {
                   onChange={(e) => handleAnswerChange(questionIndex, answerIndex, e.target.value)}
                   required
                 />
-                <select
+                <Select
                   id={`points${questionIndex}${answerIndex}`}
                   name={`points${questionIndex}${answerIndex}`}
-                  className="border rounded p-2"
+                  // className="border rounded p-2"
+                  label="Select a point" 
+                  className="max-w-xs" 
                   value={answer.points}
                   onChange={(e) => handlePointsChange(questionIndex, answerIndex, e.target.value)}
                   required
                 >
-                  <option value="0">0</option>
-                  <option value="5">5</option>
+                  <SelectItem value="0" key={'0'}>0</SelectItem>
+                  <SelectItem value="5" key={'5'}>5</SelectItem>
+                  <SelectItem value="10" key={'10'}>10</SelectItem>
+                  <SelectItem value="15" key={'15'}>15</SelectItem>
+                  {/* <option value="5">5</option>
                   <option value="10">10</option>
-                  <option value="15">15</option>
-                </select>
+                  <option value="15">15</option> */}
+                </Select>
               </div>
             ))}
           </div>

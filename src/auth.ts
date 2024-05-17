@@ -53,13 +53,17 @@ import { db } from '@/db';
 
 const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID
 const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET
+const GITHUB_AUTHORIZED_ACCOUNT1 = process.env.GITHUB_AUTHORIZED_ACCOUNT1
+const GITHUB_AUTHORIZED_ACCOUNT2 = process.env.GITHUB_AUTHORIZED_ACCOUNT2
+
 
 if (!GITHUB_CLIENT_ID || !GITHUB_CLIENT_SECRET) {
      throw new Error ('Missing github oauth credentials.')
 }
 
 // Define the allowed user here
-const allowedUser = 'email@oneromeo.com'; // Change this to the username or email you want to allow
+const allowedUser1 = GITHUB_AUTHORIZED_ACCOUNT1;
+const allowedUser2 = GITHUB_AUTHORIZED_ACCOUNT2;
 
 export const { handlers: { GET, POST }, auth, signIn, signOut } = NextAuth({
     adapter: PrismaAdapter(db),
@@ -72,7 +76,7 @@ export const { handlers: { GET, POST }, auth, signIn, signOut } = NextAuth({
     callbacks: {
         async signIn({ user, account, profile, email, credentials }) {
             // Verify if the user is allowed access
-            if (profile?.email === allowedUser || profile?.login === allowedUser) {
+            if (profile?.email === allowedUser1 || allowedUser2 || profile?.login === allowedUser1 || allowedUser2) {
                 return true; // Allow access
             } else {
                 return false; // Deny access

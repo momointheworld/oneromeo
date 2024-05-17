@@ -3,6 +3,8 @@ import { db } from "@/db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import paths from "@/components/paths";
+import { getAnswers } from "./getanswers";
+import { getQuiz } from "./getquiz";
 
 export async function deleteQuestion(id: string) {
     let questionQuizId: string; 
@@ -29,22 +31,17 @@ export async function deleteQuestion(id: string) {
         where: {
         quizId: questionQuizId
         }
-      })  
-      // revalidatePath(`/dashboard/quizzes/${questionQuizId}`)
-      revalidatePath(paths.showSingleQuiz(questionQuizId))
+      })    
       // if this quiz ID can not be found in the questions, that means the last question was deleted,
       //  proceed to delete the quiz
       if (!questionQuiz) {
         await db.quiz.delete({where: {id: questionQuizId}});
         console.log(`Quiz ${questionQuizId} is deleted`);
-        // revalidatePath('/dashboard/quizzes');
-        // redirect('/dashboard/quizzes');
-        // redirect(paths.showAllQuizzes());
       }
       console.log(`Question ${id} is deleted.`);
+      await getAnswers(id);  
     } catch (error) {
       console.error(`Error deleting question: ${error}`);
     } 
-    revalidatePath(paths.showAllQuizzes());
   }
   

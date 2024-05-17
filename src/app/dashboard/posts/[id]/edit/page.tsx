@@ -59,7 +59,7 @@ export default function UpdatePostPage() {
     ];
     const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
     const [title, setTitle] = useState('');
-    const categories = ['Thoughts', 'Work', 'Hobby']; // can change this category or add/remove any
+    const categories = ['Home', 'About', 'Thoughts', 'Work', 'Hobby']; // can change this category or add/remove any
     const [selectedCategories, setSelectedCategories] = useState<any[]>([]);
     const [editorContent, setEditorContent] = useState('');
     const [formState, action] = useFormState(updatePost, {message: ''});

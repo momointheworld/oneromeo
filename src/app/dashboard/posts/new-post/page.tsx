@@ -52,7 +52,7 @@ function createSlug(title: string) {
 export default function CreatePost() {
     const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
     const [title, setTitle] = useState('');
-    const categories = ['Thoughts', 'Work', 'Hobby'];
+    const categories = ['Home','About','Thoughts', 'Work', 'Hobby'];
     const [selectedCategories, setSelectedCategories] = useState<string[]>(['Work']); // Set default category to 'Work'
     const [formState, action] = useFormState(createPost, {message: ''});
     const formStateMessage = formState.message;

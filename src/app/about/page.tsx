@@ -1,5 +1,9 @@
-export default function Thoughts() {
-    return(
-        <div>this is the thoughts page</div>
-    )
+import PostsByCategory from '@/components/common/post-by-category';
+
+export default function AboutPage() {
+    return (
+        <div>
+            <PostsByCategory categoryName="About" />
+        </div>
+    );
 }
