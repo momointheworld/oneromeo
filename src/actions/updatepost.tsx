@@ -16,6 +16,7 @@ interface UpdateFormDataProps {
     body: string,
     id: string,
   }
+
   export async function updatePost(formState: FormState, data: UpdateFormDataProps): Promise<FormState> {
     const { date, slug, categoryNames, title, body, id } = data;
   
@@ -60,8 +61,6 @@ interface UpdateFormDataProps {
         message: error instanceof Error ? error.message : 'Something went wrong, try again later.'
     };
     }
-    //   revalidatePath(`/dashboard/posts/${id}`);
-    //   redirect(`/dashboard/posts/${id}`)  // redirect needs to be outside of try...catch
       revalidatePath(paths.showSinglePost(id));
       redirect(paths.showSinglePost(id))  // redirect needs to be outside of try...catch
   

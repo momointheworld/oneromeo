@@ -1,5 +1,5 @@
 'use client'
-import {updatePost, getPost, createPost, getAllCategories} from '@/actions';
+import {updatePost, getPost, getAllCategories} from '@/actions';
 import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -17,6 +17,7 @@ import DisplayPostMessage from '@/components/posts/post-message';
 import paths from '@/components/paths';
 import PageBreadcrumbs from '@/components/common/breadcrumbs';
 import FormButton from '@/components/common/formbutton';
+import { FullSkeleton } from '@/components/posts/skeleton-loading';
 
 interface FormState {
     message: string;
@@ -95,7 +96,7 @@ export default function UpdatePostPage() {
                 const fetchedCategories = await getAllCategories();
                 // filter the category by the category ID existing
                 const filteredCategories = fetchedCategories.filter(category => fetchedContent.categoryIDs.includes(category.id));
-                setSelectedCategories(filteredCategories);
+                setSelectedCategories(filteredCategories.map(category => category.name)); // Set the original category hightligted 
                 setTitle(fetchedContent.title);
                 editor?.commands.setContent(fetchedContent.body); // Using body content to set fetched content
             } catch (error) {
@@ -201,7 +202,7 @@ const generatedSlug = createSlug(title);
                         />
                     </div>
                     { editorContent === '' ? (
-                        <div>Loading content...</div>
+                        <div><FullSkeleton /></div>
                     ) : (
                     <div className="container flex gap-4">
                     <span className="w-20">Date</span>

@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import Link from 'next/link';
 import { getAllCategories } from "@/actions";
-import { BreadcrumbItem, Breadcrumbs } from "@nextui-org/react";
 import paths from "@/components/paths";
 import PageBreadcrumbs from "@/components/common/breadcrumbs";
 
@@ -52,7 +51,7 @@ export default function CategoryPosts(): JSX.Element {
             {categories ? (
                 categories.map((category) => (
                     <div key={category.id}>
-                        <Link href={`/dashboard/posts/categories/${category.id}`}>
+                        <Link href={paths.showCategoryPosts(category.id)}>
                             {category.name}
                         </Link>
                     </div>

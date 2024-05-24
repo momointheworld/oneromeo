@@ -1,6 +1,7 @@
 // get posts based on the category
 'use server';
 import { db } from "@/db";
+import { log } from "console";
 import { notFound } from "next/navigation";
 
 interface Post {
@@ -12,6 +13,7 @@ interface Post {
   
   export async function fetchAndGroupPostsByCategory(): Promise<{ [key: string]: Post[] } | null> {
     try {
+  
       const posts = await db.post.findMany({
         include: { categories: true },
         orderBy: { date: 'desc' }, 

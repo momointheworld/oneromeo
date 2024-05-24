@@ -3,7 +3,8 @@
 'use client';
 import * as actions from '@/actions';
 import parse from 'html-react-parser';
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
+import { FullSkeleton } from './skeleton-loading';
 
 interface Post {
     id: string;
@@ -24,13 +25,13 @@ interface PostsByCategoryProps {
 }
 
 export default function PostsByCategory({ categoryName }: PostsByCategoryProps) {
-    const [categories, setCategories] = useState<Category[] | null>(null);
-    const [fetchedPosts, setFetchedPosts] = useState<Post[] | null>(null);
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [fetchedPosts, setFetchedPosts] = useState<Post[]>([]);
 
     useEffect(() => {
         async function fetchCategories() {
             const categoriesArr = await actions.getAllCategories();
-            setCategories(categoriesArr);
+            setCategories(categoriesArr || []); // Ensure it's an array
         }
         fetchCategories(); // Call fetchCategories to fetch all categories
     }, []);
@@ -41,13 +42,16 @@ export default function PostsByCategory({ categoryName }: PostsByCategoryProps) 
                 const category = categories.find((category) => category.name === categoryName);
                 if (category) {
                     const posts = await actions.getCategoryPosts(category.id);
-                    setFetchedPosts(posts);
+                    setFetchedPosts(posts || []); // Ensure it's an array
                 }
             }
         }
         fetchPosts();
     }, [categories, categoryName]);
 
+    if (fetchedPosts.length < 1) {
+        return <div><FullSkeleton /></div>
+    }
     return (
         <div>
              {/* Render fetched posts here */}

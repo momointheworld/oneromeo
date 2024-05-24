@@ -1,6 +1,7 @@
 import { format } from 'date-fns';
 import Link from "next/link";
 import { db } from "@/db";
+import paths from '@/components/paths';
 
 export const revalidate = 3; // re-render in every 3 seconds
 export default async function Dashboard() {
@@ -11,7 +12,7 @@ export default async function Dashboard() {
         return(
           <Link 
           key={post.id}
-          href={`/dashboard/posts/${post.id}`}
+          href={paths.showSinglePost(post.id)}
           className="flex justify-between items-center p-2 border rounded hover:bg-stone-50 no-underline"
           >
             <div className='text-zinc-500'>{formattedDate} | {post.title}</div> 
@@ -29,7 +30,7 @@ export default async function Dashboard() {
         return(
           <Link 
           key={quiz.id}
-          href={`/dashboard/quizzes/${quiz.id}`}
+          href={paths.showSingleQuiz(quiz.id)}
           className="flex justify-between items-center p-2 border rounded hover:bg-stone-50 no-underline"
           >
             <div className='text-zinc-500'>{formattedDate} | {quiz.quizName}</div> 

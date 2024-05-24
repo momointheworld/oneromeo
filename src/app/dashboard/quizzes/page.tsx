@@ -21,7 +21,7 @@ export default async function RenderAllQuizzesPage() {
         return(
           <Link 
           key={quiz.id}
-          href={`/dashboard/quizzes/${quiz.id}`}
+          href={paths.showSingleQuiz(quiz.id)}
           className="flex justify-between items-center p-2 border rounded no-underline"
           >
             <div className='text-zinc-500'> {formattedDate} | {quiz.quizName}</div> 
@@ -37,7 +37,8 @@ export default async function RenderAllQuizzesPage() {
           <div className="flex justify-between items-center">
                 <h1 className="text-xl font-bold">Quizzes</h1>
                 <div>
-                <Link href={'/dashboard/quizzes/new-quiz'} className="border p-2 mx-1 rounded bg-blue-200 hover:bg-blue-600 hover:text-zinc-200 no-underline">Create Quiz</Link>
+                <Link href={paths.createNewQuiz()} 
+                className="border p-2 mx-1 rounded bg-blue-200 hover:bg-blue-600 hover:text-zinc-200 no-underline">Create Quiz</Link>
                 </div>
             </div>
             <div className="flex flex-col gap-2 mt-5">

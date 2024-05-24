@@ -4,6 +4,8 @@ import "@/app/globals.css";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import Providers from "@/app/providers";
+import { Suspense } from "react";
+import SkeletonLoading from "@/components/posts/skeleton-loading";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,9 +24,9 @@ export default function RootLayout({
       <body className={`${inter.className} mx-10` }>
       <Providers>
             <Header />
-              <main className="md:container mx-auto bg-neutral-100 mt-10 p-10 rounded-md prose">         
+                <main className="prose md:container mx-auto bg-neutral-100 mt-10 p-10 rounded-md">         
                 {children}
-              </main>
+                </main>
               <Footer />
       </Providers>
         </body>

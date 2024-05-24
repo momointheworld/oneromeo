@@ -11,10 +11,8 @@ import ListItem from '@tiptap/extension-list-item'
 import TextStyle from '@tiptap/extension-text-style'
 import TextAlign from '@tiptap/extension-text-align';
 import Youtube from '@tiptap/extension-youtube'
-import Link from 'next/link';
 import { useFormState } from 'react-dom';
 import DisplayPostMessage from '@/components/posts/post-message';
-import { BreadcrumbItem, Breadcrumbs, Checkbox, Select, SelectItem } from '@nextui-org/react';
 import paths from '@/components/paths';
 import PageBreadcrumbs from '@/components/common/breadcrumbs';
 import FormButton from '@/components/common/formbutton';

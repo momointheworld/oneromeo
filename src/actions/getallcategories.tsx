@@ -1,8 +1,9 @@
 'use server';
 import { db } from "@/db";
 import { notFound } from "next/navigation";
+import { cache } from 'react'
 
-export async function getAllCategories() {
+export const getAllCategories = cache( async() => {
     try {
         const categories = await db.category.findMany({
             include: {
@@ -14,4 +15,4 @@ export async function getAllCategories() {
         console.error('Error fetching all categories with posts:', error);
         return notFound();
     }
-  }
+  })

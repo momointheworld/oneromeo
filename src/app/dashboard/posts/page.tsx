@@ -1,11 +1,12 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import Link from 'next/link';
 import { fetchAndGroupPostsByCategory, getAllCategories } from '@/actions';
 import paths from '@/components/paths';
 import PageBreadcrumbs from '@/components/common/breadcrumbs';
 import { Button } from '@nextui-org/react';
+import { FullSkeleton } from '@/components/posts/skeleton-loading';
 
 interface Post {
     id: string;
@@ -45,28 +46,29 @@ export default function RenderAllPosts(): JSX.Element {
     }, []);
 
     useEffect(() => {
-      async function fetchCategories() {
-        const categories = await getAllCategories();
-        setCategories(categories);
-      }
-      fetchCategories();
-    })
+        async function fetchCategories() {
+          const categories = await getAllCategories();
+          setCategories(categories);
+        }
+        fetchCategories();
+      }, []);
+      
 
     const renderPosts = () => {
       if (!groupedPosts || !categories) {
-          return <div>Loading...</div>;
+          return <div><FullSkeleton /></div>;
       }
 
       return categories.map(category => (
         <div key={category.id}>
             <h2>
-                <Link href={`/dashboard/posts/categories/${category.id}`}>{category.name}</Link>
+                <Link href={paths.showCategoryPosts(category.id)}>{category.name}</Link>
             </h2>
-            {/* Slice the posts array to display only 15 posts */}
+            {/* Slice the posts array to display only 6 posts */}
             {groupedPosts[category.id]?.slice(0, 6).map(post => (
                 <Link
                     key={post.id}
-                    href={`/dashboard/posts/${post.id}`}
+                    href={paths.showSinglePost(post.id)}
                     className="flex justify-between items-center p-2 border rounded no-underline"
                 >
                     <div className="text-zinc-500">
@@ -75,19 +77,21 @@ export default function RenderAllPosts(): JSX.Element {
                     <div>view</div>
                 </Link>
             ))}
+           
         </div>
     ));
 };
 
     return (
         <div className="flex flex-col">
+           
             <PageBreadcrumbs items={breadcrumbs} />
             <div className="flex justify-between items-center">
                 <h1 className="text-xl font-bold">Posts</h1>
                 <div>
                     <Button variant='bordered' color='primary'>
                     <Link
-                        href={'/dashboard/posts/new-post'}
+                        href={paths.createNewPost()}
                         className="no-underline"
                     >
                         Create Post
@@ -96,6 +100,7 @@ export default function RenderAllPosts(): JSX.Element {
                 </div>
             </div>
             <div className="flex flex-col gap-2 mt-5">{renderPosts()}</div>
+             
         </div>
     );
 }

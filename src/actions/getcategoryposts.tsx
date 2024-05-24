@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { notFound } from "next/navigation";
 
 export async function getCategoryPosts(categoryId: string) {
-    try {
+    try {    
       // Find the posts associated with the category ID
       const posts = await db.post.findMany({
           where: {

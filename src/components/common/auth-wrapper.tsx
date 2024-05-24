@@ -20,10 +20,6 @@ const AuthWrapper = ({ children }: AuthWrapperProps) => {
     }
   }, [session, status, pathName, router]);
 
-  if (status === 'loading') {
-    return <div>Loading...</div>; // Optionally render a loading indicator
-  }
-
   if (!session && pathName.startsWith('/dashboard')) {
     return null; // Optionally render nothing while redirecting
   }

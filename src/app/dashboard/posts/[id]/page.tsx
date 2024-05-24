@@ -10,6 +10,7 @@ import paths from "@/components/paths";
 import PageBreadcrumbs from "@/components/common/breadcrumbs";
 import FormButton from "@/components/common/formbutton";
 import { Button } from "@nextui-org/react";
+import { FullSkeleton } from "@/components/posts/skeleton-loading";
 
 interface ShowPostProps {
     params: {
@@ -65,7 +66,7 @@ useEffect(() => {
 
 
 if (!post) {
-    return <div>Loading...</div>;
+    return <div><FullSkeleton /></div>;
 }
 
 if (!categories.every(Boolean)) {

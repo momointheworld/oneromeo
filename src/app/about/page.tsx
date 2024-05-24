@@ -1,4 +1,4 @@
-import PostsByCategory from '@/components/common/post-by-category';
+import PostsByCategory from '@/components/posts/post-by-category';
 
 export default function AboutPage() {
     return (

@@ -23,3 +23,8 @@
     background-color:blanchedalmond;
   }
   
+  .aspect-ratio {
+    width: 15%;  /* Or adjust to specific value */
+    height: auto; /* This will maintain the aspect ratio */
+  }
+  

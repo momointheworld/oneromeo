@@ -77,7 +77,7 @@ export default function CategoryPosts({params}: CategoryProps ){
                 <div className="flex flex-col gap-2 mt-5">
                     {posts.map(post => (
                         <div key={post.id}>
-                            <Link href={`/dashboard/posts/${post.id}`} 
+                            <Link href={paths.showSinglePost(post.id)} 
                             className="flex justify-between items-center p-2 border rounded no-underline">
                                     {format(new Date(post.date), 'MMMM d, yyyy')} - {post.title}
                             </Link>

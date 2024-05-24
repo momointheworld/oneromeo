@@ -1,13 +1,13 @@
 'use client';
-import { useEffect, useState } from "react";
+import {  useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import * as actions from "@/actions";
 import Link from "next/link";
 import DisplayMessage from "@/components/common/message";
-import { BreadcrumbItem, Breadcrumbs } from "@nextui-org/react";
 import paths from "@/components/paths";
 import PageBreadcrumbs from "@/components/common/breadcrumbs";
 import FormButton from "@/components/common/formbutton";
+import { CardSkeleton, FullSkeleton } from "@/components/posts/skeleton-loading";
 
 
 interface AnswerDataProps {
@@ -23,7 +23,7 @@ interface AnswerDataProps {
     answers: AnswerDataProps[];
   }
   
-  interface QuizDataProps {
+  interface fetchedQuiz {
     id: string;
     quizName: string;
     questions: QuestionDataProps[];
@@ -36,7 +36,7 @@ interface AnswerDataProps {
   
 
 export default function ModifyQuizzes() {
-    const [quiz, setQuiz] = useState<QuizDataProps | null>(null); 
+    const [quiz, setQuiz] = useState<fetchedQuiz | null>(null); 
     const [questions, setQuestions] = useState<QuestionDataProps[]>([]);  
     // const [addQuestion, setAddQuestion] = useState<boolean>(false);
     const [answers, setAnswers] = useState<AnswerDataProps[][]>([]);  
@@ -76,9 +76,9 @@ export default function ModifyQuizzes() {
         fetchData();
          }, [id]);
 
-    console.log(quiz);
-    console.log(questions);
-    console.log(answers);
+    // console.log(quiz);
+    // console.log(questions);
+    // console.log(answers);
 
     // Update quiz name
     const handleQuizNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -162,11 +162,21 @@ export default function ModifyQuizzes() {
                 throw new Error('Quiz data is not available.');
             }
             // Update answers
-            for (let i = 0; i < answers.length; i++) {
-                for (const answer of answers[i]) {
-                await actions.updateAnswer(answer.id, { text: answer.text, points: answer.points });
-                setFormStateMessage('Answers updated successfully, please hold.');
-            }
+            // for (let i = 0; i < answers.length; i++) {
+            //     for (const answer of answers[i]) {
+            //     await actions.updateAnswer(answer.id, { text: answer.text, points: answer.points });
+            //     setFormStateMessage('Answers updated successfully, please hold.');
+            // }
+            // }
+            for (const answerList of answers) {
+                for (const answer of answerList) {
+                    if (answer.id) {
+                        await actions.updateAnswer(answer.id, { text: answer.text, points: answer.points });
+                        setFormStateMessage('Answers updated successfully, please hold.');
+                    } else {
+                        console.log('Answer not found, skipping update.');
+                    }
+                }
             }
 
             // Update questions
@@ -176,7 +186,7 @@ export default function ModifyQuizzes() {
                 if (existingQuestion) {
                     await actions.updateQuestion(question.id, { text: question.text });
                     setFormStateMessage('Questions updated successfully, please hold.');
-                }
+                } 
             }
            
             // Update quiz
@@ -185,10 +195,19 @@ export default function ModifyQuizzes() {
             setFormStateMessage('Quiz data updated successfully...reloading');
         } catch (error) {
             console.error('Error updating data:', error);
-            setFormStateMessage('Failed to update quiz data, try again later.');
+            setFormStateMessage('Failed to update quiz data, please refresh the page!');
         }
     };
 
+    if (!quiz || !questions || !answers) {
+        return (
+        <div className="gap-3">
+            <FullSkeleton />
+            <CardSkeleton />
+        </div>
+        )
+      }
+      
     return (
     <>
        <PageBreadcrumbs items={breadcrumbs} />

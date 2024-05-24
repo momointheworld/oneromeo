@@ -1,10 +1,8 @@
 'use server';
 import { db } from "@/db";
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import paths from "@/components/paths";
 import { getAnswers } from "./getanswers";
-import { getQuiz } from "./getquiz";
 
 export async function deleteQuestion(id: string) {
     let questionQuizId: string; 
