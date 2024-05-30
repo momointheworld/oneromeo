@@ -4,7 +4,7 @@
 import * as actions from '@/actions';
 import parse from 'html-react-parser';
 import { useEffect, useState } from 'react';
-import { FullSkeleton } from './skeleton-loading';
+import { FullSkeleton } from '@/components/common/skeleton-loading';
 
 interface Post {
     id: string;

@@ -1,7 +1,6 @@
 // get posts based on the category
 'use server';
 import { db } from "@/db";
-import { log } from "console";
 import { notFound } from "next/navigation";
 
 interface Post {

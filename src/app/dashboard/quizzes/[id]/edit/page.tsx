@@ -7,7 +7,7 @@ import DisplayMessage from "@/components/common/message";
 import paths from "@/components/paths";
 import PageBreadcrumbs from "@/components/common/breadcrumbs";
 import FormButton from "@/components/common/formbutton";
-import { CardSkeleton, FullSkeleton } from "@/components/posts/skeleton-loading";
+import { CardSkeleton, FullSkeleton } from "@/components/common/skeleton-loading";
 
 
 interface AnswerDataProps {

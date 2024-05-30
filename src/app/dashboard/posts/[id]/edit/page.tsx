@@ -17,7 +17,7 @@ import DisplayPostMessage from '@/components/posts/post-message';
 import paths from '@/components/paths';
 import PageBreadcrumbs from '@/components/common/breadcrumbs';
 import FormButton from '@/components/common/formbutton';
-import { FullSkeleton } from '@/components/posts/skeleton-loading';
+import { FullSkeleton } from '@/components/common/skeleton-loading';
 
 interface FormState {
     message: string;

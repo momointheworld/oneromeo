@@ -1,4 +1,4 @@
-import { CardSkeleton, FullSkeleton } from "@/components/posts/skeleton-loading";
+import { CardSkeleton, FullSkeleton } from "@/components/common/skeleton-loading";
 
 export default function PostLoading() {
 

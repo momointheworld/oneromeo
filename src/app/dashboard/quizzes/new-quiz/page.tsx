@@ -2,10 +2,9 @@
 import React, { useState } from 'react';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import Link from 'next/link';
 import * as action from '@/actions';
 import DisplayMessage from '@/components/common/message';
-import { BreadcrumbItem, Breadcrumbs, Button, Select, SelectItem } from '@nextui-org/react';
+import { Button, Select, SelectItem } from '@nextui-org/react';
 import paths from '@/components/paths';
 import PageBreadcrumbs from '@/components/common/breadcrumbs';
 import FormButton from '@/components/common/formbutton';
@@ -153,8 +152,8 @@ export default function NewQuiz() {
                 throw new Error("Function not implemented.");
             } } />        
     </div>
-    <div className='flex justify-center text-center'>
-    <div className='flex flex-col lg:w-1/2 md:w-full'>
+  <div className='flex justify-center text-center'>
+    <div className='flex flex-col lg:w-3/5 md:w-full'>
       <h1>New Quiz</h1>
         <div className="flex flex-col gap-4 font-bold">
           {/* Datepicker */}
@@ -165,20 +164,23 @@ export default function NewQuiz() {
                     selected={selectedDate} 
                     onChange={(date) => setSelectedDate(date)}  
                     className="border rounded p-2 w-full"  />
-             </div>
+        </div>
           <div className='flex flex-row'>
-          <label className='text-nowrap self-center' htmlFor="quizName">Quiz Name:</label>
-          <input
-            type="text"
-            id="quizName"
-            name="quizName"
-            value={quizName}
-            className="border rounded p-2 mx-5 w-full"
-            onChange={(e) => setQuizName(e.target.value)}
-            required
-          />
+              <label className='text-nowrap self-center' htmlFor="quizName">Quiz Name:</label>
+              <input
+                type="text"
+                id="quizName"
+                name="quizName"
+                value={quizName}
+                className="border rounded p-2 mx-5 w-full"
+                onChange={(e) => setQuizName(e.target.value)}
+                required
+              />
           </div>
         </div>
+
+        {/* Questions + Answers + buttons */}
+        <div className='flex flex-col'>
         {/* questions */}
         {questions.map((question, questionIndex) => (
           <div key={questionIndex} className="flex flex-col justify-between my-5 p-3 bg-slate-200 rounded border">
@@ -213,8 +215,8 @@ export default function NewQuiz() {
                   id={`points${questionIndex}${answerIndex}`}
                   name={`points${questionIndex}${answerIndex}`}
                   // className="border rounded p-2"
-                  label="Select a point" 
-                  className="max-w-xs" 
+                  label="Point" 
+                  className="w-1/3" 
                   value={answer.points}
                   onChange={(e) => handlePointsChange(questionIndex, answerIndex, e.target.value)}
                   required
@@ -231,29 +233,30 @@ export default function NewQuiz() {
             ))}
           </div>
         ))}
-          <div className="flex gap-4 justify-end">
-        <Button type="button"
-         color="warning"
-        onClick={handleAddQuestion} >
-          Add Question
-        </Button>
-        <Button type="button" 
-               color="default"
-        onClick={handleCancelQuestion}>
-          Cancel adding Question
-        </Button>
-        <form onSubmit={handleSubmit}>
-          <FormButton>
-            Submit
-            </FormButton>
-        </form>
-        </div>
+          <div className="flex flex-col gap-2 md:flex-row justify-end">
+                <Button type="button"
+                color="warning"
+                onClick={handleAddQuestion} >
+                  Add Question
+                </Button>
+                <Button type="button" 
+                      color="default"
+                onClick={handleCancelQuestion}>
+                  Remove Last Question
+                </Button>
+                <form onSubmit={handleSubmit}>
+                  <FormButton>
+                    Submit
+                    </FormButton>
+                </form>
+           </div>
       {/* <button 
         type="submit"
         className="rounded bg-blue-500 shadow-md text-zinc-200 shadow-stone-600 px-4 py-2 disabled:bg-transparent">
           Submit</button> */}
-    </div>
-    </div>
+      </div>
+     </div>
+  </div>
     </>
   );
 }

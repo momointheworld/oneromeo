@@ -10,7 +10,7 @@ import paths from "@/components/paths";
 import PageBreadcrumbs from "@/components/common/breadcrumbs";
 import FormButton from "@/components/common/formbutton";
 import { Button } from "@nextui-org/react";
-import { FullSkeleton } from "@/components/posts/skeleton-loading";
+import { FullSkeleton } from "@/components/common/skeleton-loading";
 
 interface ShowPostProps {
     params: {
