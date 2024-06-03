@@ -1,191 +1,227 @@
-'use client';
-import { createPost } from '@/actions';
-import React, { useState } from "react";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import TipTap from "@/components/posts/editor";
-import { useEditor } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
+'use client'
+import { createPost } from '@/actions'
+import React, { useState } from 'react'
+import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
+import TipTap from '@/components/posts/editor'
+import { useEditor } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
 import { Color } from '@tiptap/extension-color'
+import Link from '@tiptap/extension-link'
 import ListItem from '@tiptap/extension-list-item'
 import TextStyle from '@tiptap/extension-text-style'
-import TextAlign from '@tiptap/extension-text-align';
+import TextAlign from '@tiptap/extension-text-align'
 import Youtube from '@tiptap/extension-youtube'
-import { useFormState } from 'react-dom';
-import DisplayPostMessage from '@/components/posts/post-message';
-import paths from '@/components/paths';
-import PageBreadcrumbs from '@/components/common/breadcrumbs';
-import FormButton from '@/components/common/formbutton';
+import { useFormState } from 'react-dom'
+import DisplayPostMessage from '@/components/posts/post-message'
+import paths from '@/components/paths'
+import PageBreadcrumbs from '@/components/common/breadcrumbs'
+import FormButton from '@/components/common/formbutton'
 
 interface FormState {
-  message: string;
-  // Other properties related to your form state
+    message: string
+    // Other properties related to your form state
 }
 interface FormDataProps {
-    date: Date;
-    slug: string;
-    title: string;
-    categoryNames: string[];
-    body: string;
+    date: Date
+    slug: string
+    title: string
+    categoryNames: string[]
+    body: string
 }
 
 interface Breadcrumb {
-  href: string;
-  text: string;
+    href: string
+    text: string
 }
-
 
 function createSlug(title: string) {
     // Convert title to lowercase
-    let slug = title.toLowerCase();
+    let slug = title.toLowerCase()
     // Replace spaces with underscores
-    slug = slug.replace(/\s+/g, '_');
+    slug = slug.replace(/\s+/g, '_')
     // Remove special characters and punctuation marks
-    slug = slug.replace(/[^\w-]/g, '');
+    slug = slug.replace(/[^\w-]/g, '')
     // Trim leading and trailing whitespace
-    slug = slug.trim();
-    return slug;
+    slug = slug.trim()
+    return slug
 }
 
 export default function CreatePost() {
-    const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
-    const [title, setTitle] = useState('');
-    const categories = ['Home','About','Thoughts', 'Work', 'Hobby'];
-    const [selectedCategories, setSelectedCategories] = useState<string[]>(['Work']); // Set default category to 'Work'
-    const [formState, action] = useFormState(createPost, {message: ''});
-    const formStateMessage = formState.message;
+    const [selectedDate, setSelectedDate] = useState<Date | null>(new Date())
+    const [title, setTitle] = useState('')
+    const categories = [
+        'Home',
+        'About',
+        'Privacy',
+        'Terms',
+        'Blog',
+        'Thoughts',
+        'Work',
+        'Hobby',
+    ]
+    const [selectedCategories, setSelectedCategories] = useState<string[]>([
+        'Work',
+    ]) // Set default category to 'Work'
+    const [formState, action] = useFormState(createPost, { message: '' })
+    const formStateMessage = formState.message
     const breadcrumbs: Breadcrumb[] = [
-      { href: paths.dashboard(), text: 'Dashboard' },
-      { href: paths.showAllPosts(), text: 'Posts' },
-      { href: paths.createNewPost(), text: 'New Post' },
-  ];
-  
+        { href: paths.dashboard(), text: 'Dashboard' },
+        { href: paths.showAllPosts(), text: 'Posts' },
+        { href: paths.createNewPost(), text: 'New Post' },
+    ]
+
     // Editor config
     const editor = useEditor({
         extensions: [
-          StarterKit,
-          TextAlign.configure({
-            types: ['heading', 'paragraph'],
-          }),
-          Color.configure({ 
-            types: [TextStyle.name, ListItem.name] }),
-          TextStyle,
-          Youtube.configure({
-            controls: false,
-          }),
+            StarterKit,
+            TextAlign.configure({
+                types: ['heading', 'paragraph'],
+            }),
+            Color.configure({
+                types: [TextStyle.name, ListItem.name],
+            }),
+            TextStyle,
+            Youtube.configure({
+                controls: false,
+            }),
+            Link.configure({
+                openOnClick: false,
+                linkOnPaste: true,
+                autolink: true,
+            }),
+            Link.extend({
+                inclusive: false,
+            }),
         ],
         content: '',
         // onUpdate({ editor }) {
         //     setEditorContent(editor.getHTML());
         //   },
-      })
-    const editorContent = editor?.getHTML();
+    })
+    const editorContent = editor?.getHTML()
 
-    const widthRef = React.useRef<HTMLInputElement>(null);
-    const heightRef = React.useRef<HTMLInputElement>(null);
-  
+    const widthRef = React.useRef<HTMLInputElement>(null)
+    const heightRef = React.useRef<HTMLInputElement>(null)
+
     React.useEffect(() => {
         if (widthRef.current && heightRef.current) {
-        setWidthAndHeight();
+            setWidthAndHeight()
         }
     }, [])
 
-  const setWidthAndHeight = () => {
-    widthRef.current!.value = '320';
-    heightRef.current!.value = '180';
-  };
+    const setWidthAndHeight = () => {
+        widthRef.current!.value = '320'
+        heightRef.current!.value = '180'
+    }
 
-   const addYoutubeVideo = () => {
-    const url = prompt('Enter YouTube URL');
-      
+    const addYoutubeVideo = () => {
+        const url = prompt('Enter YouTube URL')
+
         if (url) {
-          const widthValue = widthRef.current?.value ? parseInt(widthRef.current.value, 10) : null;
-          const heightValue = heightRef.current?.value ? parseInt(heightRef.current.value, 10) : null;
-      
-          const width = Math.max(320, widthValue || 448);
-          const height = Math.max(180, heightValue || 336);
-      
-          editor?.commands.setYoutubeVideo({
-            src: url,
-            width,
-            height,
-          });
+            const widthValue = widthRef.current?.value
+                ? parseInt(widthRef.current.value, 10)
+                : null
+            const heightValue = heightRef.current?.value
+                ? parseInt(heightRef.current.value, 10)
+                : null
+
+            const width = Math.max(320, widthValue || 448)
+            const height = Math.max(180, heightValue || 336)
+
+            editor?.commands.setYoutubeVideo({
+                src: url,
+                width,
+                height,
+            })
         }
-      };
-      
+    }
 
-      // form input
-      const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const selectedOptions = Array.from(e.target.selectedOptions, (option) => option.value);
-        setSelectedCategories(selectedOptions);
-    };
+    // form input
+    const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const selectedOptions = Array.from(
+            e.target.selectedOptions,
+            (option) => option.value
+        )
+        setSelectedCategories(selectedOptions)
+    }
 
-    const generatedSlug = createSlug(title); 
+    const generatedSlug = createSlug(title)
     const formData: FormDataProps = {
-    date: selectedDate || new Date(),
-    title,
-    categoryNames: selectedCategories,
-    slug: generatedSlug,
-    body: editorContent ?? '',
-}
-    
-return(
+        date: selectedDate || new Date(),
+        title,
+        categoryNames: selectedCategories,
+        slug: generatedSlug,
+        body: editorContent ?? '',
+    }
+
+    return (
         <div>
-             <PageBreadcrumbs items={breadcrumbs} />
-          {/* formState error message */}
-          <DisplayPostMessage formStateMessage={formStateMessage} />
+            <PageBreadcrumbs items={breadcrumbs} />
+            {/* formState error message */}
+            <DisplayPostMessage formStateMessage={formStateMessage} />
             {/* Form input */}
-        <form action={(event) => action(formData)}>
-         <h3 className="text-center mb-8">Create a new post</h3>
+            <form action={(event) => action(formData)}>
+                <h3 className="text-center mb-8">Create a new post</h3>
                 <div className="flex flex-col gap-4 p-5">
                     <div className="flex gap-4">
-                    <label htmlFor="date" className="w-20">Date</label>
-                    <DatePicker 
-                    id="date"
-                    selected={selectedDate} 
-                    onChange={(date) => setSelectedDate(date)}  
-                    className="border rounded p-2 w-full"  />
+                        <label htmlFor="date" className="w-20">
+                            Date
+                        </label>
+                        <DatePicker
+                            id="date"
+                            selected={selectedDate}
+                            onChange={(date) => setSelectedDate(date)}
+                            className="border rounded p-2 w-full"
+                        />
                     </div>
                     <div className="flex gap-4">
-                    <label htmlFor="category" className="w-20">Category</label>
-                    <select
-                        className="border rounded p-2"
-                        onChange={handleCategoryChange}
-                        name="category"
-                        id="category"
-                        multiple // Allow multiple selections
-                        value={selectedCategories} // Controlled component
-                    >
-                        {categories.map((category) => (
-                            <option key={category} value={category}>
-                                {category}
-                            </option>
-                        ))}
-                    </select>
+                        <label htmlFor="category" className="w-20">
+                            Category
+                        </label>
+                        <select
+                            className="border rounded p-2"
+                            onChange={handleCategoryChange}
+                            name="category"
+                            id="category"
+                            multiple // Allow multiple selections
+                            value={selectedCategories} // Controlled component
+                        >
+                            {categories.map((category) => (
+                                <option key={category} value={category}>
+                                    {category}
+                                </option>
+                            ))}
+                        </select>
                     </div>
 
-                     <div className="flex gap-4">
-                        <label htmlFor="title" className="w-20">Title</label>
-                        <input 
-                        className="border rounded p-2 w-full"
-                        onChange={(e) => setTitle(e.target.value)}
-                        name="title"
-                        type="text" 
-                        id="title"
+                    <div className="flex gap-4">
+                        <label htmlFor="title" className="w-20">
+                            Title
+                        </label>
+                        <input
+                            className="border rounded p-2 w-full"
+                            onChange={(e) => setTitle(e.target.value)}
+                            name="title"
+                            type="text"
+                            id="title"
                         />
-                     </div>
+                    </div>
 
                     <div className="container flex gap-4">
-                    <span className="w-20">Date</span>
-                    <TipTap editor={editor} onYoutubeClick={addYoutubeVideo} widthRef={widthRef} heightRef={heightRef}/>
+                        <span className="w-20">Date</span>
+                        <TipTap
+                            editor={editor}
+                            onYoutubeClick={addYoutubeVideo}
+                            widthRef={widthRef}
+                            heightRef={heightRef}
+                        />
                     </div>
                     <div className="flex gap-4 justify-end">
-                    <FormButton>
-                      Suhmit
-                    </FormButton>
+                        <FormButton>Suhmit</FormButton>
                     </div>
                 </div>
-                </form> 
-            </div>
+            </form>
+        </div>
     )
 }
