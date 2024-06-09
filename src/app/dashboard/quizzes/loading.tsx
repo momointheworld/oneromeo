@@ -1,10 +1,11 @@
-import { CardSkeleton, FullSkeleton } from "@/components/common/skeleton-loading";
+import {
+    CardSkeleton,
+    FullSkeleton,
+} from '@/components/common/skeleton-loading'
 
 export default function PostLoading() {
-
-    return(
+    return (
         <div className="gap-3">
-            <FullSkeleton />
             <CardSkeleton />
         </div>
     )

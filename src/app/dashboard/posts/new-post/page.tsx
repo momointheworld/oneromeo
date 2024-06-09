@@ -11,6 +11,8 @@ import Link from '@tiptap/extension-link'
 import ListItem from '@tiptap/extension-list-item'
 import TextStyle from '@tiptap/extension-text-style'
 import TextAlign from '@tiptap/extension-text-align'
+import Image from '@tiptap/extension-image'
+import ImageResize from 'tiptap-extension-resize-image'
 import Youtube from '@tiptap/extension-youtube'
 import { useFormState } from 'react-dom'
 import DisplayPostMessage from '@/components/posts/post-message'
@@ -61,7 +63,7 @@ export default function CreatePost() {
         'Hobby',
     ]
     const [selectedCategories, setSelectedCategories] = useState<string[]>([
-        'Work',
+        'Blog',
     ]) // Set default category to 'Work'
     const [formState, action] = useFormState(createPost, { message: '' })
     const formStateMessage = formState.message
@@ -93,6 +95,8 @@ export default function CreatePost() {
             Link.extend({
                 inclusive: false,
             }),
+            Image,
+            ImageResize,
         ],
         content: '',
         // onUpdate({ editor }) {
@@ -138,12 +142,14 @@ export default function CreatePost() {
     }
 
     // form input
-    const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const selectedOptions = Array.from(
-            e.target.selectedOptions,
-            (option) => option.value
+
+    const handleCategoryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { value, checked } = e.target
+        setSelectedCategories((prevCategories) =>
+            checked
+                ? [...prevCategories, value]
+                : prevCategories.filter((category) => category !== value)
         )
-        setSelectedCategories(selectedOptions)
     }
 
     const generatedSlug = createSlug(title)
@@ -175,24 +181,32 @@ export default function CreatePost() {
                             className="border rounded p-2 w-full"
                         />
                     </div>
+
                     <div className="flex gap-4">
                         <label htmlFor="category" className="w-20">
                             Category
                         </label>
-                        <select
-                            className="border rounded p-2"
-                            onChange={handleCategoryChange}
-                            name="category"
-                            id="category"
-                            multiple // Allow multiple selections
-                            value={selectedCategories} // Controlled component
-                        >
+                        <div className="flex flex-col">
                             {categories.map((category) => (
-                                <option key={category} value={category}>
-                                    {category}
-                                </option>
+                                <div
+                                    key={category}
+                                    className="flex items-center"
+                                >
+                                    <input
+                                        type="checkbox"
+                                        id={category}
+                                        value={category}
+                                        onChange={handleCategoryChange}
+                                        checked={selectedCategories.includes(
+                                            category
+                                        )}
+                                    />
+                                    <label htmlFor={category} className="ml-2">
+                                        {category}
+                                    </label>
+                                </div>
                             ))}
-                        </select>
+                        </div>
                     </div>
 
                     <div className="flex gap-4">

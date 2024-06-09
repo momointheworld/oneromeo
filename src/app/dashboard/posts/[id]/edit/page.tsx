@@ -12,6 +12,8 @@ import TextStyle from '@tiptap/extension-text-style'
 import TextAlign from '@tiptap/extension-text-align'
 import Link from '@tiptap/extension-link'
 import Youtube from '@tiptap/extension-youtube'
+import Image from '@tiptap/extension-image'
+import ImageResize from 'tiptap-extension-resize-image'
 import { useParams } from 'next/navigation'
 import { useFormState } from 'react-dom'
 import DisplayPostMessage from '@/components/posts/post-message'
@@ -60,7 +62,16 @@ export default function UpdatePostPage() {
     ]
     const [selectedDate, setSelectedDate] = useState<Date | null>(new Date())
     const [title, setTitle] = useState('')
-    const categories = ['Home', 'About', 'Thoughts', 'Work', 'Hobby'] // can change this category or add/remove any
+    const categories = [
+        'Home',
+        'About',
+        'Privacy',
+        'Terms',
+        'Blog',
+        'Thoughts',
+        'Work',
+        'Hobby',
+    ]
     const [selectedCategories, setSelectedCategories] = useState<any[]>([])
     const [editorContent, setEditorContent] = useState('')
     const [formState, action] = useFormState(updatePost, { message: '' })
@@ -87,6 +98,8 @@ export default function UpdatePostPage() {
             Link.extend({
                 inclusive: false,
             }),
+            Image,
+            ImageResize,
         ],
         content: editorContent,
         // when eidtor body content is changed, editor will be updated
@@ -156,12 +169,13 @@ export default function UpdatePostPage() {
         }
     }
 
-    const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const selectedOptions = Array.from(
-            e.target.selectedOptions,
-            (option) => option.value
+    const handleCategoryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { value, checked } = e.target
+        setSelectedCategories((prevCategories) =>
+            checked
+                ? [...prevCategories, value]
+                : prevCategories.filter((category) => category !== value)
         )
-        setSelectedCategories(selectedOptions)
     }
 
     const generatedSlug = createSlug(title)
@@ -193,24 +207,32 @@ export default function UpdatePostPage() {
                             className="border rounded p-2 w-full"
                         />
                     </div>
+
                     <div className="flex gap-4">
                         <label htmlFor="category" className="w-20">
                             Category
                         </label>
-                        <select
-                            className="border rounded p-2"
-                            onChange={handleCategoryChange}
-                            name="category"
-                            id="category"
-                            multiple // Allow multiple selections
-                            value={selectedCategories} // Controlled component
-                        >
+                        <div className="flex flex-col">
                             {categories.map((category) => (
-                                <option key={category} value={category}>
-                                    {category}
-                                </option>
+                                <div
+                                    key={category}
+                                    className="flex items-center"
+                                >
+                                    <input
+                                        type="checkbox"
+                                        id={category}
+                                        value={category}
+                                        onChange={handleCategoryChange}
+                                        checked={selectedCategories.includes(
+                                            category
+                                        )}
+                                    />
+                                    <label htmlFor={category} className="ml-2">
+                                        {category}
+                                    </label>
+                                </div>
                             ))}
-                        </select>
+                        </div>
                     </div>
                     <div className="flex gap-4">
                         <label htmlFor="title" className="w-20">

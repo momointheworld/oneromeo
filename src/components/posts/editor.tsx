@@ -40,6 +40,13 @@ const MenuBar: React.FC<MenuBarProps> = ({
             .run()
     }, [editor])
 
+    const addImage = useCallback(() => {
+        const url = window.prompt('URL')
+        if (url) {
+            editor?.chain().focus().setImage({ src: url }).run()
+        }
+    }, [editor])
+
     if (!editor) {
         return null
     }
@@ -184,6 +191,9 @@ const MenuBar: React.FC<MenuBarProps> = ({
                     disabled={!editor.isActive('link')}
                 >
                     unsetLink
+                </button>
+                <button type="button" onClick={addImage}>
+                    add image from URL
                 </button>
             </div>
             <div>

@@ -1,4 +1,4 @@
-import PostsByCategory from '@/components/posts/post-by-category'
+import PostsByCategory from '@/components/posts/nav-posts'
 
 export default function PrivacyPage() {
     return (
