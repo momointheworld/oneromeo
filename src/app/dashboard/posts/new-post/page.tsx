@@ -95,7 +95,9 @@ export default function CreatePost() {
             Link.extend({
                 inclusive: false,
             }),
-            Image,
+            Image.configure({
+                inline: true,
+            }),
             ImageResize,
         ],
         content: '',

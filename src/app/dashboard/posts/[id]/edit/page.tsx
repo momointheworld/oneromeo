@@ -22,10 +22,6 @@ import PageBreadcrumbs from '@/components/common/breadcrumbs'
 import FormButton from '@/components/common/formbutton'
 import { FullSkeleton } from '@/components/common/skeleton-loading'
 
-interface FormState {
-    message: string
-    // Other properties related to your form state
-}
 interface FormDataProps {
     date: Date
     slug: string
@@ -98,7 +94,9 @@ export default function UpdatePostPage() {
             Link.extend({
                 inclusive: false,
             }),
-            Image,
+            Image.configure({
+                inline: true,
+            }),
             ImageResize,
         ],
         content: editorContent,

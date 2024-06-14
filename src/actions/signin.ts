@@ -1,6 +1,7 @@
-'use server';
-import * as auth from '@/auth';  
+'use server'
+import * as auth from '@/auth'
+import { cache } from 'react'
 
-export async function signIn() {
-    return auth.signIn('github');
-  }
+export const signIn = cache(async () => {
+    return auth.signIn('github')
+})

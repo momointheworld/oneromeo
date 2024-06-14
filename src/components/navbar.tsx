@@ -13,7 +13,7 @@ import {
 } from '@nextui-org/react'
 import Image from 'next/image'
 import Logo from '/public/sparrow.svg'
-import Profile from './profile'
+import Profile from '@/components/profile'
 import { useSession } from 'next-auth/react'
 
 const MenuLogo = () => {

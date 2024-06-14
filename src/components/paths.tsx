@@ -1,12 +1,14 @@
-
-const paths =  {
+const paths = {
     dashboard() {
-        return '/dashboard';
+        return '/dashboard'
+    },
+    login() {
+        return '/login'
     },
     showAllPosts() {
         return `/dashboard/posts/`
     },
-    showAllCategories(){
+    showAllCategories() {
         return `/dashboard/posts/categories`
     },
     showCategoryPosts(categorySlug: string) {
@@ -15,24 +17,24 @@ const paths =  {
     showSinglePost(postId: string) {
         return `/dashboard/posts/${postId}`
     },
-    createNewPost(){
+    createNewPost() {
         return `/dashboard/posts/new-post`
     },
-    showAllQuizzes(){
+    showAllQuizzes() {
         return '/dashboard/quizzes'
     },
-    showSingleQuiz(quizId: string){
+    showSingleQuiz(quizId: string) {
         return `/dashboard/quizzes/${quizId}`
     },
-    createNewQuiz(){
+    createNewQuiz() {
         return '/dashboard/quizzes/new-quiz'
     },
-    editPost(postId:string) {
+    editPost(postId: string) {
         return `/dashboard/posts/${postId}/edit`
     },
-    editQuiz(quizId:string) {
+    editQuiz(quizId: string) {
         return `/dashboard/quizzes/${quizId}/edit`
     },
-    }
+}
 
-export default paths;
+export default paths
