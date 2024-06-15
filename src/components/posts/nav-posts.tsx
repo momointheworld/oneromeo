@@ -5,6 +5,7 @@ import * as actions from '@/actions'
 import parse from 'html-react-parser'
 import { useEffect, useState } from 'react'
 import { FullSkeleton } from '@/components/common/skeleton-loading'
+import { Divider } from '@nextui-org/react'
 
 interface Post {
     id: string
@@ -44,7 +45,7 @@ export default function NavbarPosts({ categoryName }: PostsByCategoryProps) {
                     (category) => category.name === categoryName
                 )
                 if (category) {
-                    const data = await actions.getCategoryPosts(category.id)
+                    const data = await actions.getCategoryPosts(category.id) // this action limit to fetch max 10 articles if not specified
                     setFetchedPosts(data.posts || []) // Ensure it's an array
                     setTotalPosts(data.totalPosts || 0)
                 }
@@ -70,6 +71,7 @@ export default function NavbarPosts({ categoryName }: PostsByCategoryProps) {
                             <div key={post.id}>
                                 <h2 className="text-center">{post.title}</h2>
                                 {parse(post.body)}
+                                <Divider className="my-8" />
                             </div>
                         ))}
                     </article>

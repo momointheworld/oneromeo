@@ -1,4 +1,22 @@
 const paths = {
+    home() {
+        return '/'
+    },
+    price() {
+        return '/price'
+    },
+    about() {
+        return '/about'
+    },
+    contact() {
+        return '/contact'
+    },
+    privacy() {
+        return '/privacy'
+    },
+    terms() {
+        return '/terms'
+    },
     dashboard() {
         return '/dashboard'
     },

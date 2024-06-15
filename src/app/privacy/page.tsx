@@ -1,9 +1,10 @@
 import PostsByCategory from '@/components/posts/nav-posts'
+import GridLayout from '@/components/grid'
 
 export default function PrivacyPage() {
     return (
-        <div>
+        <GridLayout>
             <PostsByCategory categoryName="Privacy" />
-        </div>
+        </GridLayout>
     )
 }
