@@ -1,5 +1,5 @@
 import React from 'react'
-import { Card, Skeleton } from '@nextui-org/react'
+import { Skeleton } from '@nextui-org/react'
 
 const FullSkeleton = () => {
     return (

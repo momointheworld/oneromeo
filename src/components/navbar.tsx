@@ -12,9 +12,10 @@ import {
     NavbarMenuToggle,
 } from '@nextui-org/react'
 import Image from 'next/image'
-import Logo from '/public/sparrow.svg'
+import Logo from '/public/logo.png'
 import Profile from '@/components/profile'
 import { useSession } from 'next-auth/react'
+import { CardSkeleton } from './common/skeleton-loading'
 
 const MenuLogo = () => {
     return (
@@ -57,18 +58,20 @@ const NavbarComp = () => {
     }, [pathName])
 
     const handleMenuItemClick = (item: ItemProps) => {
-        console.log('Menu item clicked:', item)
         setActiveMenuItem(item)
         setIsMenuOpen(false)
     }
 
     return (
-        <Suspense fallback={<div>Loading...</div>}>
-            <Navbar onMenuOpenChange={setIsMenuOpen}>
+        <Suspense fallback={<CardSkeleton />}>
+            <Navbar
+                isMenuOpen={isMenuOpen}
+                onMenuOpenChange={(isOpen) => setIsMenuOpen(isOpen)}
+            >
                 <NavbarContent>
                     <NavbarMenuToggle
-                        aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
                         className="sm:hidden"
+                        onClick={() => setIsMenuOpen((prev) => !prev)}
                     />
                     <NavbarBrand>
                         <p className="font-bold text-inherit">One Romeo</p>
@@ -99,12 +102,11 @@ const NavbarComp = () => {
                     ))}
                 </NavbarContent>
                 <NavbarContent justify="end">
-                    {/* shows the profile only after logged in */}
                     {session.data?.user && <Profile />}
                 </NavbarContent>
                 <NavbarMenu>
                     {menuItems.map((item, index) => (
-                        <NavbarMenuItem key={`${item}-${index}`}>
+                        <NavbarMenuItem key={`${item.title}-${index}`}>
                             <Link
                                 color={
                                     item === activeMenuItem

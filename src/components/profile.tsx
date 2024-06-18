@@ -1,6 +1,6 @@
 'use client'
 import Image from 'next/image'
-import Logo from '/public/sparrow.svg'
+import Logo from '/public/logo.png'
 import { Popover, PopoverContent, PopoverTrigger } from '@nextui-org/react'
 import { signOut } from '@/actions'
 import { useSession } from 'next-auth/react'
