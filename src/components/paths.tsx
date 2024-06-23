@@ -35,6 +35,9 @@ const paths = {
     showSinglePost(postId: string) {
         return `/dashboard/posts/${postId}`
     },
+    showAllAppointments() {
+        return '/dashboard/appointments'
+    },
     createNewPost() {
         return `/dashboard/posts/new-post`
     },

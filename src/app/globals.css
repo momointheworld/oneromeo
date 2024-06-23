@@ -6,13 +6,11 @@
 #tiptap {
   flex:auto;
 }
-  #tiptap button {
-    border: 1px solid gray;
-    border-radius: 15%;
-    background: none;
+  /* #tiptap button {
+    border-radius: 8%;
     font-size: 0.85rem;
     font-weight: 500;
-    padding: 0 0.2rem;
+    padding: 0 0.3rem;
     margin: 0.2rem;
     opacity: 0.6;
   }
@@ -20,11 +18,57 @@
   #tiptap button:hover,
   #tiptap button.is-active {
     opacity: 1;
-    background-color:blanchedalmond;
+    background-color:burlywood;
+  }
+   */
+   #tiptap button {
+    border-radius: 12px; /* Larger radius for a more rounded look */
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 0.5rem 1rem; /* Increased padding for better spacing */
+    margin: 0.3rem;
+    opacity: 0.8;
+    background-color:seashell; /* Cold color background */
+    color:darkslateblue; /* White text color */
+    border: none; /* Remove default border */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle box shadow */
+    transition: all 0.3s ease; /* Smooth transition */
+    cursor: pointer; /* Pointer cursor for better UX */
+  }
+  
+  #tiptap button:hover,
+  #tiptap button.is-active {
+    opacity: 1;
+    background: linear-gradient(135deg, #fda085 0%, #f6d365 100%); /* Invert gradient on hover/active */
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15); /* Slightly larger shadow on hover */
+    transform: translateY(-2px); /* Slight lift effect */
   }
   
   .aspect-ratio {
     width: 15%;  /* Or adjust to specific value */
     height: auto; /* This will maintain the aspect ratio */
   }
+
+  /* Responsive Video Wrapper */
+.responsive-video-wrapper {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+  max-width: 100%;
+  background: #000;
+}
+
+.responsive-video-wrapper iframe,
+.responsive-video-wrapper object,
+.responsive-video-wrapper embed {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+  
+
   

@@ -117,8 +117,8 @@ export default function CreatePost() {
     }, [])
 
     const setWidthAndHeight = () => {
-        widthRef.current!.value = '320'
-        heightRef.current!.value = '180'
+        widthRef.current!.value = '640'
+        heightRef.current!.value = '360'
     }
 
     const addYoutubeVideo = () => {
@@ -132,8 +132,8 @@ export default function CreatePost() {
                 ? parseInt(heightRef.current.value, 10)
                 : null
 
-            const width = Math.max(320, widthValue || 448)
-            const height = Math.max(180, heightValue || 336)
+            const width = Math.max(640, widthValue || 448)
+            const height = Math.max(360, heightValue || 336)
 
             editor?.commands.setYoutubeVideo({
                 src: url,

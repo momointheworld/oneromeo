@@ -5,7 +5,14 @@ import * as actions from '@/actions'
 import parse from 'html-react-parser'
 import { useEffect, useState } from 'react'
 import { FullSkeleton } from '@/components/common/skeleton-loading'
-import { Divider } from '@nextui-org/react'
+
+const wrapIframe = (htmlString: string): string => {
+    const wrappedHtml = htmlString.replace(
+        /<iframe[^>]*><\/iframe>/gi,
+        (match) => `<div class="responsive-video-wrapper">${match}</div>`
+    )
+    return wrappedHtml
+}
 
 interface Post {
     id: string
@@ -69,9 +76,9 @@ export default function NavbarPosts({ categoryName }: PostsByCategoryProps) {
                     <article>
                         {fetchedPosts.map((post) => (
                             <div key={post.id}>
-                                <h2 className="text-center">{post.title}</h2>
-                                {parse(post.body)}
-                                <Divider className="my-8" />
+                                <h2 className="text-center">{post.title}</h2>{' '}
+                                {/* {parse(post.body)} */}
+                                {parse(wrapIframe(post.body))}
                             </div>
                         ))}
                     </article>

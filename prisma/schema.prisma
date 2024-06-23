@@ -96,3 +96,9 @@ model Answer {
   question   Question @relation(fields: [questionId], references: [id])
   questionId String
 }
+
+model Appointment {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId 
+  date      DateTime
+  timeSlot  String
+}

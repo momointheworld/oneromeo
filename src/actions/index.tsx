@@ -1,9 +1,8 @@
-
 // interface FormDataProps {
 //     date: Date,
 //     title: string,
-//     slug: string,            
-//     categoryNames: string[]; 
+//     slug: string,
+//     categoryNames: string[];
 //     body: string,
 // }
 
@@ -45,11 +44,11 @@
 //             slug,
 //             categoryIDs,
 //             title,
-//             body,        
+//             body,
 //           }
 //      });
 //      console.log('Post created successfully.', post.title);
-     
+
 //      postId = post.id;
 
 //     } catch (error) {
@@ -60,11 +59,10 @@
 //   }
 //     revalidatePath(`/dashboard/posts/${postId}`);
 //     redirect(`/dashboard/posts/${postId}`);
-      
+
 //  }
 
-
- // get a single post
+// get a single post
 // interface GetPostProps {
 //   id: string; // Define 'id' directly in the interface
 // }
@@ -72,15 +70,13 @@
 // export async function getPost(props: GetPostProps): Promise<any> {
 //   const { id} = props;
 //   const post = await db.post.findFirst({
-//       where: { id }, 
+//       where: { id },
 //   });
 //   if (!post) {
 //       return notFound();
 //   }
 //   return post;
 // }
-
-
 
 // export async function getAllCategories() {
 //   try {
@@ -112,14 +108,14 @@
 // }
 //     revalidatePath('/dashboard/posts/');
 //     redirect(`/dashboard/posts/`)
-// } 
+// }
 
 // Function to update a post with the provided data
 // interface UpdateFormDataProps {
 //   date: Date,
 //   title: string,
-//   slug: string,            
-//   categoryNames: string[]; 
+//   slug: string,
+//   categoryNames: string[];
 //   body: string,
 //   id: string,
 // }
@@ -172,7 +168,6 @@
 
 // }
 
-
 // **************************************************************************************************
 // **************************************************************************************************
 // Quiz actions
@@ -220,10 +215,9 @@
 //     console.error('Error creating quiz:', error);
 //     // Handle error, such as displaying an error message to the user
 //   }
-//      revalidatePath('/dashboard/quizzes'); 
+//      revalidatePath('/dashboard/quizzes');
 //      redirect('/dashboard/quizzes');  // redirect needs to be outside of try...catch
 // }
-
 
 // interface CreateQuestionProps {
 //   quizId: string;
@@ -264,8 +258,6 @@
 
 // Get Quiz, questions and answers
 
-
-
 // interface GetQuizProps {
 //   id: string;
 // }
@@ -278,7 +270,7 @@
 // export async function getQuiz(props: GetQuizProps): Promise<any> {
 //   const { id } = props;
 //   const quiz = await db.quiz.findFirst({
-//       where: { id }, 
+//       where: { id },
 //   });
 //   if (!quiz) {
 //       return notFound();
@@ -299,7 +291,7 @@
 //   });
 //   return answers;
 // }
- 
+
 // update quiz, questions and answers
 
 // interface UpdateQuizProps {
@@ -322,7 +314,7 @@
 //    revalidatePath(`/dashboard/quizzes/${id}`);
 //    redirect(`/dashboard/quizzes/${id}`);
 // }
- 
+
 // interface UpdateQuestionProps {
 //   text: string;
 // }
@@ -343,10 +335,9 @@
 //   }
 // }
 
-
 // interface UpdateAnswerProps {
 //   text: string;
-//   points: number; 
+//   points: number;
 // }
 
 // export async function updateAnswer(id:string, data:UpdateAnswerProps) {
@@ -355,7 +346,7 @@
 //     const updatedAnswer = await db.answer.update({
 //       where: { id },
 //       data: {
-//         text, 
+//         text,
 //         points,
 //       }
 //     });
@@ -366,12 +357,10 @@
 //   }
 // }
 
-
-
 // delete quiz, questions and answers
 
 // export async function deleteQuestion(id: string) {
-//   let questionQuizId: string; 
+//   let questionQuizId: string;
 //   try {
 //     // Fetch the question and its associated answers
 //     const question = await db.question.findUnique({
@@ -395,7 +384,7 @@
 //       where: {
 //       quizId: questionQuizId
 //       }
-//     })  
+//     })
 //     revalidatePath(`/dashboard/quizzes/${questionQuizId}`)
 //     // if this quiz ID can not be found in the questions, that means the last question was deleted,
 //     //  proceed to delete the quiz
@@ -408,7 +397,7 @@
 //     console.log(`Question ${id} is deleted.`);
 //   } catch (error) {
 //     console.error(`Error deleting question: ${error}`);
-//   } 
+//   }
 // }
 
 // ****************** auth actions ******************
@@ -421,21 +410,22 @@
 //   return auth.signOut();
 // }
 
-export {createPost} from './createpost';
-export {createQuestion} from './createquestion';
-export {createQuiz} from './createquiz';
-export {deletePost} from './deletepost';
-export {deleteQuestion} from './deletequestion';
-export {fetchAndGroupPostsByCategory} from './fetchcategoryposts';
-export {getAllCategories} from './getallcategories'
-export {getCategoryPosts} from './getcategoryposts';
-export {getPost} from './getpost';
-export {getAnswers} from './getanswers';
-export {getQuestions} from './getquestions';
-export {getQuiz} from './getquiz';
-export {updatePost} from './updatepost'
-export {updateAnswer} from './updateanswer';
-export {updateQuestion} from './updatequestion';
-export {updateQuiz} from './updatequiz'
-export {signIn} from './signin';
-export {signOut} from './signout';
+export { createPost } from './createpost'
+export { createQuestion } from './createquestion'
+export { createQuiz } from './createquiz'
+export { deletePost } from './deletepost'
+export { deleteQuestion } from './deletequestion'
+export { fetchAndGroupPostsByCategory } from './fetchcategoryposts'
+export { getAllCategories } from './getallcategories'
+export { getCategoryPosts } from './getcategoryposts'
+export { getPost } from './getpost'
+export { getAnswers } from './getanswers'
+export { getQuestions } from './getquestions'
+export { getQuiz } from './getquiz'
+export { updatePost } from './updatepost'
+export { updateAnswer } from './updateanswer'
+export { updateQuestion } from './updatequestion'
+export { updateQuiz } from './updatequiz'
+export { signIn } from './signin'
+export { signOut } from './signout'
+export { addAppointment } from './addappointment'

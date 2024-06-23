@@ -32,7 +32,6 @@ const menuItems = [
     { title: 'Home', href: '/' },
     { title: 'About', href: '/about' },
     { title: 'Contact', href: '/contact' },
-    { title: 'Price', href: '/price' },
 ]
 
 interface ItemProps {
@@ -74,12 +73,12 @@ const NavbarComp = () => {
                         onClick={() => setIsMenuOpen((prev) => !prev)}
                     />
                     <NavbarBrand>
-                        <p className="font-bold text-inherit">One Romeo</p>
                         <MenuLogo />
+                        <p className="font-bold text-inherit">One Romeo</p>
                     </NavbarBrand>
                 </NavbarContent>
                 <NavbarContent
-                    className="hidden sm:flex gap-4"
+                    className="hidden sm:flex items-center space-x-4 py-3 px-6 shadow-lg rounded-lg mt-2"
                     justify="center"
                 >
                     {menuItems.map((item, index) => (
@@ -88,6 +87,7 @@ const NavbarComp = () => {
                             isActive={item === activeMenuItem}
                         >
                             <Link
+                                className="text-lg"
                                 color={
                                     item === activeMenuItem
                                         ? 'primary'
