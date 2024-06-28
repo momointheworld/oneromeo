@@ -31,7 +31,7 @@ export async function addAppointment(formData: AppointmentData) {
 
     // Example revalidation and redirection (adjust as per your Next.js setup)
     try {
-        // revalidatePath(paths.showAllAppointments())
+        revalidatePath(paths.showAllAppointments())
         console.log('appointment created')
     } catch (error) {
         console.error('Error redirecting:', error)
