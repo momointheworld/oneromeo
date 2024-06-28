@@ -35,7 +35,13 @@ const AddAppointment = () => {
     let now = today(getLocalTimeZone())
     let startDate = now.add({ days: 1 }) // Tomorrow
     let { locale } = useLocale()
+    const timeSlots = [
+        { key: '10am-11am', label: '10am-11am' },
+        { key: '3pm-4pm', label: '3pm-4pm' },
+    ]
+
     const [selectedDate, setSelectedDate] = useState<DateValue | null>(null)
+    const [availableSlots, setAvailableSlots] = useState(timeSlots)
     const [pickedTime, setPickedTime] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const [appointments, setAppointments] = useState<AppointmentData[]>([]) // State to store fetched appointments
@@ -44,11 +50,6 @@ const AddAppointment = () => {
     >([])
 
     let endDate = now.add({ days: 30 }) // Two weeks from tomorrow
-
-    const timeSlots = [
-        { key: '10am-11am', label: '10am-11am' },
-        { key: '3pm-4pm', label: '3pm-4pm' },
-    ]
 
     // Fetch appointments and update disabledRanges on component mount
     useEffect(() => {
@@ -119,9 +120,28 @@ const AddAppointment = () => {
                 date.compare(interval[0]) >= 0 && date.compare(interval[1]) <= 0
         )
 
+    // Check availability of time slots for the selected date
+    const checkTimeSlots = (selectedDate: DateValue | null) => {
+        if (!selectedDate) return
+
+        const selectedDateStr = new Date(selectedDate.toString()).toDateString()
+        const takenSlots = appointments
+            .filter(
+                (appointment) =>
+                    new Date(appointment.date).toDateString() ===
+                    selectedDateStr
+            )
+            .map((appointment) => appointment.timeSlot)
+
+        const availableSlots = timeSlots.filter(
+            (slot) => !takenSlots.includes(slot.key)
+        )
+        setAvailableSlots(availableSlots)
+    }
     const handleDateChange = (date: DateValue | null) => {
         setSelectedDate(date)
         setPickedTime('')
+        checkTimeSlots(date)
     }
 
     const handleSelectionChange = (e: {
@@ -184,7 +204,7 @@ const AddAppointment = () => {
                         selectedKeys={[pickedTime]}
                         onChange={handleSelectionChange}
                     >
-                        {timeSlots.map((slot) => (
+                        {availableSlots.map((slot) => (
                             <SelectItem key={slot.key} value={slot.key}>
                                 {slot.label}
                             </SelectItem>
