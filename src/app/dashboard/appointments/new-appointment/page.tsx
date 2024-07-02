@@ -1,6 +1,5 @@
 'use client'
 import React, { useEffect, useState } from 'react'
-import { Button, DatePicker, Select, SelectItem } from '@nextui-org/react'
 import {
     today,
     DateValue,
@@ -12,7 +11,7 @@ import {
 import { useLocale } from '@react-aria/i18n'
 import { addAppointment } from '@/actions/addappointment'
 import { getAppointments } from '@/actions'
-import { I18nProvider } from '@react-aria/i18n'
+import AddAppointment from '@/components/appointment'
 
 interface CustomDateValue {
     year: number
@@ -27,19 +26,16 @@ interface AppointmentData {
     timeSlot: string
 }
 
-const convertToDate = (customDate: CustomDateValue): Date => {
-    return new Date(customDate.year, customDate.month - 1, customDate.day)
-}
-
-const AddAppointment = () => {
+export default function NewAppointment() {
     let now = today(getLocalTimeZone())
     let startDate = now.add({ days: 1 }) // Tomorrow
     let { locale } = useLocale()
+    let endDate = now.add({ days: 30 }) // Two weeks from tomorrow
     const timeSlots = [
         { key: '10am-11am', label: '10am-11am' },
         { key: '3pm-4pm', label: '3pm-4pm' },
     ]
-
+    const [formStateMessage, setFormStateMessage] = useState('')
     const [selectedDate, setSelectedDate] = useState<DateValue | null>(null)
     const [availableSlots, setAvailableSlots] = useState(timeSlots)
     const [pickedTime, setPickedTime] = useState('')
@@ -49,7 +45,10 @@ const AddAppointment = () => {
         CalendarDate[][]
     >([])
 
-    let endDate = now.add({ days: 30 }) // Two weeks from tomorrow
+    let disabledRanges = [
+        [now.add({ days: -365 }), now], // All dates before today
+        [endDate.add({ days: 1 }), now.add({ days: 365 })], // All dates after two weeks from tomorrow
+    ]
 
     // Fetch appointments and update disabledRanges on component mount
     useEffect(() => {
@@ -96,8 +95,6 @@ const AddAppointment = () => {
                     ...disabledRanges,
                     ...calendarDates.map((date) => [date, date]),
                 ])
-
-                console.log('Unavailable Slots:', newDisabledRanges)
             } catch (error) {
                 console.error('Error fetching appointments:', error)
             }
@@ -107,24 +104,16 @@ const AddAppointment = () => {
         fetchAppointments()
     }, []) // Empty dependency array ensures this runs only once on mount
 
-    console.log('Unavailable Slots:', newDisabledRanges)
-
-    let disabledRanges = [
-        [now.add({ days: -365 }), now], // All dates before today
-        [endDate.add({ days: 1 }), now.add({ days: 365 })], // All dates after two weeks from tomorrow
-    ]
-
-    let isDateUnavailable = (date: DateValue) =>
-        newDisabledRanges.some(
-            (interval) =>
-                date.compare(interval[0]) >= 0 && date.compare(interval[1]) <= 0
-        )
+    const convertToDate = (customDate: CustomDateValue): Date => {
+        return new Date(customDate.year, customDate.month - 1, customDate.day)
+    }
 
     // Check availability of time slots for the selected date
     const checkTimeSlots = (selectedDate: DateValue | null) => {
         if (!selectedDate) return
 
         const selectedDateStr = new Date(selectedDate.toString()).toDateString()
+
         const takenSlots = appointments
             .filter(
                 (appointment) =>
@@ -133,18 +122,19 @@ const AddAppointment = () => {
             )
             .map((appointment) => appointment.timeSlot)
 
-        const availableSlots = timeSlots.filter(
+        const newAvailableSlots = timeSlots.filter(
             (slot) => !takenSlots.includes(slot.key)
         )
-        setAvailableSlots(availableSlots)
+        setAvailableSlots(newAvailableSlots)
     }
+
     const handleDateChange = (date: DateValue | null) => {
         setSelectedDate(date)
         setPickedTime('')
         checkTimeSlots(date)
     }
 
-    const handleSelectionChange = (e: {
+    const handleTimeChange = (e: {
         target: { value: React.SetStateAction<string> }
     }) => {
         setPickedTime(e.target.value)
@@ -152,8 +142,12 @@ const AddAppointment = () => {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault() // Prevent default form submission
+
+        if (!selectedDate || !pickedTime) {
+            alert('Please select a date and time slot.')
+            return
+        }
         setIsLoading(true)
-        console.log(selectedDate)
 
         if (selectedDate && pickedTime) {
             const appointmentData: AppointmentData = {
@@ -162,8 +156,16 @@ const AddAppointment = () => {
             }
             try {
                 await addAppointment(appointmentData)
+                // Reset the form
+                setSelectedDate(null)
+                setPickedTime('')
+                setAvailableSlots(timeSlots)
                 // Optionally, you can add a success message or navigate to another page here
+                setFormStateMessage('Appointment added successfully.')
             } catch (error) {
+                setFormStateMessage(
+                    'Failed to add the appointment, try again later.'
+                )
                 console.error('Error adding appointment:', error)
                 // Handle error scenario if needed
             } finally {
@@ -172,68 +174,16 @@ const AddAppointment = () => {
         }
     }
 
-    const formatDate = (date: DateValue | null): string => {
-        if (!date) return ''
-        return `${date.year}-${String(date.month).padStart(2, '0')}-${String(
-            date.day
-        ).padStart(2, '0')}`
-    }
-
     return (
-        <form onSubmit={handleSubmit}>
-            <h3 className="text-center">Make An Appointment</h3>
-            <div className="max-w-md mx-auto bg-white shadow-lg rounded-lg p-6">
-                <div>
-                    <I18nProvider locale="en-US">
-                        <DatePicker
-                            label="Appointment Date"
-                            aria-label="Appointment Date"
-                            isDateUnavailable={isDateUnavailable}
-                            minValue={startDate}
-                            onChange={handleDateChange}
-                            className="w-full mb-4"
-                        />
-                    </I18nProvider>
-                </div>
-                <div className="max-w-md mx-auto flex w-full flex-wrap md:flex-nowrap gap-4">
-                    <Select
-                        label="Time Slot"
-                        placeholder="Select a time slot"
-                        className="max-w-md"
-                        isDisabled={!selectedDate}
-                        selectedKeys={[pickedTime]}
-                        onChange={handleSelectionChange}
-                    >
-                        {availableSlots.map((slot) => (
-                            <SelectItem key={slot.key} value={slot.key}>
-                                {slot.label}
-                            </SelectItem>
-                        ))}
-                    </Select>
-                </div>
-                <div className="mt-10">
-                    <div className="text-lg">
-                        Date Picked:
-                        <p className="p-4 text-primary rounded text-center">
-                            {formatDate(selectedDate)}
-                        </p>
-                    </div>
-                    <div className="text-lg">
-                        Time Slot Picked:
-                        <p className="p-4 text-primary rounded text-center">
-                            {pickedTime}
-                        </p>
-                    </div>
-                </div>
-                <div className="mt-6 flex justify-center">
-                    <Button isLoading={isLoading} type="submit" color="primary">
-                        Add Appointment
-                    </Button>
-                    {/* Can not use FormButton on client component */}
-                </div>
-            </div>
-        </form>
+        <AddAppointment
+            handleSubmit={handleSubmit}
+            handleDateChange={handleDateChange}
+            handleTimeChange={handleTimeChange}
+            selectedDate={selectedDate}
+            pickedTime={pickedTime}
+            newDisabledRanges={newDisabledRanges}
+            availableSlots={availableSlots}
+            formStateMessage={formStateMessage}
+        />
     )
 }
-
-export default AddAppointment

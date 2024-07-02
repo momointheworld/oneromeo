@@ -30,11 +30,21 @@ const AppointmentsPage = () => {
                     })
                 )
 
-                setAppointments(formattedAppointments)
-                console.log(formattedAppointments)
+                // Sort appointments by date in descending order
+                const sortedAppointments = formattedAppointments.sort(
+                    (a, b) => b.date.getTime() - a.date.getTime()
+                )
+
+                // Get the latest 30 appointments
+                const latestAppointments = sortedAppointments.slice(0, 30)
+
+                setAppointments(latestAppointments)
+                setLoading(false)
+                console.log(latestAppointments)
             } catch (err) {
                 console.error('Error fetching appointments:', err)
-                // Handle error scenario if needed
+                setError('Failed to fetch appointments.')
+                setLoading(false)
             }
         }
 
@@ -44,17 +54,19 @@ const AppointmentsPage = () => {
     return (
         <div>
             <h1>Appointments</h1>
-            {appointments.length === 0 ? (
+            {loading ? (
                 <FullSkeleton />
+            ) : error ? (
+                <div>{error}</div>
             ) : (
-                <ul>
+                <ol reversed style={{ listStyleType: 'decimal-leading-zero' }}>
                     {appointments.map((appointment) => (
                         <li key={appointment.id}>
                             {appointment.date.toDateString()} -{' '}
                             {appointment.timeSlot}
                         </li>
                     ))}
-                </ul>
+                </ol>
             )}
         </div>
     )

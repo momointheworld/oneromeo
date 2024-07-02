@@ -1,3 +1,5 @@
+import { addAppointment } from '@/actions'
+
 const paths = {
     home() {
         return '/'
@@ -55,6 +57,9 @@ const paths = {
     },
     editQuiz(quizId: string) {
         return `/dashboard/quizzes/${quizId}/edit`
+    },
+    addAppointment() {
+        return '/dashboard/appointments/add-appointmnet'
     },
 }
 

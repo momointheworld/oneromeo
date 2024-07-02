@@ -1,9 +1,7 @@
 'use server'
-import paths from '@/components/paths' // Example paths for redirection
+import paths from '@/components/paths'
 import { db } from '@/db'
-import { DateValue } from '@nextui-org/react'
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 
 interface AppointmentData {
     date: Date
@@ -31,8 +29,8 @@ export async function addAppointment(formData: AppointmentData) {
 
     // Example revalidation and redirection (adjust as per your Next.js setup)
     try {
-        revalidatePath(paths.showAllAppointments())
         console.log('appointment created')
+        revalidatePath(paths.showAllAppointments())
     } catch (error) {
         console.error('Error redirecting:', error)
         throw new Error('Failed to redirect')
