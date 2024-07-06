@@ -1,37 +1,72 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { Children, useEffect, useState } from 'react'
 import {
     today,
     DateValue,
     CalendarDate,
     toCalendarDate,
+    parseAbsolute,
     parseAbsoluteToLocal,
     getLocalTimeZone,
 } from '@internationalized/date'
 import { useLocale } from '@react-aria/i18n'
-import { addAppointment } from '@/actions/addappointment'
 import { getAppointments } from '@/actions'
 import AddAppointment from '@/components/appointment'
+import { Card, CardBody, CardFooter, Image } from '@nextui-org/react'
+import { convertToUserTimezone, timeSlots } from '@/components/converTimeZone'
+import { useTimezone } from '@/components/useTimezone'
 
-const StripePricingTable = () => {
-    const PRICING_TABLE_ID = process.env.PRICING_TABLE_ID
-    const NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY =
-        process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+interface ItemsProps {
+    children: React.ReactNode
+}
 
-    useEffect(() => {
-        const script = document.createElement('script')
-        script.src = 'https://js.stripe.com/v3/pricing-table.js'
-        script.async = true
-        document.body.appendChild(script)
-        return () => {
-            document.body.removeChild(script)
-        }
-    }, [])
+const Items: React.FC<ItemsProps> = ({ children }) => {
+    const list = [
+        {
+            img: '',
+            title: 'U Talk, I Listen (15 min)',
+            text: 'U Talk, I Listen (15 min)',
+            price: '$5.50',
+            priceId: 'price_1PYkSdAlyXyK8wMusaHnNPOd',
+        },
+        {
+            img: '',
+            title: 'Bundle of 5',
+            text: 'Bundle of 5',
+            price: '$24.50',
+            priceId: 'price_1PYkTeAlyXyK8wMuzwGlWK1F',
+        },
+    ]
 
-    return React.createElement('stripe-pricing-table', {
-        'pricing-table-id': PRICING_TABLE_ID,
-        'publishable-key': NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
-    })
+    return (
+        <div className="gap-2 grid grid-cols-2 sm:grid-cols-4">
+            {list.map((item, index) => (
+                <Card
+                    shadow="sm"
+                    key={index}
+                    isPressable
+                    onPress={() => console.log('item pressed')}
+                >
+                    <CardBody className="overflow-visible p-0">
+                        <Image
+                            shadow="sm"
+                            radius="lg"
+                            width="100%"
+                            alt={item.title}
+                            className="w-full object-cover h-[140px]"
+                            src={item.img}
+                        />
+                    </CardBody>
+                    <CardFooter className="text-small justify-between">
+                        <b>{item.title}</b>
+                        <p className="text-default-500">{item.price}</p>
+                    </CardFooter>
+                </Card>
+            ))}
+
+            {children}
+        </div>
+    )
 }
 
 const OrderForm = () => {
@@ -52,13 +87,11 @@ const OrderForm = () => {
     let startDate = now.add({ days: 1 }) // Tomorrow
     let { locale } = useLocale()
     let endDate = now.add({ days: 30 }) // Two weeks from tomorrow
-    const timeSlots = [
-        { key: '10am-11am', label: '10am-11am' },
-        { key: '3pm-4pm', label: '3pm-4pm' },
-    ]
+
     const [formStateMessage, setFormStateMessage] = useState('')
     const [selectedDate, setSelectedDate] = useState<DateValue | null>(null)
     const [availableSlots, setAvailableSlots] = useState(timeSlots)
+    const { selectedTimeZone, setSelectedTimeZone } = useTimezone()
     const [pickedTime, setPickedTime] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const [appointments, setAppointments] = useState<AppointmentData[]>([]) // State to store fetched appointments
@@ -101,6 +134,10 @@ const OrderForm = () => {
                     }
                 })
 
+                // // Convert unavailableDates to ZonedDateTime
+                // const zonedDateTimeDates = unavailableDates.map((date) =>
+                //     parseAbsoluteToLocal(date.toISOString())
+                // )
                 // Convert unavailableDates to ZonedDateTime
                 const zonedDateTimeDates = unavailableDates.map((date) =>
                     parseAbsoluteToLocal(date.toISOString())
@@ -125,10 +162,6 @@ const OrderForm = () => {
         fetchAppointments()
     }, []) // Empty dependency array ensures this runs only once on mount
 
-    const convertToDate = (customDate: CustomDateValue): Date => {
-        return new Date(customDate.year, customDate.month - 1, customDate.day)
-    }
-
     // Check availability of time slots for the selected date
     const checkTimeSlots = (selectedDate: DateValue | null) => {
         if (!selectedDate) return
@@ -149,10 +182,21 @@ const OrderForm = () => {
         setAvailableSlots(newAvailableSlots)
     }
 
+    // Function to handle date change
     const handleDateChange = (date: DateValue | null) => {
         setSelectedDate(date)
-        setPickedTime('')
         checkTimeSlots(date)
+        setPickedTime('')
+
+        if (date) {
+            const dateObj = new Date(date.year, date.month - 1, date.day)
+            const convertedSlots = convertToUserTimezone(
+                timeSlots,
+                dateObj,
+                selectedTimeZone
+            )
+            setAvailableSlots(convertedSlots)
+        }
     }
 
     const handleTimeChange = (e: {
@@ -170,17 +214,18 @@ const OrderForm = () => {
 
     return (
         <>
-            <AddAppointment
-                handleSubmit={handleSubmit}
-                handleDateChange={handleDateChange}
-                handleTimeChange={handleTimeChange}
-                selectedDate={selectedDate}
-                pickedTime={pickedTime}
-                newDisabledRanges={newDisabledRanges}
-                availableSlots={availableSlots}
-                formStateMessage={formStateMessage}
-            />
-            <StripePricingTable />
+            <Items>
+                <AddAppointment
+                    handleSubmit={handleSubmit}
+                    handleDateChange={handleDateChange}
+                    handleTimeChange={handleTimeChange}
+                    selectedDate={selectedDate}
+                    pickedTime={pickedTime}
+                    newDisabledRanges={newDisabledRanges}
+                    availableSlots={availableSlots}
+                    formStateMessage={formStateMessage}
+                />
+            </Items>
         </>
     )
 }

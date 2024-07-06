@@ -5,6 +5,7 @@ import {
     DateValue,
     CalendarDate,
     toCalendarDate,
+    parseAbsolute,
     parseAbsoluteToLocal,
     getLocalTimeZone,
 } from '@internationalized/date'
@@ -32,8 +33,9 @@ export default function NewAppointment() {
     let { locale } = useLocale()
     let endDate = now.add({ days: 30 }) // Two weeks from tomorrow
     const timeSlots = [
-        { key: '10am-11am', label: '10am-11am' },
-        { key: '3pm-4pm', label: '3pm-4pm' },
+        { key: '1030 - 1045 am', label: '1030 - 1045 am GMT+7' },
+        { key: '530 - 545 pm', label: '530 - 545 pm GMT+7' },
+        { key: '930 - 945 pm', label: '930 - 945 pm GMT+7' },
     ]
     const [formStateMessage, setFormStateMessage] = useState('')
     const [selectedDate, setSelectedDate] = useState<DateValue | null>(null)
@@ -82,7 +84,7 @@ export default function NewAppointment() {
 
                 // Convert unavailableDates to ZonedDateTime
                 const zonedDateTimeDates = unavailableDates.map((date) =>
-                    parseAbsoluteToLocal(date.toISOString())
+                    parseAbsolute(date.toISOString(), 'Asia/Bangkok')
                 )
 
                 // Convert ZonedDateTime to CalendarDate

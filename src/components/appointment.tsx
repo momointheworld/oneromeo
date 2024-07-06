@@ -10,6 +10,7 @@ import {
 import { useLocale } from '@react-aria/i18n'
 import { I18nProvider } from '@react-aria/i18n'
 import DisplayMessage from '@/components/common/message'
+import CustomSelect from '@/components/selectTimeZone'
 
 type HandleSubmitType = (
     event: FormEvent<HTMLFormElement>
@@ -46,11 +47,24 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
     let { locale } = useLocale()
     const [isLoading, setIsLoading] = useState(false)
 
-    let isDateUnavailable = (date: DateValue) =>
-        newDisabledRanges.some(
+    // let isDateUnavailable = (date: DateValue) =>
+    //     newDisabledRanges.some(
+    //         (interval) =>
+    //             date.compare(interval[0]) >= 0 && date.compare(interval[1]) <= 0
+    //     )
+    const isDateUnavailable = (date: DateValue) => {
+        // Disable all dates except Tuesday (2) and Friday (5)
+        const dayOfWeek = new Date(date.year, date.month - 1, date.day).getDay()
+        const isWeekdayUnavailable = dayOfWeek !== 2 && dayOfWeek !== 5
+
+        // Combine with other disabled ranges
+        const isInDisabledRange = newDisabledRanges.some(
             (interval) =>
                 date.compare(interval[0]) >= 0 && date.compare(interval[1]) <= 0
         )
+
+        return isWeekdayUnavailable || isInDisabledRange
+    }
 
     const formatDate = (date: DateValue | null): string => {
         if (!date) return ''
@@ -64,6 +78,7 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
             <h3 className="text-center">Make An Appointment</h3>
             <div className="max-w-md mx-auto bg-white shadow-lg rounded-lg p-6">
                 <div>
+                    <CustomSelect />
                     <I18nProvider locale="en-US">
                         <DatePicker
                             label="Appointment Date"
