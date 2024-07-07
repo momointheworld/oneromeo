@@ -106,7 +106,7 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
                         ))}
                     </Select>
                 </div>
-                <div className="mt-10">
+                {/* <div className="mt-10">
                     <div className="text-lg">
                         Date Picked:
                         <p className="p-4 text-primary rounded text-center">
@@ -119,7 +119,7 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
                             {pickedTime}
                         </p>
                     </div>
-                </div>
+                </div> */}
                 <div className="mt-6 flex justify-center">
                     <Button isLoading={isLoading} type="submit" color="primary">
                         Add Appointment

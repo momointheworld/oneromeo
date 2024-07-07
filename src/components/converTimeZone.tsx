@@ -1,4 +1,9 @@
-import { formatInTimeZone, format, toZonedTime } from 'date-fns-tz'
+import {
+    formatInTimeZone,
+    format,
+    toZonedTime,
+    fromZonedTime,
+} from 'date-fns-tz'
 
 interface TimeSlot {
     key: string
@@ -59,22 +64,56 @@ const convertToUserTimezone = (
             0
         )
 
-        const localStartFormatted = formatInTimeZone(
-            startDateTime,
-            selectedTimezone, // Use selected timezone here
-            'hh:mm a'
-        )
-        const localEndFormatted = formatInTimeZone(
-            endDateTime,
-            selectedTimezone, // Use selected timezone here
-            'hh:mm a'
-        )
-        // / Adjust label if local start time is in PM period
-        const isPM = localStartFormatted.toLowerCase().includes('pm')
-        const label = `${localStartFormatted} - ${localEndFormatted}${
-            isPM ? ' -1' : ''
-        }`
+        // Utility function to get the offset in hours for a given timezone
+        const getTimezoneOffsetInHours = (date: Date, timezone: string) => {
+            const zonedDate = toZonedTime(date, timezone)
+            const utcDate = fromZonedTime(zonedDate, timezone)
+            return (zonedDate.getTime() - utcDate.getTime()) / (1000 * 60 * 60)
+        }
 
+        // Utility function to format time and handle the special case for 12:xxam
+        const formatTimeLabel = (date: Date, timezone: string) => {
+            let formattedTime = formatInTimeZone(date, timezone, 'hh:mm a')
+            if (
+                formattedTime.startsWith('12:') &&
+                formattedTime.endsWith('AM')
+            ) {
+                formattedTime = '00' + formattedTime.slice(2)
+            }
+            return formattedTime
+        }
+
+        // Convert to the selected timezone and format the time labels
+        const localStartFormatted = formatTimeLabel(
+            startDateTime,
+            selectedTimezone
+        )
+        const localEndFormatted = formatTimeLabel(endDateTime, selectedTimezone)
+
+        // Get timezone offsets
+        const bangkokOffset = getTimezoneOffsetInHours(
+            startDateTime,
+            'Asia/Bangkok'
+        )
+        const startOffset = getTimezoneOffsetInHours(
+            startDateTime,
+            selectedTimezone
+        )
+
+        // Calculate the difference
+        const offsetDifference = bangkokOffset - startOffset
+
+        // Prepare the labels with the necessary suffix
+        let localStartLabel = localStartFormatted
+        let localEndLabel = localEndFormatted
+
+        if (offsetDifference >= 10 && localStartLabel.includes('PM')) {
+            localEndLabel += ' -1'
+        } else if (offsetDifference < 0 && localStartLabel.includes('AM')) {
+            localEndLabel += ' +1'
+        }
+
+        const label = `${localStartLabel} - ${localEndLabel}`
         return {
             ...slot,
             start: localStartFormatted.split(' ')[0], // Update start time
