@@ -99,6 +99,8 @@ model Answer {
 
 model Appointment {
   id        String     @id @default(auto()) @map("_id") @db.ObjectId 
+  timeZone  String
   date      DateTime
   timeSlot  String
+  email     String
 }

@@ -1,15 +1,32 @@
-'use server'
+import { useRouter } from 'next/router'
+import { StaticImageData } from 'next/image'
 
-export default function PreviewPage() {
-    // Check to see if this is a redirect back from Checkout
-    const query = new URLSearchParams(window.location.search)
-    if (query.get('success')) {
-        console.log('Order placed! You will receive an email confirmation.')
-    }
+const checkout = async (
+    priceId: string,
+    email: string,
+    timeZone: string,
+    date: string,
+    timeSlot: string
+): Promise<void> => {
+    try {
+        const response = await fetch('/api/checkout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ priceId, email, timeZone, date, timeSlot }),
+        })
 
-    if (query.get('canceled')) {
-        console.log(
-            'Order canceled -- continue to shop around and checkout when you’re ready.'
-        )
+        if (!response.ok) {
+            throw new Error('Failed to create checkout session')
+        }
+
+        const { url } = await response.json()
+        window.location.href = url // Redirect to Stripe checkout
+    } catch (error) {
+        console.error('Error during checkout:', error)
+        alert('An error occurred during checkout. Please try again.')
     }
 }
+
+export default checkout

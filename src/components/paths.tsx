@@ -1,5 +1,3 @@
-import { addAppointment } from '@/actions'
-
 const paths = {
     home() {
         return '/'

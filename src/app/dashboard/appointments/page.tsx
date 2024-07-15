@@ -6,8 +6,10 @@ import { useEffect, useState } from 'react'
 
 type Appointment = {
     id: number
+    timeZone: String
     date: Date
     timeSlot: string
+    email: string
 }
 
 const AppointmentsPage = () => {
@@ -25,8 +27,10 @@ const AppointmentsPage = () => {
                 const formattedAppointments: Appointment[] = data.map(
                     (appointment) => ({
                         id: parseInt(appointment.id), // Assuming id is converted to number
+                        timeZone: appointment.timeZone,
                         date: new Date(appointment.date),
                         timeSlot: appointment.timeSlot,
+                        email: appointment.email,
                     })
                 )
 
@@ -62,8 +66,13 @@ const AppointmentsPage = () => {
                 <ol reversed style={{ listStyleType: 'decimal-leading-zero' }}>
                     {appointments.map((appointment) => (
                         <li key={appointment.id}>
-                            {appointment.date.toDateString()} -{' '}
-                            {appointment.timeSlot}
+                            <p>
+                                {' '}
+                                Bangkok Time: {appointment.date.toDateString()}{' '}
+                                -{appointment.timeSlot}
+                            </p>
+                            <p>Customer TimeZone: {appointment.timeZone}</p>
+                            <p>Customer Email: {appointment.email}</p>
                         </li>
                     ))}
                 </ol>

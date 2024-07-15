@@ -1,5 +1,6 @@
 'use client'
-import React, { Children, useEffect, useState } from 'react'
+import React, { ReactHTMLElement, useEffect, useRef, useState } from 'react'
+import { Navigate } from 'react-router-dom'
 import {
     today,
     DateValue,
@@ -10,66 +11,30 @@ import {
     getLocalTimeZone,
 } from '@internationalized/date'
 import { useLocale } from '@react-aria/i18n'
-import { getAppointments } from '@/actions'
+import { addAppointment, getAppointments } from '@/actions'
 import AddAppointment from '@/components/appointment'
-import { Card, CardBody, CardFooter, Image } from '@nextui-org/react'
-import { convertToUserTimezone, timeSlots } from '@/components/converTimeZone'
-import { useTimezone } from '@/components/useTimezone'
-
-interface ItemsProps {
-    children: React.ReactNode
-}
-
-const Items: React.FC<ItemsProps> = ({ children }) => {
-    const list = [
-        {
-            img: '',
-            title: 'U Talk, I Listen (15 min)',
-            text: 'U Talk, I Listen (15 min)',
-            price: '$5.50',
-            priceId: 'price_1PYkSdAlyXyK8wMusaHnNPOd',
-        },
-        {
-            img: '',
-            title: 'Bundle of 5',
-            text: 'Bundle of 5',
-            price: '$24.50',
-            priceId: 'price_1PYkTeAlyXyK8wMuzwGlWK1F',
-        },
-    ]
-
-    return (
-        <div className="gap-2 grid grid-cols-2 sm:grid-cols-4">
-            {list.map((item, index) => (
-                <Card
-                    shadow="sm"
-                    key={index}
-                    isPressable
-                    onPress={() => console.log('item pressed')}
-                >
-                    <CardBody className="overflow-visible p-0">
-                        <Image
-                            shadow="sm"
-                            radius="lg"
-                            width="100%"
-                            alt={item.title}
-                            className="w-full object-cover h-[140px]"
-                            src={item.img}
-                        />
-                    </CardBody>
-                    <CardFooter className="text-small justify-between">
-                        <b>{item.title}</b>
-                        <p className="text-default-500">{item.price}</p>
-                    </CardFooter>
-                </Card>
-            ))}
-
-            {children}
-        </div>
-    )
-}
+import { Button, Input } from '@nextui-org/react'
+import { convertToUserTimezone, timeSlots } from '@/utils/converTimeZone'
+import { useTimezone } from '@/hooks/useTimezone'
+import { useDate } from '@/hooks/useDate'
+import OrderItems from '@/components/orderItems'
+import productImg from '/public/logo.png'
+import { StaticImageData } from 'next/image'
+import { useEmail } from '@/hooks/useEmail'
+import { useSelectedItem } from '@/hooks/useSelectedItem'
+import checkout from '@/actions/checkout'
+import { revertTimeZone } from '@/utils/revertTimeZone'
 
 const OrderForm = () => {
+    interface Item {
+        imgSrc: StaticImageData
+        imgAlt: string
+        title: string
+        price: string
+        priceId: string
+        description: string
+    }
+
     interface CustomDateValue {
         year: number
         month: number
@@ -79,19 +44,26 @@ const OrderForm = () => {
     }
 
     interface AppointmentData {
+        timeZone: string
         date: Date
         timeSlot: string
+        email: string
     }
+
+    const [selectedItem, setSelectedItem] = useState<Item | null>(null)
+    const { selectedPriceId, setSelectedPriceId } = useSelectedItem()
 
     let now = today(getLocalTimeZone())
     let startDate = now.add({ days: 1 }) // Tomorrow
     let { locale } = useLocale()
     let endDate = now.add({ days: 30 }) // Two weeks from tomorrow
-
+    const appointmentRef = useRef<HTMLDivElement>(null) // Create a ref for the Appointment component
+    const { email, setEmail } = useEmail()
     const [formStateMessage, setFormStateMessage] = useState('')
-    const [selectedDate, setSelectedDate] = useState<DateValue | null>(null)
     const [availableSlots, setAvailableSlots] = useState(timeSlots)
     const { selectedTimeZone, setSelectedTimeZone } = useTimezone()
+    const { selectedDate, setSelectedDate } = useDate()
+    const [dateAndTime, setDateAndTime] = useState('')
     const [pickedTime, setPickedTime] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const [appointments, setAppointments] = useState<AppointmentData[]>([]) // State to store fetched appointments
@@ -102,6 +74,25 @@ const OrderForm = () => {
     let disabledRanges = [
         [now.add({ days: -365 }), now], // All dates before today
         [endDate.add({ days: 1 }), now.add({ days: 365 })], // All dates after two weeks from tomorrow
+    ]
+
+    const items = [
+        {
+            imgSrc: productImg,
+            imgAlt: '',
+            title: 'U Talk, I Listen',
+            price: 'HKD30',
+            priceId: 'price_1PckCSHcOAKxyg1Z0WStpNJl',
+            description: '15 min per session.',
+        },
+        {
+            imgSrc: productImg,
+            imgAlt: '',
+            title: 'Bundle of 5',
+            price: 'HKD125',
+            priceId: 'price_1PckCyHcOAKxyg1ZPUkOd5XO',
+            description: '15 min per session.',
+        },
     ]
 
     // Fetch appointments and update disabledRanges on component mount
@@ -162,6 +153,34 @@ const OrderForm = () => {
         fetchAppointments()
     }, []) // Empty dependency array ensures this runs only once on mount
 
+    useEffect(() => {
+        // Check to see if this is a redirect back from Checkout
+        const query = new URLSearchParams(window.location.search)
+        if (query.get('success')) {
+            console.log('Order placed! You will receive an email confirmation.')
+        }
+
+        if (query.get('canceled')) {
+            console.log(
+                'Order canceled -- continue to shop around and checkout when you’re ready.'
+            )
+        }
+    }, [])
+
+    // get the product information
+    const handleItemClick: React.MouseEventHandler<HTMLButtonElement> = (e) => {
+        const priceId = e.currentTarget.getAttribute('data-price-id')
+        const item = items.find((item) => item.priceId === priceId) || null
+        setSelectedItem(item)
+        setSelectedPriceId(priceId)
+        console.log(item)
+
+        // Scroll to the Appointment component
+        if (appointmentRef.current) {
+            appointmentRef.current.scrollIntoView({ behavior: 'smooth' })
+        }
+    }
+
     // Check availability of time slots for the selected date
     const checkTimeSlots = (selectedDate: DateValue | null) => {
         if (!selectedDate) return
@@ -207,26 +226,83 @@ const OrderForm = () => {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault() // Prevent default form submission
-        console.log('Selected Date: ', { selectedDate }, 'selected slot', {
-            pickedTime,
-        })
+        setIsLoading(true)
+        if (!selectedItem) {
+            alert('Please select an item.')
+            setIsLoading(false)
+            return
+        } else if (!selectedDate) {
+            alert('Please select a date.')
+            setIsLoading(false)
+            return
+        } else if (!pickedTime) {
+            alert('Please select a time slot.')
+            setIsLoading(false)
+            return
+        }
+
+        // console.log(selectedDate, pickedTime, email, selectedTimeZone)
+        if (selectedDate && pickedTime && selectedTimeZone) {
+            const dateStr = new Date(selectedDate.toString())
+            const convertedTimeSlot = revertTimeZone(
+                pickedTime,
+                selectedTimeZone
+            )
+            try {
+                await addAppointment({
+                    timeZone: selectedTimeZone, // Match property names
+                    date: dateStr, // Match property names
+                    timeSlot: convertedTimeSlot, // Match property names
+                    email, // Match property names
+                })
+                // await checkout(
+                //     selectedItem.priceId,
+                //     email,
+                //     selectedTimeZone,
+                //     dateStr,
+                //     pickedTime
+                // )
+                setSelectedDate(null)
+                setPickedTime('')
+                setAvailableSlots(timeSlots)
+                // Optionally, you can add a success message or navigate to another page here
+                setFormStateMessage('Appointment added successfully.')
+            } catch (error) {
+                setFormStateMessage(
+                    'Failed to add the appointment, try again later.'
+                )
+                console.error('Error adding appointment:', error)
+                // Handle error scenario if needed
+            } finally {
+                setIsLoading(false)
+            }
+        }
     }
 
     return (
-        <>
-            <Items>
-                <AddAppointment
-                    handleSubmit={handleSubmit}
-                    handleDateChange={handleDateChange}
-                    handleTimeChange={handleTimeChange}
-                    selectedDate={selectedDate}
-                    pickedTime={pickedTime}
-                    newDisabledRanges={newDisabledRanges}
-                    availableSlots={availableSlots}
-                    formStateMessage={formStateMessage}
-                />
-            </Items>
-        </>
+        <div>
+            <form onSubmit={handleSubmit} className="flex flex-col gap-y-20">
+                <OrderItems handleItemClick={handleItemClick} items={items} />
+                <div ref={appointmentRef}>
+                    <AddAppointment
+                        // handleSubmit={handleSubmit}
+                        handleDateChange={handleDateChange}
+                        handleTimeChange={handleTimeChange}
+                        // selectedDate={selectedDate}
+                        pickedTime={pickedTime}
+                        newDisabledRanges={newDisabledRanges}
+                        availableSlots={availableSlots}
+                        formStateMessage={formStateMessage}
+                    />
+                </div>
+                <div className=" flex justify-center">
+                    <Button isLoading={isLoading} type="submit" color="primary">
+                        Checkout
+                    </Button>
+                    {/* Can not use FormButton on client component */}
+                </div>
+            </form>
+        </div>
     )
 }
 

@@ -1,6 +1,13 @@
 'use client'
 import React, { FormEvent, useEffect, useState } from 'react'
-import { Button, DatePicker, Select, SelectItem } from '@nextui-org/react'
+import {
+    Button,
+    Chip,
+    DatePicker,
+    Input,
+    Select,
+    SelectItem,
+} from '@nextui-org/react'
 import {
     today,
     DateValue,
@@ -10,11 +17,13 @@ import {
 import { useLocale } from '@react-aria/i18n'
 import { I18nProvider } from '@react-aria/i18n'
 import DisplayMessage from '@/components/common/message'
-import CustomSelect from '@/components/selectTimeZone'
+import SelectTimeZone from '@/components/timeZoneSelector'
+import { useDate } from '@/hooks/useDate'
+import { useEmail } from '@/hooks/useEmail'
 
-type HandleSubmitType = (
-    event: FormEvent<HTMLFormElement>
-) => void | Promise<void>
+// type HandleSubmitType = (
+//     event: FormEvent<HTMLFormElement>
+// ) => void | Promise<void>
 
 interface TimeSlot {
     key: string
@@ -22,10 +31,10 @@ interface TimeSlot {
 }
 
 interface AddAppointmentProps {
-    handleSubmit: HandleSubmitType
+    // handleSubmit: HandleSubmitType
     handleDateChange: (date: DateValue | null) => void
     handleTimeChange: React.ChangeEventHandler<HTMLSelectElement>
-    selectedDate: DateValue | null
+    // selectedDate: DateValue | null
     newDisabledRanges: CalendarDate[][]
     availableSlots: TimeSlot[]
     pickedTime: string
@@ -33,10 +42,10 @@ interface AddAppointmentProps {
 }
 
 const AddAppointment: React.FC<AddAppointmentProps> = ({
-    handleSubmit,
+    // handleSubmit,
     handleDateChange,
     handleTimeChange,
-    selectedDate,
+    // selectedDate,
     newDisabledRanges,
     availableSlots,
     pickedTime,
@@ -46,12 +55,9 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
     let startDate = now.add({ days: 1 }) // Tomorrow
     let { locale } = useLocale()
     const [isLoading, setIsLoading] = useState(false)
+    const { selectedDate, setSelectedDate } = useDate()
+    const { email, setEmail } = useEmail()
 
-    // let isDateUnavailable = (date: DateValue) =>
-    //     newDisabledRanges.some(
-    //         (interval) =>
-    //             date.compare(interval[0]) >= 0 && date.compare(interval[1]) <= 0
-    //     )
     const isDateUnavailable = (date: DateValue) => {
         // Disable all dates except Tuesday (2) and Friday (5)
         const dayOfWeek = new Date(date.year, date.month - 1, date.day).getDay()
@@ -66,25 +72,31 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
         return isWeekdayUnavailable || isInDisabledRange
     }
 
-    const formatDate = (date: DateValue | null): string => {
-        if (!date) return ''
-        return `${date.year}-${String(date.month).padStart(2, '0')}-${String(
-            date.day
-        ).padStart(2, '0')}`
-    }
+    // const formatDate = (date: DateValue | null): string => {
+    //     if (!date) return ''
+    //     return `${date.year}-${String(date.month).padStart(2, '0')}-${String(
+    //         date.day
+    //     ).padStart(2, '0')}`
+    // }
 
     return (
-        <form onSubmit={handleSubmit}>
-            <h3 className="text-center">Make An Appointment</h3>
+        <>
+            <div className="flex place-content-center">
+                <Chip color="primary">2 </Chip>
+                <span className="mx-5 text-2xl font-bold tracking-tight text-gray-900">
+                    SELECT A TIME SLOT
+                </span>
+            </div>
             <div className="max-w-md mx-auto bg-white shadow-lg rounded-lg p-6">
                 <div>
-                    <CustomSelect />
+                    <SelectTimeZone />
                     <I18nProvider locale="en-US">
                         <DatePicker
                             label="Appointment Date"
                             aria-label="Appointment Date"
                             isDateUnavailable={isDateUnavailable}
                             minValue={startDate}
+                            value={selectedDate}
                             onChange={handleDateChange}
                             className="w-full mb-4"
                         />
@@ -94,37 +106,30 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
                     <Select
                         label="Time Slot"
                         placeholder="Select a time slot"
-                        className="max-w-md"
+                        className="max-w-md  mb-4"
                         isDisabled={!selectedDate}
+                        items={availableSlots}
                         selectedKeys={[pickedTime]}
                         onChange={handleTimeChange}
                     >
+                        {/* slot has key and label, label is what is being updated, while key is still the default value */}
                         {availableSlots.map((slot) => (
-                            <SelectItem key={slot.key} value={slot.key}>
+                            <SelectItem key={slot.label} value={slot.label}>
                                 {slot.label}
                             </SelectItem>
                         ))}
                     </Select>
                 </div>
-                {/* <div className="mt-10">
-                    <div className="text-lg">
-                        Date Picked:
-                        <p className="p-4 text-primary rounded text-center">
-                            {formatDate(selectedDate)}
-                        </p>
-                    </div>
-                    <div className="text-lg">
-                        Time Slot Picked:
-                        <p className="p-4 text-primary rounded text-center">
-                            {pickedTime}
-                        </p>
-                    </div>
-                </div> */}
-                <div className="mt-6 flex justify-center">
-                    <Button isLoading={isLoading} type="submit" color="primary">
-                        Add Appointment
-                    </Button>
-                    {/* Can not use FormButton on client component */}
+                <div className="">
+                    {' '}
+                    <Input
+                        isRequired
+                        type="email"
+                        label="Email"
+                        placeholder="Enter your email"
+                        value={email}
+                        onValueChange={setEmail}
+                    />
                 </div>
                 <DisplayMessage
                     formStateMessage={formStateMessage}
@@ -133,7 +138,7 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
                     }}
                 />
             </div>
-        </form>
+        </>
     )
 }
 

@@ -21,7 +21,10 @@ import { NextUIProvider } from '@nextui-org/react'
 import { SessionProvider } from 'next-auth/react'
 import AuthWrapper from '@/components/common/auth-wrapper'
 import React from 'react'
-import { TimezoneProvider } from '@/components/useTimezone'
+import { TimezoneProvider } from '@/hooks/useTimezone'
+import { DateProvider } from '@/hooks/useDate'
+import { EmailProvider } from '@/hooks/useEmail'
+import { SelectedItemProvider } from '@/hooks/useSelectedItem'
 
 interface ProviderProps {
     children: React.ReactNode
@@ -32,7 +35,13 @@ const Providers = ({ children }: ProviderProps) => {
         <SessionProvider>
             <NextUIProvider>
                 <AuthWrapper>
-                    <TimezoneProvider>{children}</TimezoneProvider>
+                    <SelectedItemProvider>
+                        <TimezoneProvider>
+                            <DateProvider>
+                                <EmailProvider> {children} </EmailProvider>
+                            </DateProvider>
+                        </TimezoneProvider>
+                    </SelectedItemProvider>
                 </AuthWrapper>
             </NextUIProvider>
         </SessionProvider>

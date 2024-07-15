@@ -1,23 +1,28 @@
 'use server'
 import paths from '@/components/paths'
 import { db } from '@/db'
+import { convertToUserTimezone } from '@/utils/converTimeZone'
+import { revertTimeZone } from '@/utils/revertTimeZone'
 import { revalidatePath } from 'next/cache'
 
 interface AppointmentData {
+    timeZone: string
     date: Date
     timeSlot: string
+    email: string
 }
 
 export async function addAppointment(formData: AppointmentData) {
-    const { date, timeSlot } = formData
-    // Handle DateValue | null and convert it to Date if necessary
-    const actualDate = date instanceof Date ? date : new Date() // Example conversion logic
+    const { timeZone, date, timeSlot, email } = formData
+    console.log(timeZone, date, timeSlot, email)
 
     try {
         const appointment = await db.appointment.create({
             data: {
+                timeZone,
                 date,
                 timeSlot,
+                email,
             },
         })
 

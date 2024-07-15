@@ -6,7 +6,6 @@ import {
     CalendarDate,
     toCalendarDate,
     parseAbsolute,
-    parseAbsoluteToLocal,
     getLocalTimeZone,
 } from '@internationalized/date'
 import { useLocale } from '@react-aria/i18n'
@@ -181,7 +180,7 @@ export default function NewAppointment() {
             handleSubmit={handleSubmit}
             handleDateChange={handleDateChange}
             handleTimeChange={handleTimeChange}
-            selectedDate={selectedDate}
+            // selectedDate={selectedDate}
             pickedTime={pickedTime}
             newDisabledRanges={newDisabledRanges}
             availableSlots={availableSlots}
