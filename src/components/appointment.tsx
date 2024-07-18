@@ -123,7 +123,6 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
                 <div className="">
                     {' '}
                     <Input
-                        isRequired
                         type="email"
                         label="Email"
                         placeholder="Enter your email"

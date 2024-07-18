@@ -8,7 +8,8 @@ type Appointment = {
     id: number
     timeZone: String
     date: Date
-    timeSlot: string
+    thTimeSlot: string
+    csrTimeSlot: string
     email: string
 }
 
@@ -29,7 +30,8 @@ const AppointmentsPage = () => {
                         id: parseInt(appointment.id), // Assuming id is converted to number
                         timeZone: appointment.timeZone,
                         date: new Date(appointment.date),
-                        timeSlot: appointment.timeSlot,
+                        thTimeSlot: appointment.thTimeSlot,
+                        csrTimeSlot: appointment.csrTimeSlot,
                         email: appointment.email,
                     })
                 )
@@ -69,7 +71,12 @@ const AppointmentsPage = () => {
                             <p>
                                 {' '}
                                 Bangkok Time: {appointment.date.toDateString()}{' '}
-                                -{appointment.timeSlot}
+                                -{appointment.thTimeSlot}
+                            </p>
+                            <p>
+                                {' '}
+                                Customer Time: {appointment.date.toDateString()}{' '}
+                                -{appointment.csrTimeSlot}
                             </p>
                             <p>Customer TimeZone: {appointment.timeZone}</p>
                             <p>Customer Email: {appointment.email}</p>

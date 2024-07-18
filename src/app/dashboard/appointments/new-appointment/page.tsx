@@ -70,7 +70,9 @@ export default function NewAppointment() {
                         dateSlotsMap.set(appointmentDate, [])
                     }
 
-                    dateSlotsMap.get(appointmentDate).push(appointment.timeSlot)
+                    dateSlotsMap
+                        .get(appointmentDate)
+                        .push(appointment.thTimeSlot)
                 })
 
                 // Find dates that have two or more time slots taken

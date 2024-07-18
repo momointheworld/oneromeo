@@ -1,27 +1,27 @@
 'use server'
 import paths from '@/components/paths'
 import { db } from '@/db'
-import { convertToUserTimezone } from '@/utils/converTimeZone'
-import { revertTimeZone } from '@/utils/revertTimeZone'
 import { revalidatePath } from 'next/cache'
 
 interface AppointmentData {
     timeZone: string
     date: Date
-    timeSlot: string
+    thTimeSlot: string
+    csrTimeSlot: string
     email: string
 }
 
 export async function addAppointment(formData: AppointmentData) {
-    const { timeZone, date, timeSlot, email } = formData
-    console.log(timeZone, date, timeSlot, email)
+    const { timeZone, date, thTimeSlot, csrTimeSlot, email } = formData
+    console.log(timeZone, date, thTimeSlot, csrTimeSlot, email)
 
     try {
         const appointment = await db.appointment.create({
             data: {
                 timeZone,
                 date,
-                timeSlot,
+                thTimeSlot,
+                csrTimeSlot,
                 email,
             },
         })

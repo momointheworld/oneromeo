@@ -1,51 +1,110 @@
-import { formatInTimeZone } from 'date-fns-tz'
+import { formatInTimeZone, fromZonedTime, toZonedTime } from 'date-fns-tz'
 
-const revertTimeZone = (
-    timeSlot: string,
-    selectedTimezone: string // Parameter for the selected timezone of the time slot
-): string => {
-    // Split the time slot into start and end times
-    const [startTime, endTime] = timeSlot.split(' - ')
+interface TimeSlot {
+    key: string
+    start: string
+    end: string
+    period: string
+    label: string
+}
 
-    // Parse the start and end times
-    const [startHour, startMinute, startPeriod] = parseTime(startTime)
-    const [endHour, endMinute, endPeriod] = parseTime(endTime)
+const parseTimeSlotString = (timeSlotStr: string): TimeSlot => {
+    // Split the string by the ' - ' delimiter
+    const parts = timeSlotStr.split(' - ')
 
-    // Create Date objects for start and end times
-    const startDate = new Date()
-    startDate.setHours(
-        startHour + (startPeriod === 'PM' && startHour !== 12 ? 12 : 0),
+    // Extract the start and end times
+    const startStr = parts[0]
+    let endStrWithPeriod = parts[1]
+    // Check if there's an additional marker like '-1' at the end
+    let additionalMarker = ''
+    if (parts.length > 2) {
+        additionalMarker = parts.slice(2).join(' - ')
+    }
+
+    // Extract the period from the end time
+    let period = ''
+    if (endStrWithPeriod.includes(' - ')) {
+        ;[endStrWithPeriod, period] = endStrWithPeriod.split(' - ')
+    }
+
+    const [start, startPeriod] = startStr.split(' ')
+    const [end, endPeriod] = endStrWithPeriod.split(' ')
+
+    return {
+        key: timeSlotStr,
+        start,
+        end,
+        period: startPeriod,
+        label: timeSlotStr,
+    }
+}
+
+const revertTimezone = (
+    timeSlotStr: string,
+    selectedDate: Date,
+    selectedTimezone: string
+): TimeSlot | null => {
+    const timeSlot = parseTimeSlotString(timeSlotStr)
+    if (!timeSlot) {
+        return null
+    }
+
+    const { start, end, period } = timeSlot
+    const [startHour, startMinute] = start.split(':').map(Number)
+    const [endHour, endMinute] = end.split(':').map(Number)
+
+    const constructDateWithTime = (
+        hour: number,
+        minute: number,
+        period: string,
+        date: Date
+    ): Date => {
+        let time = new Date(date)
+        time.setHours(
+            hour +
+                (period === 'PM' && hour !== 12 ? 12 : 0) -
+                (period === 'AM' && hour === 12 ? 12 : 0),
+            minute,
+            0,
+            0
+        )
+        return time
+    }
+
+    const startDateTime = constructDateWithTime(
+        startHour,
         startMinute,
-        0
+        period,
+        selectedDate
     )
-
-    const endDate = new Date()
-    endDate.setHours(
-        endHour + (endPeriod === 'PM' && endHour !== 12 ? 12 : 0),
+    const endDateTime = constructDateWithTime(
+        endHour,
         endMinute,
-        0
+        period,
+        selectedDate
     )
 
-    // Convert start and end times to Bangkok time
-    const bangkokStartTime = formatInTimeZone(
-        startDate,
-        selectedTimezone,
-        'HH:mm'
+    // Convert to UTC
+    const startUtc = fromZonedTime(startDateTime, selectedTimezone)
+    const endUtc = fromZonedTime(endDateTime, selectedTimezone)
+
+    // Convert UTC to Bangkok time
+    const startBangkok = toZonedTime(startUtc, 'Asia/Bangkok')
+    const endBangkok = toZonedTime(endUtc, 'Asia/Bangkok')
+
+    const formattedStart = formatInTimeZone(
+        startBangkok,
+        'Asia/Bangkok',
+        'hh:mm a'
     )
-    const bangkokEndTime = formatInTimeZone(endDate, selectedTimezone, 'HH:mm')
+    const formattedEnd = formatInTimeZone(endBangkok, 'Asia/Bangkok', 'hh:mm a')
 
-    // Format the result
-    return `${bangkokStartTime} - ${bangkokEndTime}`
+    const label = `${formattedStart} - ${formattedEnd}`
+
+    return {
+        ...timeSlot,
+        label,
+    }
 }
 
-// Helper function to parse time string in "hh:mm AM/PM" format
-const parseTime = (timeString: string): [number, number, string] => {
-    const [timePart, period] = timeString.split(' ')
-    const [hourStr, minuteStr] = timePart.split(':')
-    const hour = parseInt(hourStr, 10)
-    const minute = parseInt(minuteStr, 10)
-
-    return [hour, minute, period]
-}
-
-export { revertTimeZone }
+export { revertTimezone }

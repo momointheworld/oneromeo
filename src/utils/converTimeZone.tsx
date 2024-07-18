@@ -15,25 +15,25 @@ interface TimeSlot {
 
 const timeSlots: TimeSlot[] = [
     {
-        key: '1030 - 1045 am',
+        key: '10:30 AM - 10:45 AM',
         start: '10:30',
         end: '10:45',
-        period: 'am',
-        label: '1030 - 1045 am', // Default label, can be updated after conversion
+        period: 'AM',
+        label: '10:30 AM - 10:45 AM', // Default label, can be updated after conversion
     },
     {
-        key: '0530 - 0545 pm',
+        key: '0530 PM - 0545 PM',
         start: '05:30',
         end: '05:45',
-        period: 'pm',
-        label: '530 - 545 pm', // Default label, can be updated after conversion
+        period: 'PM',
+        label: '05:30 PM - 05:45 PM', // Default label, can be updated after conversion
     },
     {
-        key: '0930 - 0945 pm',
+        key: '09:30 PM - 09:45 PM',
         start: '09:30',
         end: '09:45',
-        period: 'pm',
-        label: '930 - 945 pm', // Default label, can be updated after conversion
+        period: 'PM',
+        label: '09:30 PM - 09:45 PM', // Default label, can be updated after conversion
     },
 ]
 
@@ -52,14 +52,14 @@ const convertToUserTimezone = (
         let startDateTime = new Date(selectedDate)
 
         startDateTime.setHours(
-            startHour + (period === 'pm' && startHour !== 12 ? 12 : 0),
+            startHour + (period === 'PM' && startHour !== 12 ? 12 : 0),
             startMinute,
             0
         )
 
         let endDateTime = new Date(selectedDate)
         endDateTime.setHours(
-            endHour + (period === 'pm' && endHour !== 12 ? 12 : 0),
+            endHour + (period === 'PM' && endHour !== 12 ? 12 : 0),
             endMinute,
             0
         )
@@ -109,7 +109,7 @@ const convertToUserTimezone = (
 
         if (offsetDifference >= 10 && localStartLabel.includes('PM')) {
             localEndLabel += ' -1'
-        } else if (offsetDifference < 0 && localStartLabel.includes('AM')) {
+        } else if (offsetDifference < -1 && localStartLabel.includes('AM')) {
             localEndLabel += ' +1'
         }
 

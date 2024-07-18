@@ -3,7 +3,7 @@ import { db } from '@/db'
 import { notFound } from 'next/navigation'
 import { cache } from 'react'
 
-export const getAppointments = cache(async () => {
+export const getAppointments = async () => {
     try {
         const appointments = await db.appointment.findMany()
 
@@ -15,4 +15,4 @@ export const getAppointments = cache(async () => {
         console.error('Error fetching appointments:', error)
         return notFound()
     }
-})
+}

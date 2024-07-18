@@ -23,7 +23,7 @@ import { StaticImageData } from 'next/image'
 import { useEmail } from '@/hooks/useEmail'
 import { useSelectedItem } from '@/hooks/useSelectedItem'
 import checkout from '@/actions/checkout'
-import { revertTimeZone } from '@/utils/revertTimeZone'
+import { revertTimezone } from '@/utils/revertTimeZone'
 
 const OrderForm = () => {
     interface Item {
@@ -35,18 +35,19 @@ const OrderForm = () => {
         description: string
     }
 
-    interface CustomDateValue {
-        year: number
-        month: number
-        day: number
-        era: string
-        calendar: { identifier: string }
-    }
+    // interface CustomDateValue {
+    //     year: number
+    //     month: number
+    //     day: number
+    //     era: string
+    //     calendar: { identifier: string }
+    // }
 
     interface AppointmentData {
         timeZone: string
         date: Date
-        timeSlot: string
+        thTimeSlot: string
+        csrTimeSlot: string
         email: string
     }
 
@@ -63,7 +64,6 @@ const OrderForm = () => {
     const [availableSlots, setAvailableSlots] = useState(timeSlots)
     const { selectedTimeZone, setSelectedTimeZone } = useTimezone()
     const { selectedDate, setSelectedDate } = useDate()
-    const [dateAndTime, setDateAndTime] = useState('')
     const [pickedTime, setPickedTime] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const [appointments, setAppointments] = useState<AppointmentData[]>([]) // State to store fetched appointments
@@ -114,7 +114,9 @@ const OrderForm = () => {
                         dateSlotsMap.set(appointmentDate, [])
                     }
 
-                    dateSlotsMap.get(appointmentDate).push(appointment.timeSlot)
+                    dateSlotsMap
+                        .get(appointmentDate)
+                        .push(appointment.thTimeSlot)
                 })
 
                 // Find dates that have two or more time slots taken
@@ -193,7 +195,7 @@ const OrderForm = () => {
                     new Date(appointment.date).toDateString() ===
                     selectedDateStr
             )
-            .map((appointment) => appointment.timeSlot)
+            .map((appointment) => appointment.thTimeSlot)
 
         const newAvailableSlots = timeSlots.filter(
             (slot) => !takenSlots.includes(slot.key)
@@ -222,6 +224,7 @@ const OrderForm = () => {
         target: { value: React.SetStateAction<string> }
     }) => {
         setPickedTime(e.target.value)
+        console.log(e.target.value)
     }
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -240,20 +243,29 @@ const OrderForm = () => {
             setIsLoading(false)
             return
         }
-
-        // console.log(selectedDate, pickedTime, email, selectedTimeZone)
         if (selectedDate && pickedTime && selectedTimeZone) {
             const dateStr = new Date(selectedDate.toString())
-            const convertedTimeSlot = revertTimeZone(
+            console.log(dateStr)
+            console.log(pickedTime)
+
+            const convertedTimeSlot = revertTimezone(
                 pickedTime,
+                dateStr,
                 selectedTimeZone
             )
+            if (!convertedTimeSlot) {
+                return
+            }
+            const convertedLabel = convertedTimeSlot?.label
+            console.log(convertedTimeSlot?.label)
+
             try {
                 await addAppointment({
-                    timeZone: selectedTimeZone, // Match property names
-                    date: dateStr, // Match property names
-                    timeSlot: convertedTimeSlot, // Match property names
-                    email, // Match property names
+                    timeZone: selectedTimeZone,
+                    date: dateStr,
+                    thTimeSlot: convertedLabel,
+                    csrTimeSlot: pickedTime,
+                    email,
                 })
                 // await checkout(
                 //     selectedItem.priceId,
