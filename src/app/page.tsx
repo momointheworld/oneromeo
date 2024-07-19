@@ -119,18 +119,14 @@ const OrderForm = () => {
                         .push(appointment.thTimeSlot)
                 })
 
-                // Find dates that have two or more time slots taken
+                // Find dates that have three slots taken
                 const unavailableDates: Date[] = []
                 dateSlotsMap.forEach((slots, date) => {
-                    if (slots.length >= 2) {
+                    if (slots.length === 3) {
                         unavailableDates.push(new Date(date))
                     }
                 })
 
-                // // Convert unavailableDates to ZonedDateTime
-                // const zonedDateTimeDates = unavailableDates.map((date) =>
-                //     parseAbsoluteToLocal(date.toISOString())
-                // )
                 // Convert unavailableDates to ZonedDateTime
                 const zonedDateTimeDates = unavailableDates.map((date) =>
                     parseAbsoluteToLocal(date.toISOString())
@@ -169,22 +165,8 @@ const OrderForm = () => {
         }
     }, [])
 
-    // get the product information
-    const handleItemClick: React.MouseEventHandler<HTMLButtonElement> = (e) => {
-        const priceId = e.currentTarget.getAttribute('data-price-id')
-        const item = items.find((item) => item.priceId === priceId) || null
-        setSelectedItem(item)
-        setSelectedPriceId(priceId)
-        console.log(item)
-
-        // Scroll to the Appointment component
-        if (appointmentRef.current) {
-            appointmentRef.current.scrollIntoView({ behavior: 'smooth' })
-        }
-    }
-
-    // Check availability of time slots for the selected date
-    const checkTimeSlots = (selectedDate: DateValue | null) => {
+    // UseEffect to check availability of time slots for the selected date
+    useEffect(() => {
         if (!selectedDate) return
 
         const selectedDateStr = new Date(selectedDate.toString()).toDateString()
@@ -198,21 +180,49 @@ const OrderForm = () => {
             .map((appointment) => appointment.thTimeSlot)
 
         const newAvailableSlots = timeSlots.filter(
-            (slot) => !takenSlots.includes(slot.key)
+            (slot) => !takenSlots.includes(slot.label)
         )
-        setAvailableSlots(newAvailableSlots)
+        // setAvailableSlots(newAvailableSlots)
+        if (selectedDate) {
+            const dateObj = new Date(
+                selectedDate.year,
+                selectedDate.month - 1,
+                selectedDate.day
+            )
+            const convertedSlots = convertToUserTimezone(
+                newAvailableSlots,
+                dateObj,
+                selectedTimeZone
+            )
+            setAvailableSlots(convertedSlots)
+            console.log(convertedSlots)
+        }
+
+        console.log(newAvailableSlots)
+    }, [selectedDate, appointments, selectedTimeZone])
+
+    // get the product information
+    const handleItemClick: React.MouseEventHandler<HTMLButtonElement> = (e) => {
+        const priceId = e.currentTarget.getAttribute('data-price-id')
+        const item = items.find((item) => item.priceId === priceId) || null
+        setSelectedItem(item)
+        setSelectedPriceId(priceId)
+        // Scroll to the Appointment component
+        if (appointmentRef.current) {
+            appointmentRef.current.scrollIntoView({ behavior: 'smooth' })
+        }
     }
 
     // Function to handle date change
     const handleDateChange = (date: DateValue | null) => {
         setSelectedDate(date)
-        checkTimeSlots(date)
+        // checkTimeSlots(date)
         setPickedTime('')
 
         if (date) {
             const dateObj = new Date(date.year, date.month - 1, date.day)
             const convertedSlots = convertToUserTimezone(
-                timeSlots,
+                availableSlots,
                 dateObj,
                 selectedTimeZone
             )
@@ -248,22 +258,23 @@ const OrderForm = () => {
             console.log(dateStr)
             console.log(pickedTime)
 
-            const convertedTimeSlot = revertTimezone(
+            //convert the customer time slot label to the Thai time slot label
+            const thTimeSlot = revertTimezone(
                 pickedTime,
                 dateStr,
                 selectedTimeZone
             )
-            if (!convertedTimeSlot) {
+            if (!thTimeSlot) {
                 return
             }
-            const convertedLabel = convertedTimeSlot?.label
-            console.log(convertedTimeSlot?.label)
+            const thLabel = thTimeSlot?.label
+            console.log(thTimeSlot?.label)
 
             try {
                 await addAppointment({
                     timeZone: selectedTimeZone,
                     date: dateStr,
-                    thTimeSlot: convertedLabel,
+                    thTimeSlot: thLabel,
                     csrTimeSlot: pickedTime,
                     email,
                 })
