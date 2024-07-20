@@ -105,3 +105,9 @@ model Appointment {
   csrTimeSlot  String
   email        String
 }
+
+model ProcessedEvent {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId 
+  eventId    String   @unique
+  createdAt  DateTime
+}

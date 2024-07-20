@@ -1,31 +1,57 @@
 'use client'
-import { CardSkeleton } from '@/components/common/skeleton-loading'
+import React, { Suspense, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { Suspense } from 'react'
+import { addAppointment } from '@/actions'
 
-const OrderConfirmationContent = () => {
-    const searchPath = useSearchParams()
-    const sessionId = searchPath.get('session_id')
+const ConfirmationPage = () => {
+    const searchParams = useSearchParams()
+    const success = searchParams.get('success') === 'true'
+    const session_id = searchParams.get('session_id')
 
-    if (sessionId) {
-        return (
-            <div>
-                Thanks for your order. We will send you an email to confirm the
-                date.
-                <div>You can visit this page to manage your subscriptions.</div>
-            </div>
-        )
-    } else {
-        return <div>No order found!</div>
-    }
-}
+    useEffect(() => {
+        const addAppointmentAfterPayment = async () => {
+            if (success && session_id) {
+                try {
+                    const session = await fetch(
+                        `/api/get-session?session_id=${session_id}`
+                    ).then((res) => res.json())
 
-const OrderConfirmation = () => {
+                    const {
+                        appointment_date,
+                        appointment_timeSlot,
+                        appointment_timeZone,
+                    } = session.metadata
+                    // Split the combined timeSlot back into thTimeSlot and csrTimeSlot
+                    const [thTimeSlot, csrTimeSlot] =
+                        appointment_timeSlot.split(';')
+
+                    await addAppointment({
+                        timeZone: appointment_timeZone,
+                        date: appointment_date,
+                        thTimeSlot: thTimeSlot,
+                        csrTimeSlot: csrTimeSlot,
+                        email: session.customer_email,
+                    })
+                } catch (error) {
+                    console.error('Error adding appointment:', error)
+                }
+            }
+        }
+
+        addAppointmentAfterPayment()
+    }, [success, session_id])
+
     return (
-        <Suspense fallback={<CardSkeleton />}>
-            <OrderConfirmationContent />
-        </Suspense>
+        <div>
+            <h1>Thank you for your payment!</h1>
+        </div>
     )
 }
 
-export default OrderConfirmation
+export default function ConfirmationPageWrapper() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <ConfirmationPage />
+        </Suspense>
+    )
+}

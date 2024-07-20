@@ -1,6 +1,3 @@
-import { useRouter } from 'next/router'
-import { StaticImageData } from 'next/image'
-
 const checkout = async (
     priceId: string,
     email: string,

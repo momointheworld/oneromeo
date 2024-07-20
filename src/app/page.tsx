@@ -195,10 +195,7 @@ const OrderForm = () => {
                 selectedTimeZone
             )
             setAvailableSlots(convertedSlots)
-            console.log(convertedSlots)
         }
-
-        console.log(newAvailableSlots)
     }, [selectedDate, appointments, selectedTimeZone])
 
     // get the product information
@@ -234,7 +231,6 @@ const OrderForm = () => {
         target: { value: React.SetStateAction<string> }
     }) => {
         setPickedTime(e.target.value)
-        console.log(e.target.value)
     }
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -255,9 +251,7 @@ const OrderForm = () => {
         }
         if (selectedDate && pickedTime && selectedTimeZone) {
             const dateStr = new Date(selectedDate.toString())
-            console.log(dateStr)
-            console.log(pickedTime)
-
+            const orderDate = selectedDate.toString()
             //convert the customer time slot label to the Thai time slot label
             const thTimeSlot = revertTimezone(
                 pickedTime,
@@ -268,23 +262,22 @@ const OrderForm = () => {
                 return
             }
             const thLabel = thTimeSlot?.label
-            console.log(thTimeSlot?.label)
 
             try {
-                await addAppointment({
-                    timeZone: selectedTimeZone,
-                    date: dateStr,
-                    thTimeSlot: thLabel,
-                    csrTimeSlot: pickedTime,
-                    email,
-                })
-                // await checkout(
-                //     selectedItem.priceId,
+                // await addAppointment({
+                //     timeZone: selectedTimeZone,
+                //     date: dateStr,
+                //     thTimeSlot: thLabel,
+                //     csrTimeSlot: pickedTime,
                 //     email,
-                //     selectedTimeZone,
-                //     dateStr,
-                //     pickedTime
-                // )
+                // })
+                await checkout(
+                    selectedItem.priceId,
+                    email,
+                    selectedTimeZone,
+                    orderDate,
+                    `${thLabel};${pickedTime}`
+                )
                 setSelectedDate(null)
                 setPickedTime('')
                 setAvailableSlots(timeSlots)
