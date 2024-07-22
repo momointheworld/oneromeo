@@ -5,6 +5,7 @@ export async function logProcessedEvent(eventId: string) {
     await db.processedEvent.create({
         data: {
             eventId,
+            createdAt: new Date(),
         },
     })
 }

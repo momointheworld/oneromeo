@@ -264,13 +264,6 @@ const OrderForm = () => {
             const thLabel = thTimeSlot?.label
 
             try {
-                // await addAppointment({
-                //     timeZone: selectedTimeZone,
-                //     date: dateStr,
-                //     thTimeSlot: thLabel,
-                //     csrTimeSlot: pickedTime,
-                //     email,
-                // })
                 await checkout(
                     selectedItem.priceId,
                     email,

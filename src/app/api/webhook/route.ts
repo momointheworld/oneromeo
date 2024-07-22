@@ -2,13 +2,98 @@ import Stripe from 'stripe'
 import { NextRequest, NextResponse } from 'next/server'
 import { addAppointment } from '@/actions'
 import { isEventProcessed, logProcessedEvent } from '@/actions/eventhelper'
+import { findAppointmentByEmailAndDate } from '@/actions/findAppointmentByEmailAndDate'
+// Add the new segment config
+export const runtime = 'nodejs'
+export const preferredRegion = 'auto' // or specify a region if needed
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
 
-export const config = {
-    api: {
-        bodyParser: false, // Disable the built-in body parser
-    },
+interface CheckAppointmentProps {
+    session: Stripe.Checkout.Session
+    date: Date
+    appointment_timeZone: string
+    thTimeSlot: string
+    csrTimeSlot: string
+}
+
+// Example function where this code might be used
+export const handleAppointment = async ({
+    session,
+    date,
+    appointment_timeZone,
+    thTimeSlot,
+    csrTimeSlot,
+}: CheckAppointmentProps) => {
+    if (session?.customer_email) {
+        // Check if the appointment already exists
+        const existingAppointment = await findAppointmentByEmailAndDate(
+            session.customer_email,
+            date
+        )
+
+        if (existingAppointment) {
+            console.log('Appointment already exists:', existingAppointment)
+            return NextResponse.json(
+                { message: 'Appointment already exists' },
+                { status: 200 }
+            )
+        }
+
+        // Add the appointment
+        try {
+            await addAppointment({
+                timeZone: appointment_timeZone,
+                date: date,
+                thTimeSlot,
+                csrTimeSlot,
+                email: session.customer_email,
+            })
+            console.log('Appointment created')
+            return NextResponse.json(
+                { message: 'Appointment created successfully' },
+                { status: 201 }
+            )
+        } catch (error: unknown) {
+            console.error('Error adding appointment:', error)
+            return NextResponse.json(
+                { error: 'Error adding appointment' },
+                { status: 500 }
+            )
+        }
+    } else {
+        console.warn('No metadata found on session')
+        return NextResponse.json(
+            { error: 'No customer email found in session' },
+            { status: 400 }
+        )
+    }
+}
+
+async function handleCheckoutSessionCompleted(
+    session: Stripe.Checkout.Session
+) {
+    if (session.metadata) {
+        const { appointment_date, appointment_timeSlot, appointment_timeZone } =
+            session.metadata as {
+                appointment_date: string
+                appointment_timeSlot: string
+                appointment_timeZone: string
+            }
+
+        const [thTimeSlot, csrTimeSlot] = appointment_timeSlot.split(';')
+        const date = new Date(`${appointment_date}T00:00:00Z`)
+        console.log(date)
+        handleAppointment({
+            session,
+            date,
+            appointment_timeZone,
+            thTimeSlot,
+            csrTimeSlot,
+        })
+    } else {
+        console.warn('No metadata found on session')
+    }
 }
 
 // Convert a ReadableStream to a Node.js Readable Stream
@@ -33,6 +118,7 @@ async function streamToBuffer(
 export async function POST(req: NextRequest) {
     const sig = req.headers.get('stripe-signature') as string
     let event
+    let processedEvents = new Set()
 
     try {
         // Convert the ReadableStream to Node.js Buffer
@@ -47,6 +133,14 @@ export async function POST(req: NextRequest) {
         return NextResponse.json(
             { error: `Webhook Error: ${err.message}` },
             { status: 400 }
+        )
+    }
+
+    // Check if the event has already been processed
+    if (processedEvents.has(event.id)) {
+        return NextResponse.json(
+            { message: 'Event already processed' },
+            { status: 200 }
         )
     }
 
@@ -65,46 +159,16 @@ export async function POST(req: NextRequest) {
     // Log the event as processed
     await logProcessedEvent(event.id)
 
-    if (event.type === 'checkout.session.completed') {
-        const session = event.data.object as Stripe.Checkout.Session
-
-        if (session.metadata) {
-            const {
-                appointment_date,
-                appointment_timeSlot,
-                appointment_timeZone,
-            } = session.metadata as {
-                appointment_date: string
-                appointment_timeSlot: string
-                appointment_timeZone: string
+    switch (event.type) {
+        case 'checkout.session.completed':
+            {
+                const session = event.data.object as Stripe.Checkout.Session
+                await handleCheckoutSessionCompleted(session)
             }
-
-            const [thTimeSlot, csrTimeSlot] = appointment_timeSlot.split(';')
-            const date = new Date(`${appointment_date}`)
-
-            // Add the appointment
-            try {
-                await addAppointment({
-                    timeZone: appointment_timeZone,
-                    date: date,
-                    thTimeSlot,
-                    csrTimeSlot,
-                    email: session.customer_email || '',
-                })
-                console.log('Appointment created')
-            } catch (error: unknown) {
-                console.error('Error adding appointment:', error)
-                return NextResponse.json(
-                    { error: 'Error adding appointment' },
-                    { status: 500 }
-                )
-            }
-        } else {
-            console.warn('No metadata found on session')
-        }
-    } else {
-        console.log(`Unhandled event type ${event.type}`)
+            break
+        default:
+            console.log(`Unhandled event type ${event.type}`)
+            break
     }
-
     return NextResponse.json({ received: true }, { status: 200 })
 }
