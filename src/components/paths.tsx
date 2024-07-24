@@ -56,9 +56,6 @@ const paths = {
     editQuiz(quizId: string) {
         return `/dashboard/quizzes/${quizId}/edit`
     },
-    addAppointment() {
-        return '/dashboard/appointments/add-appointmnet'
-    },
 }
 
 export default paths

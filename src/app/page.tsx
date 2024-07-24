@@ -35,14 +35,6 @@ const OrderForm = () => {
         description: string
     }
 
-    // interface CustomDateValue {
-    //     year: number
-    //     month: number
-    //     day: number
-    //     era: string
-    //     calendar: { identifier: string }
-    // }
-
     interface AppointmentData {
         timeZone: string
         date: Date
@@ -53,6 +45,7 @@ const OrderForm = () => {
 
     const [selectedItem, setSelectedItem] = useState<Item | null>(null)
     const { selectedPriceId, setSelectedPriceId } = useSelectedItem()
+    const [isAppointmentAvailable, setIsAppointmentAvailable] = useState(true)
 
     let now = today(getLocalTimeZone())
     let startDate = now.add({ days: 1 }) // Tomorrow
@@ -81,7 +74,7 @@ const OrderForm = () => {
             imgSrc: productImg,
             imgAlt: '',
             title: 'U Talk, I Listen',
-            price: 'HKD30',
+            price: 'HKD 30',
             priceId: 'price_1PckCSHcOAKxyg1Z0WStpNJl',
             description: '15 min per session.',
         },
@@ -89,9 +82,17 @@ const OrderForm = () => {
             imgSrc: productImg,
             imgAlt: '',
             title: 'Bundle of 5',
-            price: 'HKD125',
+            price: 'HKD 125',
             priceId: 'price_1PckCyHcOAKxyg1ZPUkOd5XO',
             description: '15 min per session.',
+        },
+        {
+            imgSrc: productImg,
+            imgAlt: '',
+            title: 'Ebook',
+            price: 'HKD 10',
+            priceId: 'price_1PffWVHcOAKxyg1ZcYyxKX8U',
+            description: 'Not In A Million Years',
         },
     ]
 
@@ -204,6 +205,11 @@ const OrderForm = () => {
         const item = items.find((item) => item.priceId === priceId) || null
         setSelectedItem(item)
         setSelectedPriceId(priceId)
+        if (priceId === 'price_1PffWVHcOAKxyg1ZcYyxKX8U') {
+            setIsAppointmentAvailable(false)
+        } else {
+            setIsAppointmentAvailable(true)
+        }
         // Scroll to the Appointment component
         if (appointmentRef.current) {
             appointmentRef.current.scrollIntoView({ behavior: 'smooth' })
@@ -240,36 +246,47 @@ const OrderForm = () => {
             alert('Please select an item.')
             setIsLoading(false)
             return
-        } else if (!selectedDate) {
-            alert('Please select a date.')
-            setIsLoading(false)
-            return
-        } else if (!pickedTime) {
-            alert('Please select a time slot.')
-            setIsLoading(false)
-            return
-        }
-        if (selectedDate && pickedTime && selectedTimeZone) {
-            const dateStr = new Date(selectedDate.toString())
-            const orderDate = selectedDate.toString()
-            //convert the customer time slot label to the Thai time slot label
-            const thTimeSlot = revertTimezone(
-                pickedTime,
-                dateStr,
-                selectedTimeZone
-            )
-            if (!thTimeSlot) {
+        } // If the selectedPriceID is 'price_1PffWVHcOAKxyg1ZcYyxKX8U', skip the checks for date, time, and timezone
+        if (selectedPriceId !== 'price_1PffWVHcOAKxyg1ZcYyxKX8U') {
+            if (!selectedDate) {
+                alert('Please select a date.')
+                setIsLoading(false)
+                return
+            } else if (!pickedTime) {
+                alert('Please select a time slot.')
+                setIsLoading(false)
                 return
             }
-            const thLabel = thTimeSlot?.label
+        } else {
+            // Clear the fields if the selectedPriceID is 'price_1PffWVHcOAKxyg1ZcYyxKX8U'
+            setSelectedDate(null)
+            setPickedTime('')
+            setSelectedTimeZone('')
+        }
+        if (
+            (selectedDate && pickedTime && selectedTimeZone) ||
+            selectedPriceId === 'price_1PffWVHcOAKxyg1ZcYyxKX8U'
+        ) {
+            const dateStr = selectedDate
+                ? new Date(selectedDate.toString())
+                : null
+            const orderDate = selectedDate ? selectedDate.toString() : ''
 
+            // Convert the customer time slot label to the Thai time slot label
+            const thTimeSlot =
+                pickedTime && dateStr && selectedTimeZone
+                    ? revertTimezone(pickedTime, dateStr, selectedTimeZone)
+                    : null
+            const thLabel = thTimeSlot ? thTimeSlot.label : ''
+            const label = thLabel ? `${thLabel};${pickedTime}` : ''
             try {
                 await checkout(
                     selectedItem.priceId,
                     email,
                     selectedTimeZone,
                     orderDate,
-                    `${thLabel};${pickedTime}`
+                    // `${thLabel};${pickedTime}`
+                    label
                 )
                 setSelectedDate(null)
                 setPickedTime('')
@@ -302,6 +319,7 @@ const OrderForm = () => {
                         newDisabledRanges={newDisabledRanges}
                         availableSlots={availableSlots}
                         formStateMessage={formStateMessage}
+                        isDisabled={!isAppointmentAvailable}
                     />
                 </div>
                 <div className=" flex justify-center">

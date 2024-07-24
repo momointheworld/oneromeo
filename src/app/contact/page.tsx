@@ -57,46 +57,66 @@ export default function ContactPage() {
 
     return (
         <div className="text-center">
-            <h2>Have Questions? Drop us a line!</h2>
             {successMessage ? (
-                <div style={{ color: 'green' }}>{successMessage}</div>
-            ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-6">
-                    <form
-                        onSubmit={onSubmit}
-                        className="flex flex-col gap-4 col-span-1 sm:col-start-2 sm:col-span-4 w-full"
+                <div className="flex flex-col items-center gap-5">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="size-20 text-green-600"
                     >
-                        <Input
-                            type="email"
-                            name="email"
-                            label="Email"
-                            isInvalid={!!errors.email}
-                            errorMessage={errors.email}
-                            required
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="m4.5 12.75 6 6 9-13.5"
                         />
-                        <Input
-                            type="text"
-                            name="name"
-                            label="Name"
-                            isInvalid={!!errors.name}
-                            errorMessage={errors.name}
-                            required
-                        />
-                        <Textarea
-                            name="description"
-                            label="Description"
-                            isInvalid={!!errors.description}
-                            errorMessage={errors.description}
-                            required
-                        />
-                        <Button
-                            type="submit"
-                            disabled={isLoading}
-                            color="primary"
+                    </svg>
+
+                    <div style={{ color: 'green' }}>{successMessage}</div>
+                </div>
+            ) : (
+                <div>
+                    <h2>Have Questions? Drop us a line!</h2>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-6">
+                        <form
+                            onSubmit={onSubmit}
+                            className="flex flex-col gap-4 col-span-1 sm:col-start-2 sm:col-span-4 w-full"
                         >
-                            {isLoading ? 'Loading...' : 'Submit'}
-                        </Button>
-                    </form>
+                            <Input
+                                type="email"
+                                name="email"
+                                label="Email"
+                                isInvalid={!!errors.email}
+                                errorMessage={errors.email}
+                                required
+                            />
+                            <Input
+                                type="text"
+                                name="name"
+                                label="Name"
+                                isInvalid={!!errors.name}
+                                errorMessage={errors.name}
+                                required
+                            />
+                            <Textarea
+                                name="description"
+                                label="Description"
+                                isInvalid={!!errors.description}
+                                errorMessage={errors.description}
+                                required
+                            />
+                            <Button
+                                type="submit"
+                                disabled={isLoading}
+                                color="primary"
+                            >
+                                {isLoading ? 'Loading...' : 'Submit'}
+                            </Button>
+                        </form>
+                    </div>
                 </div>
             )}
         </div>

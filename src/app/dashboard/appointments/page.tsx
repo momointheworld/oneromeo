@@ -1,15 +1,17 @@
-// app/appointmentsPage.tsx
 'use client'
 import { getAppointments } from '@/actions'
 import { FullSkeleton } from '@/components/common/skeleton-loading'
+import RenderAppointments from '@/components/renderAppointments'
+import { Button } from '@nextui-org/react'
 import { useEffect, useState } from 'react'
+import { Pagination } from '@nextui-org/react'
 
-type Appointment = {
-    id: number
-    timeZone: String
+interface Appointment {
+    id: string
     date: Date
     thTimeSlot: string
     csrTimeSlot: string
+    timeZone: string
     email: string
 }
 
@@ -17,6 +19,9 @@ const AppointmentsPage = () => {
     const [appointments, setAppointments] = useState<Appointment[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+    const [page, setPage] = useState(1)
+    const [index, setIndex] = useState(1)
+    const appointmentsPerPage = 30
 
     useEffect(() => {
         const fetchAppointments = async () => {
@@ -27,9 +32,9 @@ const AppointmentsPage = () => {
                 // Map fetched data to match the Appointment type
                 const formattedAppointments: Appointment[] = data.map(
                     (appointment) => ({
-                        id: parseInt(appointment.id), // Assuming id is converted to number
-                        timeZone: appointment.timeZone,
+                        id: appointment.id,
                         date: new Date(appointment.date),
+                        timeZone: appointment.timeZone,
                         thTimeSlot: appointment.thTimeSlot,
                         csrTimeSlot: appointment.csrTimeSlot,
                         email: appointment.email,
@@ -41,12 +46,9 @@ const AppointmentsPage = () => {
                     (a, b) => b.date.getTime() - a.date.getTime()
                 )
 
-                // Get the latest 30 appointments
-                const latestAppointments = sortedAppointments.slice(0, 30)
-
-                setAppointments(latestAppointments)
+                setAppointments(sortedAppointments)
                 setLoading(false)
-                console.log(latestAppointments)
+                console.log(sortedAppointments)
             } catch (err) {
                 console.error('Error fetching appointments:', err)
                 setError('Failed to fetch appointments.')
@@ -57,6 +59,15 @@ const AppointmentsPage = () => {
         fetchAppointments()
     }, [])
 
+    const indexOfLastAppointment = page * appointmentsPerPage
+    const indexOfFirstAppointment = indexOfLastAppointment - appointmentsPerPage
+    const currentAppointments = appointments.slice(
+        indexOfFirstAppointment,
+        indexOfLastAppointment
+    )
+
+    const totalPages = Math.ceil(appointments.length / appointmentsPerPage)
+
     return (
         <div>
             <h1>Appointments</h1>
@@ -65,24 +76,20 @@ const AppointmentsPage = () => {
             ) : error ? (
                 <div>{error}</div>
             ) : (
-                <ol reversed style={{ listStyleType: 'decimal-leading-zero' }}>
-                    {appointments.map((appointment) => (
-                        <li key={appointment.id}>
-                            <p>
-                                {' '}
-                                Bangkok Time: {appointment.date.toDateString()}{' '}
-                                -{appointment.thTimeSlot}
-                            </p>
-                            <p>
-                                {' '}
-                                Customer Time: {appointment.date.toDateString()}{' '}
-                                -{appointment.csrTimeSlot}
-                            </p>
-                            <p>Customer TimeZone: {appointment.timeZone}</p>
-                            <p>Customer Email: {appointment.email}</p>
-                        </li>
-                    ))}
-                </ol>
+                <>
+                    <RenderAppointments
+                        latestAppointments={currentAppointments}
+                        startIndex={indexOfFirstAppointment + 1}
+                    />
+                    <div className="flex justify-center mt-5">
+                        <Pagination
+                            total={totalPages}
+                            initialPage={1}
+                            page={page}
+                            onChange={(page) => setPage(page)}
+                        />
+                    </div>
+                </>
             )}
         </div>
     )

@@ -2,6 +2,7 @@ import { format } from 'date-fns'
 import Link from 'next/link'
 import { db } from '@/db'
 import paths from '@/components/paths'
+import RenderAppointments from '@/components/renderAppointments'
 
 export const revalidate = 3 // re-render in every 3 seconds
 export default async function Dashboard() {
@@ -42,19 +43,24 @@ export default async function Dashboard() {
         )
     })
 
+    const appointments = await db.appointment.findMany({
+        orderBy: { date: 'desc' },
+    })
+    const latestAppointments = appointments.slice(0, 5) // Get the latest 5 quizzes
+
     return (
         <div className="flex flex-col">
             <div className="flex justify-between items-center sm:flex-row">
                 <h1 className="text-xl font-bold">Latest Posts</h1>
                 <div className="flex sm:flex-row">
                     <Link
-                        href={'/dashboard/posts/new-post'}
+                        href={paths.createNewPost()}
                         className="border p-2 mx-1 rounded bg-blue-200 hover:bg-blue-600 hover:text-zinc-200 no-underline"
                     >
                         Create New Post
                     </Link>
                     <Link
-                        href={'/dashboard/posts/'}
+                        href={paths.showAllPosts()}
                         className="border p-2 mx-1 rounded bg-blue-200 hover:bg-blue-600 hover:text-zinc-200 no-underline"
                     >
                         View All Posts
@@ -69,13 +75,13 @@ export default async function Dashboard() {
                 <h1 className="text-xl font-bold">Latest Quizzes</h1>
                 <div className="flex sm:flex-row">
                     <Link
-                        href={'/dashboard/quizzes/new-quiz'}
+                        href={paths.createNewQuiz()}
                         className="border p-2 mx-1 rounded bg-blue-200 hover:bg-blue-600 hover:text-zinc-200 no-underline"
                     >
                         Create New Quiz
                     </Link>
                     <Link
-                        href={'/dashboard/quizzes/'}
+                        href={paths.showAllQuizzes()}
                         className="border p-2 mx-1 rounded bg-blue-200 hover:bg-blue-600 hover:text-zinc-200 no-underline"
                     >
                         View All Quizzes
@@ -83,6 +89,22 @@ export default async function Dashboard() {
                 </div>
             </div>
             <div className="flex flex-col gap-2 mt-5">{renderQuizzes}</div>
+            <div className="flex justify-between items-center mt-10">
+                <h1 className="text-xl font-bold">Latest Appointments</h1>
+                <Link
+                    href={paths.showAllAppointments()}
+                    className="border p-2 mx-1 rounded bg-blue-200 hover:bg-blue-600 hover:text-zinc-200 no-underline"
+                >
+                    View All Appointments
+                </Link>
+            </div>
+            <div className="flex flex-col gap-2 mt-5">
+                {' '}
+                <RenderAppointments
+                    latestAppointments={latestAppointments}
+                    startIndex={1}
+                />
+            </div>
         </div>
     )
 }

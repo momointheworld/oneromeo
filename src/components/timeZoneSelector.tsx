@@ -10,7 +10,11 @@ const timezones = {
     ...allTimezones,
 }
 
-const TimeZoneSelector: React.FC = () => {
+interface TimeZoneSelectorProps {
+    isDisabled: boolean
+}
+
+const TimeZoneSelector: React.FC<TimeZoneSelectorProps> = ({ isDisabled }) => {
     const { options, parseTimezone } = useTimezoneSelect({
         labelStyle,
         timezones,
@@ -31,6 +35,7 @@ const TimeZoneSelector: React.FC = () => {
                 selectionMode="single"
                 label="Pick a timezone"
                 value={selectedTimeZone}
+                isDisabled={isDisabled}
             >
                 {options.map((item) => (
                     <SelectItem key={item.value} value={item.value}>

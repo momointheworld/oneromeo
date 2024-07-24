@@ -21,10 +21,6 @@ import SelectTimeZone from '@/components/timeZoneSelector'
 import { useDate } from '@/hooks/useDate'
 import { useEmail } from '@/hooks/useEmail'
 
-// type HandleSubmitType = (
-//     event: FormEvent<HTMLFormElement>
-// ) => void | Promise<void>
-
 interface TimeSlot {
     key: string
     label: string
@@ -39,6 +35,7 @@ interface AddAppointmentProps {
     availableSlots: TimeSlot[]
     pickedTime: string
     formStateMessage: string
+    isDisabled: boolean
 }
 
 const AddAppointment: React.FC<AddAppointmentProps> = ({
@@ -50,6 +47,7 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
     availableSlots,
     pickedTime,
     formStateMessage,
+    isDisabled,
 }) => {
     let now = today(getLocalTimeZone())
     let startDate = now.add({ days: 1 }) // Tomorrow
@@ -72,13 +70,6 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
         return isWeekdayUnavailable || isInDisabledRange
     }
 
-    // const formatDate = (date: DateValue | null): string => {
-    //     if (!date) return ''
-    //     return `${date.year}-${String(date.month).padStart(2, '0')}-${String(
-    //         date.day
-    //     ).padStart(2, '0')}`
-    // }
-
     return (
         <>
             <div className="flex place-content-center">
@@ -89,7 +80,7 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
             </div>
             <div className="max-w-md mx-auto bg-white shadow-lg rounded-lg p-6">
                 <div>
-                    <SelectTimeZone />
+                    <SelectTimeZone isDisabled={isDisabled} />
                     <I18nProvider locale="en-US">
                         <DatePicker
                             label="Appointment Date"
@@ -99,6 +90,7 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
                             value={selectedDate}
                             onChange={handleDateChange}
                             className="w-full mb-4"
+                            isDisabled={isDisabled}
                         />
                     </I18nProvider>
                 </div>
