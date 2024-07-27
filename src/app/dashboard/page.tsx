@@ -103,6 +103,7 @@ export default async function Dashboard() {
                 <RenderAppointments
                     latestAppointments={latestAppointments}
                     startIndex={1}
+                    showDeleteButton={false}
                 />
             </div>
         </div>

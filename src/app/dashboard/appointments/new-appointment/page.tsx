@@ -1,40 +1,25 @@
 'use client'
-import React, { ReactHTMLElement, useEffect, useRef, useState } from 'react'
-import { Navigate } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
 import {
     today,
     DateValue,
     CalendarDate,
     toCalendarDate,
-    parseAbsolute,
     parseAbsoluteToLocal,
     getLocalTimeZone,
 } from '@internationalized/date'
 import { useLocale } from '@react-aria/i18n'
 import { addAppointment, getAppointments } from '@/actions'
-import AddAppointment from '@/components/appointment'
-import { Button, Chip, Input } from '@nextui-org/react'
 import { convertToUserTimezone, timeSlots } from '@/utils/converTimeZone'
 import { useTimezone } from '@/hooks/useTimezone'
 import { useDate } from '@/hooks/useDate'
-import OrderItems from '@/components/orderItems'
-import productImg from '/public/logo.png'
-import { StaticImageData } from 'next/image'
 import { useEmail } from '@/hooks/useEmail'
-import { useSelectedItem } from '@/hooks/useSelectedItem'
-import checkout from '@/actions/checkout'
 import { revertTimezone } from '@/utils/revertTimeZone'
+import AddAppointment from '@/components/appointment'
+import FormButton from '@/components/common/formbutton'
+import { Chip } from '@nextui-org/react'
 
-const OrderForm = () => {
-    interface Item {
-        imgSrc: StaticImageData
-        imgAlt: string
-        title: string
-        price: string
-        priceId: string
-        description: string
-    }
-
+export default function CreateNewAppointment() {
     interface AppointmentData {
         timeZone: string
         date: Date
@@ -43,15 +28,10 @@ const OrderForm = () => {
         email: string
     }
 
-    const [selectedItem, setSelectedItem] = useState<Item | null>(null)
-    const { selectedPriceId, setSelectedPriceId } = useSelectedItem()
-    const [isAppointmentAvailable, setIsAppointmentAvailable] = useState(true)
-
     let now = today(getLocalTimeZone())
     let startDate = now.add({ days: 1 }) // Tomorrow
     let { locale } = useLocale()
     let endDate = now.add({ days: 30 }) // Two weeks from tomorrow
-    const appointmentRef = useRef<HTMLDivElement>(null) // Create a ref for the Appointment component
     const { email, setEmail } = useEmail()
     const [formStateMessage, setFormStateMessage] = useState('')
     const [availableSlots, setAvailableSlots] = useState(timeSlots)
@@ -67,36 +47,6 @@ const OrderForm = () => {
     let disabledRanges = [
         [now.add({ days: -365 }), now], // All dates before today
         [endDate.add({ days: 1 }), now.add({ days: 365 })], // All dates after two weeks from tomorrow
-    ]
-
-    const items = [
-        {
-            imgSrc: productImg,
-            imgAlt: '',
-            title: 'U Talk, I Listen',
-            price: 'USD 5.50',
-            priceId: 'price_1PckCSHcOAKxyg1Z0WStpNJl',
-            description:
-                "15-minute session / Buy me a coffee and I'll be the best listener you've ever had :-)",
-        },
-        {
-            imgSrc: productImg,
-            imgAlt: '',
-            title: 'U Talk, I Listen (5x)',
-            price: 'USD 24.50',
-            priceId: 'price_1PckCyHcOAKxyg1ZPUkOd5XO',
-            description:
-                'Bundle of 5 x 15-minute sessions / Buy me 5 coffees for a lower price :-)',
-        },
-        {
-            imgSrc: productImg,
-            imgAlt: '',
-            title: 'Ebook',
-            price: 'USD 1.25',
-            priceId: 'price_1PffWVHcOAKxyg1ZcYyxKX8U',
-            description:
-                'I’ve been typing away for hours, days, and weeks, but it’s finally here — my debut novel is out now! Not in a Million Years!',
-        },
     ]
 
     // Fetch appointments and update disabledRanges on component mount
@@ -155,20 +105,6 @@ const OrderForm = () => {
         fetchAppointments()
     }, []) // Empty dependency array ensures this runs only once on mount
 
-    // useEffect(() => {
-    //     // Check to see if this is a redirect back from Checkout
-    //     const query = new URLSearchParams(window.location.search)
-    //     if (query.get('success')) {
-    //         console.log('Order placed! You will receive an email confirmation.')
-    //     }
-
-    //     if (query.get('canceled')) {
-    //         console.log(
-    //             'Order canceled -- continue to shop around and checkout when you’re ready.'
-    //         )
-    //     }
-    // }, [])
-
     // UseEffect to check availability of time slots for the selected date
     useEffect(() => {
         if (!selectedDate) return
@@ -202,28 +138,6 @@ const OrderForm = () => {
         }
     }, [selectedDate, appointments, selectedTimeZone])
 
-    const resetAppointment = () => {
-        setSelectedTimeZone(''), setSelectedDate(null), setPickedTime('')
-    }
-
-    // get the product information
-    const handleItemClick: React.MouseEventHandler<HTMLButtonElement> = (e) => {
-        const priceId = e.currentTarget.getAttribute('data-price-id')
-        const item = items.find((item) => item.priceId === priceId) || null
-        setSelectedItem(item)
-        setSelectedPriceId(priceId)
-        if (priceId === 'price_1PffWVHcOAKxyg1ZcYyxKX8U') {
-            setIsAppointmentAvailable(false)
-            resetAppointment()
-        } else {
-            setIsAppointmentAvailable(true)
-        }
-        // Scroll to the Appointment component
-        if (appointmentRef.current) {
-            appointmentRef.current.scrollIntoView({ behavior: 'smooth' })
-        }
-    }
-
     // Function to handle date change
     const handleDateChange = (date: DateValue | null) => {
         setSelectedDate(date)
@@ -250,57 +164,76 @@ const OrderForm = () => {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault() // Prevent default form submission
         setIsLoading(true)
-        if (!selectedItem) {
-            alert('Please select an item.')
+        if (!selectedDate) {
+            alert('Please select a date.')
             setIsLoading(false)
             return
-        } // If the selectedPriceID is 'price_1PffWVHcOAKxyg1ZcYyxKX8U', skip the checks for date, time, and timezone
-        if (selectedPriceId !== 'price_1PffWVHcOAKxyg1ZcYyxKX8U') {
-            if (!selectedDate) {
-                alert('Please select a date.')
-                setIsLoading(false)
-                return
-            } else if (!pickedTime) {
-                alert('Please select a time slot.')
-                setIsLoading(false)
-                return
-            }
-        } else {
-            // Clear the fields if the selectedPriceID is 'price_1PffWVHcOAKxyg1ZcYyxKX8U'
-            setSelectedDate(null)
-            setPickedTime('')
-            setSelectedTimeZone('')
+        } else if (!pickedTime) {
+            alert('Please select a time slot.')
+            setIsLoading(false)
+            return
+        } else if (!selectedTimeZone) {
+            alert('Please select a time zone.')
+            setIsLoading(false)
+            return
         }
-        if (
-            (selectedDate && pickedTime && selectedTimeZone) ||
-            selectedPriceId === 'price_1PffWVHcOAKxyg1ZcYyxKX8U'
-        ) {
-            const dateStr = selectedDate
-                ? new Date(selectedDate.toString())
-                : null
-            const orderDate = selectedDate ? selectedDate.toString() : ''
 
+        if (selectedDate && pickedTime && selectedTimeZone) {
+            const dateStr = new Date(selectedDate.toString())
             // Convert the customer time slot label to the Thai time slot label
-            const thTimeSlot =
-                pickedTime && dateStr && selectedTimeZone
-                    ? revertTimezone(pickedTime, dateStr, selectedTimeZone)
-                    : null
-            const thLabel = thTimeSlot ? thTimeSlot.label : ''
-            const label = thLabel ? `${pickedTime} (${thLabel})` : ''
+            let thTimeSlot = revertTimezone(
+                pickedTime,
+                dateStr,
+                selectedTimeZone
+            )
+
+            if (!thTimeSlot || !thTimeSlot.label) {
+                thTimeSlot = {
+                    key: '09:30 PM - 09:45 PM',
+                    start: '09:30',
+                    end: '09:45',
+                    period: 'PM',
+                    label: '09:30 PM - 09:45 PM', // Default label, can be updated after conversion
+                }
+            }
+            const thLabel = thTimeSlot.label
+            const label = `${pickedTime} (${thLabel})`
             try {
-                await checkout(
-                    selectedItem.priceId,
+                await addAppointment({
+                    timeZone: selectedTimeZone,
+                    date: dateStr,
+                    thTimeSlot: thLabel,
+                    csrTimeSlot: pickedTime,
                     email,
-                    selectedTimeZone,
-                    orderDate,
-                    // `${thLabel};${pickedTime}`
-                    label
-                )
+                })
                 setSelectedDate(null)
                 setPickedTime('')
                 setAvailableSlots(timeSlots)
                 // Optionally, you can add a success message or navigate to another page here
                 setFormStateMessage('Appointment added successfully.')
+                // Fetch the updated appointments list
+                const updatedAppointments = await getAppointments()
+                const formattedAppointments: AppointmentData[] =
+                    updatedAppointments.map((appointment) => ({
+                        id: appointment.id,
+                        date: new Date(appointment.date),
+                        timeZone: appointment.timeZone,
+                        thTimeSlot: appointment.thTimeSlot,
+                        csrTimeSlot: appointment.csrTimeSlot,
+                        email: appointment.email,
+                    }))
+
+                // Sort appointments by date in descending order
+                const sortedAppointments = formattedAppointments.sort(
+                    (a, b) => b.date.getTime() - a.date.getTime()
+                )
+
+                setAppointments(sortedAppointments)
+
+                // Reset message after 5 seconds
+                setTimeout(() => {
+                    setFormStateMessage('')
+                }, 5000)
             } catch (error) {
                 setFormStateMessage(
                     'Failed to add the appointment, try again later.'
@@ -314,37 +247,26 @@ const OrderForm = () => {
     }
 
     return (
-        <div>
-            <form onSubmit={handleSubmit} className="flex flex-col gap-y-20">
-                <OrderItems handleItemClick={handleItemClick} items={items} />
-                <div ref={appointmentRef}>
-                    <div className="flex place-content-center">
-                        <Chip color="primary">2 </Chip>
-                        <span className="mx-5 text-2xl font-bold tracking-tight text-gray-900">
-                            Choose Your Time
-                        </span>
-                    </div>
+        <form onSubmit={handleSubmit} className="w-full">
+            <div className="flex place-content-center">
+                <span className="mx-5 text-2xl font-bold tracking-tight text-gray-900">
+                    Add An Appointment
+                </span>
+            </div>
+            <div className="flex flex-col justify-center items-center w-full gap-y-5">
+                <div className="w-full">
                     <AddAppointment
-                        // handleSubmit={handleSubmit}
                         handleDateChange={handleDateChange}
                         handleTimeChange={handleTimeChange}
-                        // selectedDate={selectedDate}
-                        pickedTime={pickedTime}
                         newDisabledRanges={newDisabledRanges}
                         availableSlots={availableSlots}
+                        pickedTime={pickedTime}
                         formStateMessage={formStateMessage}
-                        isDisabled={!isAppointmentAvailable}
+                        isDisabled={false}
                     />
                 </div>
-                <div className=" flex justify-center">
-                    <Button isLoading={isLoading} type="submit" color="primary">
-                        PROCEED &gt;&gt;
-                    </Button>
-                    {/* Can not use FormButton on client component */}
-                </div>
-            </form>
-        </div>
+                <FormButton color="primary">Add Appointment</FormButton>
+            </div>
+        </form>
     )
 }
-
-export default OrderForm

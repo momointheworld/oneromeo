@@ -5,6 +5,10 @@ import RenderAppointments from '@/components/renderAppointments'
 import { Button } from '@nextui-org/react'
 import { useEffect, useState } from 'react'
 import { Pagination } from '@nextui-org/react'
+import { deleteAppointment } from '@/actions/deleteAppointment'
+import { useFormState } from 'react-dom'
+import { log } from 'console'
+import DisplayMessage from '@/components/common/message'
 
 interface Appointment {
     id: string
@@ -15,13 +19,14 @@ interface Appointment {
     email: string
 }
 
-const AppointmentsPage = () => {
+const AllAppointmentsPage = () => {
     const [appointments, setAppointments] = useState<Appointment[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [page, setPage] = useState(1)
     const [index, setIndex] = useState(1)
     const appointmentsPerPage = 30
+    const [formMessage, setFormMessage] = useState('')
 
     useEffect(() => {
         const fetchAppointments = async () => {
@@ -68,6 +73,41 @@ const AppointmentsPage = () => {
 
     const totalPages = Math.ceil(appointments.length / appointmentsPerPage)
 
+    const handleDelete = async (id: string) => {
+        if (!handleDelete) return // No-op if handleDelete is not defined
+        console.log(id)
+        try {
+            await deleteAppointment(id)
+            setFormMessage('Appointment deleted successfully')
+
+            // Fetch the updated appointments list
+            const updatedAppointments = await getAppointments()
+            const formattedAppointments: Appointment[] =
+                updatedAppointments.map((appointment) => ({
+                    id: appointment.id,
+                    date: new Date(appointment.date),
+                    timeZone: appointment.timeZone,
+                    thTimeSlot: appointment.thTimeSlot,
+                    csrTimeSlot: appointment.csrTimeSlot,
+                    email: appointment.email,
+                }))
+
+            // Sort appointments by date in descending order
+            const sortedAppointments = formattedAppointments.sort(
+                (a, b) => b.date.getTime() - a.date.getTime()
+            )
+
+            setAppointments(sortedAppointments)
+            // Reset message after 5 seconds
+            setTimeout(() => {
+                setFormMessage('')
+            }, 5000)
+        } catch (error) {
+            console.error('Error deleting appointment:', error)
+            setFormMessage('Failed to delete appointment.')
+        }
+    }
+
     return (
         <div>
             <h1>Appointments</h1>
@@ -77,9 +117,12 @@ const AppointmentsPage = () => {
                 <div>{error}</div>
             ) : (
                 <>
+                    <DisplayMessage formStateMessage={formMessage} />
                     <RenderAppointments
                         latestAppointments={currentAppointments}
                         startIndex={indexOfFirstAppointment + 1}
+                        handleDelete={handleDelete}
+                        showDeleteButton={true}
                     />
                     <div className="flex justify-center mt-5">
                         <Pagination
@@ -95,4 +138,4 @@ const AppointmentsPage = () => {
     )
 }
 
-export default AppointmentsPage
+export default AllAppointmentsPage

@@ -33,7 +33,7 @@ const TimeZoneSelector: React.FC<TimeZoneSelectorProps> = ({ isDisabled }) => {
             <Select
                 onChange={handleChange}
                 selectionMode="single"
-                label="Pick a timezone"
+                label="Pick a time zone"
                 value={selectedTimeZone}
                 isDisabled={isDisabled}
             >

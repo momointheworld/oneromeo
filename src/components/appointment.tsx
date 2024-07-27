@@ -72,19 +72,13 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
 
     return (
         <>
-            <div className="flex place-content-center">
-                <Chip color="primary">2 </Chip>
-                <span className="mx-5 text-2xl font-bold tracking-tight text-gray-900">
-                    SELECT A TIME SLOT
-                </span>
-            </div>
             <div className="max-w-md mx-auto bg-white shadow-lg rounded-lg p-6">
                 <div>
                     <SelectTimeZone isDisabled={isDisabled} />
                     <I18nProvider locale="en-US">
                         <DatePicker
-                            label="Appointment Date"
-                            aria-label="Appointment Date"
+                            label="Appointment day"
+                            aria-label="Appointment day"
                             isDateUnavailable={isDateUnavailable}
                             minValue={startDate}
                             value={selectedDate}
@@ -96,7 +90,7 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
                 </div>
                 <div className="max-w-md mx-auto flex w-full flex-wrap md:flex-nowrap gap-4">
                     <Select
-                        label="Time Slot"
+                        label=""
                         placeholder="Select a time slot"
                         className="max-w-md  mb-4"
                         isDisabled={!selectedDate}
@@ -116,7 +110,7 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
                     {' '}
                     <Input
                         type="email"
-                        label="Email"
+                        label=""
                         placeholder="Enter your email"
                         value={email}
                         onValueChange={setEmail}

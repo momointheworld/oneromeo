@@ -257,7 +257,9 @@ async function handleCheckoutSessionCompleted(
                 appointment_timeZone: string
             }
 
-        const [thTimeSlot, csrTimeSlot] = appointment_timeSlot.split(';')
+        let [thTimeSlot, csrTimeSlot] = appointment_timeSlot.split(' (')
+        csrTimeSlot = csrTimeSlot.replace(')', '')
+
         const date = new Date(`${appointment_date}T00:00:00Z`)
         await handleAppointment({
             session,

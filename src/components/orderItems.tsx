@@ -23,10 +23,11 @@ const OrderItems: React.FC<OrderItemsProps> = ({ handleItemClick, items }) => {
     return (
         <div className="bg-white">
             <div className="mx-auto flex flex-col gap-12">
+                <h1>We got this. I&apos;m here, to listen.</h1>
                 <div className="flex place-content-center">
                     <Chip color="primary">1 </Chip>
                     <span className="mx-5 text-2xl font-bold tracking-tight text-gray-900">
-                        SELECT A PLAN
+                        Choose: Coffee or eBook
                     </span>
                 </div>
                 <div className="flex flex-col sm:flex-row justify-center gap-12">
@@ -60,7 +61,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({ handleItemClick, items }) => {
                                         {product.price}
                                     </p>
                                 </div>
-                                <p className="mt-1 text-sm text-gray-500">
+                                <p className="mt-1 text-sm text-gray-500 text-wrap">
                                     {product.description}
                                 </p>
                             </div>

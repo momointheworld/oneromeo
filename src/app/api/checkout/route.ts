@@ -80,7 +80,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
                 key: 'appointment_date',
                 label: {
                     type: 'custom',
-                    custom: 'Appointment Date',
+                    custom: 'Appointment day',
                 },
                 type: 'text',
                 text: {
@@ -93,7 +93,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
                 key: 'appointment_timeSlot',
                 label: {
                     type: 'custom',
-                    custom: 'Time Slot',
+                    custom: "Your time (& Arnold's time)",
                 },
                 type: 'text',
                 text: {
@@ -106,7 +106,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
                 key: 'appointment_timeZone',
                 label: {
                     type: 'custom',
-                    custom: 'Appointment TimeZone',
+                    custom: 'Your time zone',
                 },
                 type: 'text',
                 text: {
@@ -130,6 +130,11 @@ export async function POST(req: NextRequest, res: NextResponse) {
                 },
             ],
             custom_fields: customFields,
+            custom_text: {
+                submit: {
+                    message: '**$1 ≈ HK$ 7.80**', // Your custom message goes here
+                },
+            },
             metadata,
             mode: 'payment',
             customer_email: email,
