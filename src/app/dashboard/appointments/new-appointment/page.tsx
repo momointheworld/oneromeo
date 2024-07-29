@@ -17,7 +17,6 @@ import { useEmail } from '@/hooks/useEmail'
 import { revertTimezone } from '@/utils/revertTimeZone'
 import AddAppointment from '@/components/appointment'
 import FormButton from '@/components/common/formbutton'
-import { Chip } from '@nextui-org/react'
 
 export default function CreateNewAppointment() {
     interface AppointmentData {

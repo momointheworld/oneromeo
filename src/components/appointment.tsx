@@ -35,19 +35,27 @@ interface AddAppointmentProps {
     availableSlots: TimeSlot[]
     pickedTime: string
     formStateMessage: string
+    isEmailInvalid: boolean
     isDisabled: boolean
+    timeZoneError: string
+    emailError: string
+    dateError: string
+    timeSlotError: string
 }
 
 const AddAppointment: React.FC<AddAppointmentProps> = ({
-    // handleSubmit,
     handleDateChange,
     handleTimeChange,
-    // selectedDate,
     newDisabledRanges,
     availableSlots,
     pickedTime,
     formStateMessage,
+    isEmailInvalid,
     isDisabled,
+    timeZoneError,
+    emailError,
+    dateError,
+    timeSlotError,
 }) => {
     let now = today(getLocalTimeZone())
     let startDate = now.add({ days: 1 }) // Tomorrow
@@ -74,7 +82,11 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
         <>
             <div className="max-w-md mx-auto bg-white shadow-lg rounded-lg p-6">
                 <div>
-                    <SelectTimeZone isDisabled={isDisabled} />
+                    <SelectTimeZone
+                        isDisabled={isDisabled}
+                        aria-label="Select your time zone"
+                        timeZoneError={timeZoneError}
+                    />
                     <I18nProvider locale="en-US">
                         <DatePicker
                             label="Appointment day"
@@ -85,17 +97,19 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
                             onChange={handleDateChange}
                             className="w-full mb-4"
                             isDisabled={isDisabled}
+                            errorMessage={dateError}
                         />
                     </I18nProvider>
                 </div>
                 <div className="max-w-md mx-auto flex w-full flex-wrap md:flex-nowrap gap-4">
                     <Select
-                        label=""
+                        aria-label="Select a time slot" // Provide aria-label for accessibility
                         placeholder="Select a time slot"
                         className="max-w-md  mb-4"
                         isDisabled={!selectedDate}
                         items={availableSlots}
                         selectedKeys={[pickedTime]}
+                        errorMessage={timeSlotError}
                         onChange={handleTimeChange}
                     >
                         {/* slot has key and label, label is what is being updated, while key is still the default value */}
@@ -110,18 +124,15 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
                     {' '}
                     <Input
                         type="email"
-                        label=""
+                        aria-label="Enter your email" // Provide aria-label for accessibility
                         placeholder="Enter your email"
                         value={email}
                         onValueChange={setEmail}
+                        isInvalid={isEmailInvalid}
+                        errorMessage={emailError}
                     />
                 </div>
-                <DisplayMessage
-                    formStateMessage={formStateMessage}
-                    actions={function (): Promise<FormData> {
-                        throw new Error('Function not implemented.')
-                    }}
-                />
+                <DisplayMessage formStateMessage={formStateMessage} />
             </div>
         </>
     )

@@ -24,6 +24,7 @@ import { useEmail } from '@/hooks/useEmail'
 import { useSelectedItem } from '@/hooks/useSelectedItem'
 import checkout from '@/actions/checkout'
 import { revertTimezone } from '@/utils/revertTimeZone'
+import parseErrors from '@/components/common/errorMessage'
 
 const OrderForm = () => {
     interface Item {
@@ -53,6 +54,12 @@ const OrderForm = () => {
     let endDate = now.add({ days: 30 }) // Two weeks from tomorrow
     const appointmentRef = useRef<HTMLDivElement>(null) // Create a ref for the Appointment component
     const { email, setEmail } = useEmail()
+    const [isEmailInvalid, setIsEmailInvalid] = useState(false)
+    const [emailError, setEmailError] = useState('')
+    const [dateError, setDateError] = useState('')
+    const [timeZoneError, setTimeZoneError] = useState('')
+    const [timeSlotError, setTimeSlotError] = useState('')
+    const [generalError, setGeneralError] = useState('')
     const [formStateMessage, setFormStateMessage] = useState('')
     const [availableSlots, setAvailableSlots] = useState(timeSlots)
     const { selectedTimeZone, setSelectedTimeZone } = useTimezone()
@@ -250,31 +257,16 @@ const OrderForm = () => {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault() // Prevent default form submission
         setIsLoading(true)
+
         if (!selectedItem) {
-            alert('Please select an item.')
+            // alert('Please select an item.')
+            setFormStateMessage('Please choose a coffee or ebook.')
             setIsLoading(false)
             return
-        } // If the selectedPriceID is 'price_1PffWVHcOAKxyg1ZcYyxKX8U', skip the checks for date, time, and timezone
-        if (selectedPriceId !== 'price_1PffWVHcOAKxyg1ZcYyxKX8U') {
-            if (!selectedDate) {
-                alert('Please select a date.')
-                setIsLoading(false)
-                return
-            } else if (!pickedTime) {
-                alert('Please select a time slot.')
-                setIsLoading(false)
-                return
-            }
-        } else {
-            // Clear the fields if the selectedPriceID is 'price_1PffWVHcOAKxyg1ZcYyxKX8U'
-            setSelectedDate(null)
-            setPickedTime('')
-            setSelectedTimeZone('')
         }
-        if (
-            (selectedDate && pickedTime && selectedTimeZone) ||
-            selectedPriceId === 'price_1PffWVHcOAKxyg1ZcYyxKX8U'
-        ) {
+
+        try {
+            // Prepare the values to be sent to the server
             const dateStr = selectedDate
                 ? new Date(selectedDate.toString())
                 : null
@@ -287,29 +279,51 @@ const OrderForm = () => {
                     : null
             const thLabel = thTimeSlot ? thTimeSlot.label : ''
             const label = thLabel ? `${pickedTime} (${thLabel})` : ''
-            try {
-                await checkout(
-                    selectedItem.priceId,
-                    email,
-                    selectedTimeZone,
-                    orderDate,
-                    // `${thLabel};${pickedTime}`
-                    label
-                )
+
+            // Call the checkout function to interact with the server
+            const result = await checkout(
+                selectedItem.priceId,
+                email,
+                selectedTimeZone,
+                orderDate,
+                label
+            )
+
+            if (result.error) {
+                // Display the error message returned from the server
+                console.log(result.error)
+                if (result.error.includes('email')) {
+                    setIsEmailInvalid(true)
+                    setEmailError(result.error)
+                }
+                // const errorString =
+                //     'Select your time zone. Select an appointment date. Choose your time slot. Invalid email address.'
+                const errorString = result.error
+                const parsedErrors = parseErrors(errorString)
+                console.log(parsedErrors)
+                console.error('Checkout error:', result.error)
+            } else if (result.url) {
+                // Redirect to the checkout URL
+                window.location.href = result.url
                 setSelectedDate(null)
                 setPickedTime('')
                 setAvailableSlots(timeSlots)
-                // Optionally, you can add a success message or navigate to another page here
-                setFormStateMessage('Appointment added successfully.')
-            } catch (error) {
-                setFormStateMessage(
-                    'Failed to add the appointment, try again later.'
-                )
-                console.error('Error adding appointment:', error)
-                // Handle error scenario if needed
-            } finally {
-                setIsLoading(false)
+            } else {
+                // Handle case where result.url is not defined
+                alert('Failed to get the checkout URL. Please try again.')
+                setFormStateMessage('Failed to proceed with the checkout.')
             }
+        } catch (error) {
+            setFormStateMessage(
+                'Failed to add the appointment, try again later.'
+            )
+            console.error('Error adding appointment:', error)
+        } finally {
+            setIsLoading(false)
+            // Reset message after 5 seconds
+            setTimeout(() => {
+                setFormStateMessage('')
+            }, 5000)
         }
     }
 
@@ -333,7 +347,12 @@ const OrderForm = () => {
                         newDisabledRanges={newDisabledRanges}
                         availableSlots={availableSlots}
                         formStateMessage={formStateMessage}
+                        isEmailInvalid={isEmailInvalid}
                         isDisabled={!isAppointmentAvailable}
+                        emailError={emailError}
+                        timeZoneError={timeZoneError}
+                        timeSlotError={timeSlotError}
+                        dateError={dateError}
                     />
                 </div>
                 <div className=" flex justify-center">

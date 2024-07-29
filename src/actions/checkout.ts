@@ -4,7 +4,7 @@ const checkout = async (
     timeZone: string,
     date: string,
     timeSlot: string
-): Promise<void> => {
+): Promise<{ error?: string; url?: string }> => {
     try {
         const response = await fetch('/api/checkout', {
             method: 'POST',
@@ -13,16 +13,30 @@ const checkout = async (
             },
             body: JSON.stringify({ priceId, email, timeZone, date, timeSlot }),
         })
-
         if (!response.ok) {
-            throw new Error('Failed to create checkout session')
+            const errorData = await response.json()
+            console.log('Error Data:', errorData)
+
+            // Extract specific error types from the response
+            const { emailError, timezoneError, dateError, timeSlotError } =
+                errorData.errors || {}
+
+            // Create formatted messages
+            const formattedErrors = [
+                ...(timezoneError || []).map((error: any) => `${error}`),
+                ...(dateError || []).map((error: any) => `${error}`),
+                ...(timeSlotError || []).map((error: any) => `${error}`),
+                ...(emailError || []).map((error: any) => `${error}`),
+            ].join(' ')
+
+            return { error: formattedErrors }
         }
 
         const { url } = await response.json()
-        window.location.href = url // Redirect to Stripe checkout
+        return { url } // Return the URL if the checkout session is created successfully
     } catch (error) {
         console.error('Error during checkout:', error)
-        alert('An error occurred during checkout. Please try again.')
+        return { error: 'An error occurred during checkout. Please try again.' }
     }
 }
 

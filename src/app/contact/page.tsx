@@ -42,7 +42,7 @@ export default function ContactPage() {
                     setErrors(newErrors)
                     return
                 }
-                throw new Error('Failed to submit the data. Please try again.')
+                throw new Error('Failed to send the email. Please try again.')
             }
             // Display success message
             setSuccessMessage(
@@ -78,7 +78,7 @@ export default function ContactPage() {
                 </div>
             ) : (
                 <div>
-                    <h2>Have Questions? Drop us a line!</h2>
+                    <h1>{`Say hello :)`} </h1>
 
                     <div className="grid grid-cols-1 sm:grid-cols-6">
                         <form

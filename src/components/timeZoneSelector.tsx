@@ -12,9 +12,13 @@ const timezones = {
 
 interface TimeZoneSelectorProps {
     isDisabled: boolean
+    timeZoneError: string
 }
 
-const TimeZoneSelector: React.FC<TimeZoneSelectorProps> = ({ isDisabled }) => {
+const TimeZoneSelector: React.FC<TimeZoneSelectorProps> = ({
+    isDisabled,
+    timeZoneError,
+}) => {
     const { options, parseTimezone } = useTimezoneSelect({
         labelStyle,
         timezones,
@@ -36,6 +40,7 @@ const TimeZoneSelector: React.FC<TimeZoneSelectorProps> = ({ isDisabled }) => {
                 label="Pick a time zone"
                 value={selectedTimeZone}
                 isDisabled={isDisabled}
+                errorMessage={timeZoneError}
             >
                 {options.map((item) => (
                     <SelectItem key={item.value} value={item.value}>
