@@ -55,14 +55,17 @@ const OrderForm = () => {
     const appointmentRef = useRef<HTMLDivElement>(null) // Create a ref for the Appointment component
     const { email, setEmail } = useEmail()
     const [isEmailInvalid, setIsEmailInvalid] = useState(false)
+    const [isDateInvalid, setIsDateInvalid] = useState(false)
+    const [isTimezoneInvalid, setIsTimezoneInvalid] = useState(false)
+    const [isTimeSlotInvalid, setIsTimeSlotInvalid] = useState(false)
     const [emailError, setEmailError] = useState('')
     const [dateError, setDateError] = useState('')
-    const [timeZoneError, setTimeZoneError] = useState('')
+    const [timezoneError, setTimezoneError] = useState('')
     const [timeSlotError, setTimeSlotError] = useState('')
     const [generalError, setGeneralError] = useState('')
     const [formStateMessage, setFormStateMessage] = useState('')
     const [availableSlots, setAvailableSlots] = useState(timeSlots)
-    const { selectedTimeZone, setSelectedTimeZone } = useTimezone()
+    const { selectedTimezone, setSelectedTimezone } = useTimezone()
     const { selectedDate, setSelectedDate } = useDate()
     const [pickedTime, setPickedTime] = useState('')
     const [isLoading, setIsLoading] = useState(false)
@@ -203,14 +206,14 @@ const OrderForm = () => {
             const convertedSlots = convertToUserTimezone(
                 newAvailableSlots,
                 dateObj,
-                selectedTimeZone
+                selectedTimezone
             )
             setAvailableSlots(convertedSlots)
         }
-    }, [selectedDate, appointments, selectedTimeZone])
+    }, [selectedDate, appointments, selectedTimezone])
 
     const resetAppointment = () => {
-        setSelectedTimeZone(''), setSelectedDate(null), setPickedTime('')
+        setSelectedTimezone(''), setSelectedDate(null), setPickedTime('')
     }
 
     // get the product information
@@ -242,7 +245,7 @@ const OrderForm = () => {
             const convertedSlots = convertToUserTimezone(
                 availableSlots,
                 dateObj,
-                selectedTimeZone
+                selectedTimezone
             )
             setAvailableSlots(convertedSlots)
         }
@@ -274,8 +277,8 @@ const OrderForm = () => {
 
             // Convert the customer time slot label to the Thai time slot label
             const thTimeSlot =
-                pickedTime && dateStr && selectedTimeZone
-                    ? revertTimezone(pickedTime, dateStr, selectedTimeZone)
+                pickedTime && dateStr && selectedTimezone
+                    ? revertTimezone(pickedTime, dateStr, selectedTimezone)
                     : null
             const thLabel = thTimeSlot ? thTimeSlot.label : ''
             const label = thLabel ? `${pickedTime} (${thLabel})` : ''
@@ -284,23 +287,61 @@ const OrderForm = () => {
             const result = await checkout(
                 selectedItem.priceId,
                 email,
-                selectedTimeZone,
+                selectedTimezone,
                 orderDate,
                 label
             )
 
             if (result.error) {
-                // Display the error message returned from the server
-                console.log(result.error)
-                if (result.error.includes('email')) {
-                    setIsEmailInvalid(true)
-                    setEmailError(result.error)
-                }
-                // const errorString =
-                //     'Select your time zone. Select an appointment date. Choose your time slot. Invalid email address.'
                 const errorString = result.error
-                const parsedErrors = parseErrors(errorString)
-                console.log(parsedErrors)
+                const fieldErrors = parseErrors(errorString)
+                console.log(fieldErrors)
+                // Display specific error messages and update state
+                switch (true) {
+                    case !!fieldErrors.emailError:
+                        setIsEmailInvalid(true)
+                        setEmailError(fieldErrors.emailError)
+                        break
+                    default:
+                        setIsEmailInvalid(false)
+                        setEmailError('')
+                        break
+                }
+
+                switch (true) {
+                    case !!fieldErrors.timezoneError:
+                        setIsTimezoneInvalid(true)
+                        setTimezoneError(fieldErrors.timezoneError)
+                        break
+                    default:
+                        setIsTimezoneInvalid(false)
+                        setTimezoneError('')
+                        break
+                }
+
+                switch (true) {
+                    case !!fieldErrors.dateError:
+                        setIsDateInvalid(true)
+                        setDateError(fieldErrors.dateError)
+                        break
+                    default:
+                        setIsDateInvalid(false)
+                        setDateError('')
+                        break
+                }
+
+                switch (true) {
+                    case !!fieldErrors.timeSlotError:
+                        setIsTimeSlotInvalid(true)
+                        setTimeSlotError(fieldErrors.timeSlotError)
+                        break
+                    default:
+                        setIsTimeSlotInvalid(false)
+                        setTimeSlotError('')
+                        break
+                }
+
+                // Log the errors for debugging
                 console.error('Checkout error:', result.error)
             } else if (result.url) {
                 // Redirect to the checkout URL
@@ -334,7 +375,7 @@ const OrderForm = () => {
                 <div ref={appointmentRef}>
                     <div className="flex place-content-center">
                         <Chip color="primary">2 </Chip>
-                        <span className="mx-5 text-2xl font-bold tracking-tight text-gray-900">
+                        <span className="mx-5 text-2xl font-bold tracking-tight text-gray-600">
                             Choose Your Time
                         </span>
                     </div>
@@ -348,9 +389,12 @@ const OrderForm = () => {
                         availableSlots={availableSlots}
                         formStateMessage={formStateMessage}
                         isEmailInvalid={isEmailInvalid}
+                        isTimezoneInvalid={isTimezoneInvalid}
+                        isDateInvalid={isDateInvalid}
+                        isTimeSlotInvalid={isTimeSlotInvalid}
                         isDisabled={!isAppointmentAvailable}
                         emailError={emailError}
-                        timeZoneError={timeZoneError}
+                        timezoneError={timezoneError}
                         timeSlotError={timeSlotError}
                         dateError={dateError}
                     />

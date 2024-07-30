@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React from 'react'
 import { useTimezoneSelect, allTimezones } from 'react-timezone-select'
 import { useTimezone } from '@/hooks/useTimezone'
 import { Select, SelectItem } from '@nextui-org/react'
@@ -10,25 +10,27 @@ const timezones = {
     ...allTimezones,
 }
 
-interface TimeZoneSelectorProps {
+interface TimezoneSelectorProps {
     isDisabled: boolean
-    timeZoneError: string
+    timezoneError: string
+    isTimezoneInvalid: boolean
 }
 
-const TimeZoneSelector: React.FC<TimeZoneSelectorProps> = ({
+const TimezoneSelector: React.FC<TimezoneSelectorProps> = ({
     isDisabled,
-    timeZoneError,
+    isTimezoneInvalid,
+    timezoneError,
 }) => {
     const { options, parseTimezone } = useTimezoneSelect({
         labelStyle,
         timezones,
     })
-    const { selectedTimeZone, setSelectedTimeZone } = useTimezone()
+    const { selectedTimezone, setSelectedTimezone } = useTimezone()
     const { selectedDate, setSelectedDate } = useDate()
 
     const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const parsed = parseTimezone(e.target.value)
-        setSelectedTimeZone(parsed?.value || '')
+        setSelectedTimezone(parsed?.value || '')
         setSelectedDate(null) // Reset the selected date to null when timezone changes
     }
 
@@ -38,9 +40,10 @@ const TimeZoneSelector: React.FC<TimeZoneSelectorProps> = ({
                 onChange={handleChange}
                 selectionMode="single"
                 label="Pick a time zone"
-                value={selectedTimeZone}
+                value={selectedTimezone}
+                isInvalid={isTimezoneInvalid}
                 isDisabled={isDisabled}
-                errorMessage={timeZoneError}
+                errorMessage={timezoneError}
             >
                 {options.map((item) => (
                     <SelectItem key={item.value} value={item.value}>
@@ -52,4 +55,4 @@ const TimeZoneSelector: React.FC<TimeZoneSelectorProps> = ({
     )
 }
 
-export default TimeZoneSelector
+export default TimezoneSelector

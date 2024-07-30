@@ -1,28 +1,47 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-
-// Define Zod schema with specific error messages
+// Define the Zod schema with validation
 const schema = z
     .object({
         priceId: z.string().min(1, 'Choose a coffee or ebook please.'),
         email: z.string().email('Invalid email address.'),
-        timeZone: z.string().min(1, 'Select your time zone.').optional(),
-        date: z.string().min(1, 'Select an appointment date.').optional(),
-        timeSlot: z.string().min(1, 'Choose your time slot.').optional(),
+        timeZone: z.string().optional(),
+        date: z.string().optional(),
+        timeSlot: z.string().optional(),
     })
-    .refine(
-        (data) => {
-            const exemptProductId = 'price_1PffWVHcOAKxyg1ZcYyxKX8U'
-            if (data.priceId !== exemptProductId) {
-                return data.timeZone && data.date && data.timeSlot
+    .superRefine((data, ctx) => {
+        const exemptProductId = 'price_1PffWVHcOAKxyg1ZcYyxKX8U'
+
+        console.log('SuperRefine - priceId:', data.priceId) // Log for debugging
+
+        if (data.priceId.trim() !== exemptProductId) {
+            // Only validate if priceId is not exempt
+            if (!data.timeZone) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    path: ['timeZone'],
+                    message: 'Select your time zone.',
+                })
             }
-            return true
-        },
-        {
-            message: 'Error: ',
-            path: [''],
+            if (!data.date) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    path: ['date'],
+                    message: 'Select an appointment date.',
+                })
+            }
+            if (!data.timeSlot) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    path: ['timeSlot'],
+                    message: 'Choose your time slot.',
+                })
+            }
+        } else {
+            // When exempt, no need to validate optional fields
+            console.log('Exempt product - skipping optional field validation')
         }
-    )
+    })
 
 const stripeInstance = require('stripe')(process.env.STRIPE_SECRET_KEY)
 
@@ -55,6 +74,8 @@ export async function POST(req: NextRequest, res: NextResponse) {
             }
         )
     }
+
+    console.log('Validation Passed for priceId:', body.priceId.trim()) // Log the priceId if validation passes
 
     // Proceed with creating checkout session
     try {

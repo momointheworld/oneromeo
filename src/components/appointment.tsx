@@ -17,7 +17,7 @@ import {
 import { useLocale } from '@react-aria/i18n'
 import { I18nProvider } from '@react-aria/i18n'
 import DisplayMessage from '@/components/common/message'
-import SelectTimeZone from '@/components/timeZoneSelector'
+import SelectTimezone from '@/components/timezoneSelector'
 import { useDate } from '@/hooks/useDate'
 import { useEmail } from '@/hooks/useEmail'
 
@@ -36,8 +36,11 @@ interface AddAppointmentProps {
     pickedTime: string
     formStateMessage: string
     isEmailInvalid: boolean
+    isTimezoneInvalid: boolean
+    isDateInvalid: boolean
+    isTimeSlotInvalid: boolean
     isDisabled: boolean
-    timeZoneError: string
+    timezoneError: string
     emailError: string
     dateError: string
     timeSlotError: string
@@ -51,8 +54,11 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
     pickedTime,
     formStateMessage,
     isEmailInvalid,
+    isTimezoneInvalid,
+    isDateInvalid,
+    isTimeSlotInvalid,
     isDisabled,
-    timeZoneError,
+    timezoneError,
     emailError,
     dateError,
     timeSlotError,
@@ -82,10 +88,11 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
         <>
             <div className="max-w-md mx-auto bg-white shadow-lg rounded-lg p-6">
                 <div>
-                    <SelectTimeZone
+                    <SelectTimezone
                         isDisabled={isDisabled}
+                        isTimezoneInvalid={isTimezoneInvalid}
                         aria-label="Select your time zone"
-                        timeZoneError={timeZoneError}
+                        timezoneError={timezoneError}
                     />
                     <I18nProvider locale="en-US">
                         <DatePicker
@@ -97,6 +104,7 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
                             onChange={handleDateChange}
                             className="w-full mb-4"
                             isDisabled={isDisabled}
+                            isInvalid={isDateInvalid}
                             errorMessage={dateError}
                         />
                     </I18nProvider>
@@ -110,6 +118,7 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
                         items={availableSlots}
                         selectedKeys={[pickedTime]}
                         errorMessage={timeSlotError}
+                        isInvalid={isTimeSlotInvalid}
                         onChange={handleTimeChange}
                     >
                         {/* slot has key and label, label is what is being updated, while key is still the default value */}

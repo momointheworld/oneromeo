@@ -1,8 +1,8 @@
 import React, { createContext, useState, ReactNode, useContext } from 'react'
 
 interface TimezoneContextProps {
-    selectedTimeZone: string
-    setSelectedTimeZone: (timezone: string) => void
+    selectedTimezone: string
+    setSelectedTimezone: (timezone: string) => void
 }
 
 const TimezoneContext = createContext<TimezoneContextProps | undefined>(
@@ -10,11 +10,11 @@ const TimezoneContext = createContext<TimezoneContextProps | undefined>(
 )
 
 function TimezoneProvider({ children }: { children: ReactNode }) {
-    const [selectedTimeZone, setSelectedTimeZone] = useState<string>('')
+    const [selectedTimezone, setSelectedTimezone] = useState<string>('')
 
     return (
         <TimezoneContext.Provider
-            value={{ selectedTimeZone, setSelectedTimeZone }}
+            value={{ selectedTimezone, setSelectedTimezone }}
         >
             {children}
         </TimezoneContext.Provider>
