@@ -34,10 +34,4 @@ function parseErrors(errorString: string) {
     return errors
 }
 
-const errorString =
-    'Select your time zone. Select an appointment date. Choose your time slot. Invalid email address.'
-const parsedErrors = parseErrors(errorString)
-
-console.log(parsedErrors)
-
 export default parseErrors

@@ -212,6 +212,8 @@ export const handleAppointment = async ({
             )
         }
 
+        console.log(thTimeSlot, csrTimeSlot)
+
         try {
             await addAppointment({
                 timeZone: appointment_timeZone,
@@ -257,8 +259,8 @@ async function handleCheckoutSessionCompleted(
                 appointment_timeZone: string
             }
 
-        let [thTimeSlot, csrTimeSlot] = appointment_timeSlot.split(' (')
-        csrTimeSlot = csrTimeSlot.replace(')', '')
+        let [csrTimeSlot, thTimeSlot] = appointment_timeSlot.split(' (')
+        thTimeSlot = thTimeSlot.replace(')', '')
 
         const date = new Date(`${appointment_date}T00:00:00Z`)
         await handleAppointment({

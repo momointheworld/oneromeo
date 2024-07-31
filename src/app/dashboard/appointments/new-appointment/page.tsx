@@ -34,7 +34,15 @@ export default function CreateNewAppointment() {
     const { email, setEmail } = useEmail()
     const [formStateMessage, setFormStateMessage] = useState('')
     const [availableSlots, setAvailableSlots] = useState(timeSlots)
-    const { selectedTimeZone, setSelectedTimeZone } = useTimezone()
+    const [isEmailInvalid, setIsEmailInvalid] = useState(false)
+    const [isDateInvalid, setIsDateInvalid] = useState(false)
+    const [isTimezoneInvalid, setIsTimezoneInvalid] = useState(false)
+    const [isTimeSlotInvalid, setIsTimeSlotInvalid] = useState(false)
+    const [emailError, setEmailError] = useState('')
+    const [dateError, setDateError] = useState('')
+    const [timezoneError, setTimezoneError] = useState('')
+    const [timeSlotError, setTimeSlotError] = useState('')
+    const { selectedTimezone, setSelectedTimezone } = useTimezone()
     const { selectedDate, setSelectedDate } = useDate()
     const [pickedTime, setPickedTime] = useState('')
     const [isLoading, setIsLoading] = useState(false)
@@ -131,11 +139,11 @@ export default function CreateNewAppointment() {
             const convertedSlots = convertToUserTimezone(
                 newAvailableSlots,
                 dateObj,
-                selectedTimeZone
+                selectedTimezone
             )
             setAvailableSlots(convertedSlots)
         }
-    }, [selectedDate, appointments, selectedTimeZone])
+    }, [selectedDate, appointments, selectedTimezone])
 
     // Function to handle date change
     const handleDateChange = (date: DateValue | null) => {
@@ -148,7 +156,7 @@ export default function CreateNewAppointment() {
             const convertedSlots = convertToUserTimezone(
                 availableSlots,
                 dateObj,
-                selectedTimeZone
+                selectedTimezone
             )
             setAvailableSlots(convertedSlots)
         }
@@ -164,26 +172,34 @@ export default function CreateNewAppointment() {
         e.preventDefault() // Prevent default form submission
         setIsLoading(true)
         if (!selectedDate) {
-            alert('Please select a date.')
+            setIsDateInvalid(true)
+            setDateError('Please choose a date')
             setIsLoading(false)
             return
         } else if (!pickedTime) {
-            alert('Please select a time slot.')
+            setIsTimeSlotInvalid(true)
+            setTimeSlotError('Please choose a time slot')
             setIsLoading(false)
             return
-        } else if (!selectedTimeZone) {
-            alert('Please select a time zone.')
+        } else if (!!selectedTimezone) {
+            setIsTimezoneInvalid(true)
+            setTimezoneError('Please choose a time zone')
+            setIsLoading(false)
+            return
+        } else if (!email) {
+            setIsEmailInvalid(true)
+            setEmailError('Invalid email')
             setIsLoading(false)
             return
         }
 
-        if (selectedDate && pickedTime && selectedTimeZone) {
+        if (selectedDate && pickedTime && selectedTimezone) {
             const dateStr = new Date(selectedDate.toString())
             // Convert the customer time slot label to the Thai time slot label
             let thTimeSlot = revertTimezone(
                 pickedTime,
                 dateStr,
-                selectedTimeZone
+                selectedTimezone
             )
 
             if (!thTimeSlot || !thTimeSlot.label) {
@@ -199,7 +215,7 @@ export default function CreateNewAppointment() {
             const label = `${pickedTime} (${thLabel})`
             try {
                 await addAppointment({
-                    timeZone: selectedTimeZone,
+                    timeZone: selectedTimezone,
                     date: dateStr,
                     thTimeSlot: thLabel,
                     csrTimeSlot: pickedTime,
@@ -262,6 +278,14 @@ export default function CreateNewAppointment() {
                         pickedTime={pickedTime}
                         formStateMessage={formStateMessage}
                         isDisabled={false}
+                        isEmailInvalid={isEmailInvalid}
+                        isTimezoneInvalid={isTimezoneInvalid}
+                        isDateInvalid={isDateInvalid}
+                        isTimeSlotInvalid={isTimeSlotInvalid}
+                        timezoneError={timezoneError}
+                        emailError={emailError}
+                        dateError={dateError}
+                        timeSlotError={timeSlotError}
                     />
                 </div>
                 <FormButton color="primary">Add Appointment</FormButton>
