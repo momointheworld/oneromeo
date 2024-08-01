@@ -1,5 +1,6 @@
 'use client'
 import React, { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import {
     today,
     DateValue,
@@ -17,6 +18,19 @@ import { useEmail } from '@/hooks/useEmail'
 import { revertTimezone } from '@/utils/revertTimeZone'
 import AddAppointment from '@/components/appointment'
 import FormButton from '@/components/common/formbutton'
+import paths from '@/components/paths'
+import PageBreadCrumbs from '@/components/common/breadcrumbs'
+
+interface Breadcrumb {
+    href: string
+    text: string
+}
+
+const breadcrumbs: Breadcrumb[] = [
+    { href: paths.dashboard(), text: 'Dashboard' },
+    { href: paths.showAllAppointments(), text: 'Appointments' },
+    { href: paths.createNewAppointment(), text: `New Appointment` },
+]
 
 export default function CreateNewAppointment() {
     interface AppointmentData {
@@ -26,7 +40,7 @@ export default function CreateNewAppointment() {
         csrTimeSlot: string
         email: string
     }
-
+    const router = useRouter()
     let now = today(getLocalTimeZone())
     let startDate = now.add({ days: 1 }) // Tomorrow
     let { locale } = useLocale()
@@ -167,10 +181,20 @@ export default function CreateNewAppointment() {
     }) => {
         setPickedTime(e.target.value)
     }
-
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault() // Prevent default form submission
         setIsLoading(true)
+
+        // Reset error states
+        setIsDateInvalid(false)
+        setIsTimeSlotInvalid(false)
+        setIsTimezoneInvalid(false)
+        setIsEmailInvalid(false)
+        setDateError('')
+        setTimeSlotError('')
+        setTimezoneError('')
+        setEmailError('')
+
         if (!selectedDate) {
             setIsDateInvalid(true)
             setDateError('Please choose a date')
@@ -181,7 +205,7 @@ export default function CreateNewAppointment() {
             setTimeSlotError('Please choose a time slot')
             setIsLoading(false)
             return
-        } else if (!!selectedTimezone) {
+        } else if (!selectedTimezone) {
             setIsTimezoneInvalid(true)
             setTimezoneError('Please choose a time zone')
             setIsLoading(false)
@@ -224,37 +248,13 @@ export default function CreateNewAppointment() {
                 setSelectedDate(null)
                 setPickedTime('')
                 setAvailableSlots(timeSlots)
-                // Optionally, you can add a success message or navigate to another page here
                 setFormStateMessage('Appointment added successfully.')
-                // Fetch the updated appointments list
-                const updatedAppointments = await getAppointments()
-                const formattedAppointments: AppointmentData[] =
-                    updatedAppointments.map((appointment) => ({
-                        id: appointment.id,
-                        date: new Date(appointment.date),
-                        timeZone: appointment.timeZone,
-                        thTimeSlot: appointment.thTimeSlot,
-                        csrTimeSlot: appointment.csrTimeSlot,
-                        email: appointment.email,
-                    }))
-
-                // Sort appointments by date in descending order
-                const sortedAppointments = formattedAppointments.sort(
-                    (a, b) => b.date.getTime() - a.date.getTime()
-                )
-
-                setAppointments(sortedAppointments)
-
-                // Reset message after 5 seconds
-                setTimeout(() => {
-                    setFormStateMessage('')
-                }, 5000)
+                router.push(paths.showAllAppointments())
             } catch (error) {
                 setFormStateMessage(
                     'Failed to add the appointment, try again later.'
                 )
                 console.error('Error adding appointment:', error)
-                // Handle error scenario if needed
             } finally {
                 setIsLoading(false)
             }
@@ -262,34 +262,37 @@ export default function CreateNewAppointment() {
     }
 
     return (
-        <form onSubmit={handleSubmit} className="w-full">
-            <div className="flex place-content-center">
-                <span className="mx-5 text-2xl font-bold tracking-tight text-gray-900">
-                    Add An Appointment
-                </span>
-            </div>
-            <div className="flex flex-col justify-center items-center w-full gap-y-5">
-                <div className="w-full">
-                    <AddAppointment
-                        handleDateChange={handleDateChange}
-                        handleTimeChange={handleTimeChange}
-                        newDisabledRanges={newDisabledRanges}
-                        availableSlots={availableSlots}
-                        pickedTime={pickedTime}
-                        formStateMessage={formStateMessage}
-                        isDisabled={false}
-                        isEmailInvalid={isEmailInvalid}
-                        isTimezoneInvalid={isTimezoneInvalid}
-                        isDateInvalid={isDateInvalid}
-                        isTimeSlotInvalid={isTimeSlotInvalid}
-                        timezoneError={timezoneError}
-                        emailError={emailError}
-                        dateError={dateError}
-                        timeSlotError={timeSlotError}
-                    />
+        <div>
+            <PageBreadCrumbs items={breadcrumbs} />
+            <form onSubmit={handleSubmit} className="w-full">
+                <div className="flex place-content-center">
+                    <span className="mx-5 text-2xl font-bold tracking-tight text-gray-900">
+                        Add An Appointment
+                    </span>
                 </div>
-                <FormButton color="primary">Add Appointment</FormButton>
-            </div>
-        </form>
+                <div className="flex flex-col justify-center items-center w-full gap-y-5">
+                    <div className="w-full">
+                        <AddAppointment
+                            handleDateChange={handleDateChange}
+                            handleTimeChange={handleTimeChange}
+                            newDisabledRanges={newDisabledRanges}
+                            availableSlots={availableSlots}
+                            pickedTime={pickedTime}
+                            formStateMessage={formStateMessage}
+                            isDisabled={false}
+                            isEmailInvalid={isEmailInvalid}
+                            isTimezoneInvalid={isTimezoneInvalid}
+                            isDateInvalid={isDateInvalid}
+                            isTimeSlotInvalid={isTimeSlotInvalid}
+                            timezoneError={timezoneError}
+                            emailError={emailError}
+                            dateError={dateError}
+                            timeSlotError={timeSlotError}
+                        />
+                    </div>
+                    <FormButton color="primary">Add Appointment</FormButton>
+                </div>
+            </form>
+        </div>
     )
 }

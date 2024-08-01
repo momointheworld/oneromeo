@@ -52,16 +52,7 @@ function createSlug(title: string) {
 export default function CreatePost() {
     const [selectedDate, setSelectedDate] = useState<Date | null>(new Date())
     const [title, setTitle] = useState('')
-    const categories = [
-        'Home',
-        'About',
-        'Privacy',
-        'Terms',
-        'Blog',
-        'Thoughts',
-        'Work',
-        'Hobby',
-    ]
+    const categories = ['About', 'Privacy', 'Terms', 'Blog', 'FAQ', 'Quiz']
     const [selectedCategories, setSelectedCategories] = useState<string[]>([
         'Blog',
     ]) // Set default category to 'Work'
@@ -225,7 +216,7 @@ export default function CreatePost() {
                     </div>
 
                     <div className="container flex gap-4">
-                        <span className="w-20">Date</span>
+                        <span className="w-20">Body</span>
                         <TipTap
                             editor={editor}
                             onYoutubeClick={addYoutubeVideo}

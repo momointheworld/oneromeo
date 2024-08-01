@@ -3,8 +3,10 @@ import { z } from 'zod'
 // Define the Zod schema with validation
 const schema = z
     .object({
-        priceId: z.string().min(1, 'Choose a coffee or ebook please.'),
-        email: z.string().email('Invalid email address.'),
+        priceId: z
+            .string()
+            .min(1, 'You need to select a service or product first!'),
+        email: z.string().email('(please enter a valid email address'),
         timeZone: z.string().optional(),
         date: z.string().optional(),
         timeSlot: z.string().optional(),
@@ -20,21 +22,21 @@ const schema = z
                 ctx.addIssue({
                     code: z.ZodIssueCode.custom,
                     path: ['timeZone'],
-                    message: 'Select your time zone.',
+                    message: 'please make a selection',
                 })
             }
             if (!data.date) {
                 ctx.addIssue({
                     code: z.ZodIssueCode.custom,
                     path: ['date'],
-                    message: 'Select an appointment date.',
+                    message: 'please make a selection',
                 })
             }
             if (!data.timeSlot) {
                 ctx.addIssue({
                     code: z.ZodIssueCode.custom,
                     path: ['timeSlot'],
-                    message: 'Choose your time slot.',
+                    message: 'please make a selection',
                 })
             }
         } else {
@@ -139,6 +141,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
             metadata,
             mode: 'payment',
             customer_email: email,
+            customer_creation: 'always', // Ensure a new customer object is created
             success_url: `http://localhost:3000/confirmation?success=true&session_id={CHECKOUT_SESSION_ID}&date=${date}&timeSlot=${timeSlot}&timeZone=${timeZone}&email=${email}`,
             cancel_url: 'http://localhost:3000/',
         })

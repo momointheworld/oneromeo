@@ -38,6 +38,9 @@ const paths = {
     showAllAppointments() {
         return '/dashboard/appointments'
     },
+    createNewAppointment() {
+        return `/dashboard/appointments/new-appointment`
+    },
     createNewPost() {
         return `/dashboard/posts/new-post`
     },

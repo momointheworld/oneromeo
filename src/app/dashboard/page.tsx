@@ -91,12 +91,20 @@ export default async function Dashboard() {
             <div className="flex flex-col gap-2 mt-5">{renderQuizzes}</div>
             <div className="flex justify-between items-center mt-10">
                 <h1 className="text-xl font-bold">Latest Appointments</h1>
-                <Link
-                    href={paths.showAllAppointments()}
-                    className="border p-2 mx-1 rounded bg-blue-200 hover:bg-blue-600 hover:text-zinc-200 no-underline"
-                >
-                    View All Appointments
-                </Link>
+                <div className="flex sm:flex-row">
+                    <Link
+                        href={paths.createNewAppointment()}
+                        className="border p-2 mx-1 rounded bg-blue-200 hover:bg-blue-600 hover:text-zinc-200 no-underline"
+                    >
+                        Create New Appointment
+                    </Link>
+                    <Link
+                        href={paths.showAllAppointments()}
+                        className="border p-2 mx-1 rounded bg-blue-200 hover:bg-blue-600 hover:text-zinc-200 no-underline"
+                    >
+                        View All Appointments
+                    </Link>
+                </div>
             </div>
             <div className="flex flex-col gap-2 mt-5">
                 {' '}

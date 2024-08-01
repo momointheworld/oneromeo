@@ -31,6 +31,7 @@ const MenuLogo = () => {
 const menuItems = [
     { title: 'Home', href: '/' },
     { title: 'About', href: '/about' },
+    { title: 'FAQ', href: '/faq' },
     { title: 'Contact', href: '/contact' },
 ]
 

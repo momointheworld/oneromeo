@@ -2,13 +2,15 @@
 import { getAppointments } from '@/actions'
 import { FullSkeleton } from '@/components/common/skeleton-loading'
 import RenderAppointments from '@/components/renderAppointments'
-import { Button } from '@nextui-org/react'
+import { Button, Link } from '@nextui-org/react'
 import { useEffect, useState } from 'react'
 import { Pagination } from '@nextui-org/react'
 import { deleteAppointment } from '@/actions/deleteAppointment'
 import { useFormState } from 'react-dom'
 import { log } from 'console'
 import DisplayMessage from '@/components/common/message'
+import paths from '@/components/paths'
+import PageBreadCrumbs from '@/components/common/breadcrumbs'
 
 interface Appointment {
     id: string
@@ -19,6 +21,11 @@ interface Appointment {
     email: string
 }
 
+interface Breadcrumb {
+    href: string
+    text: string
+}
+
 const AllAppointmentsPage = () => {
     const [appointments, setAppointments] = useState<Appointment[]>([])
     const [loading, setLoading] = useState(true)
@@ -27,6 +34,10 @@ const AllAppointmentsPage = () => {
     const [index, setIndex] = useState(1)
     const appointmentsPerPage = 30
     const [formMessage, setFormMessage] = useState('')
+    const breadcrumbs: Breadcrumb[] = [
+        { href: paths.dashboard(), text: 'Dashboard' },
+        { href: paths.showAllAppointments(), text: 'Appointments' },
+    ]
 
     useEffect(() => {
         const fetchAppointments = async () => {
@@ -110,30 +121,43 @@ const AllAppointmentsPage = () => {
 
     return (
         <div>
-            <h1>Appointments</h1>
-            {loading ? (
-                <FullSkeleton />
-            ) : error ? (
-                <div>{error}</div>
-            ) : (
-                <>
-                    <DisplayMessage formStateMessage={formMessage} />
-                    <RenderAppointments
-                        latestAppointments={currentAppointments}
-                        startIndex={indexOfFirstAppointment + 1}
-                        handleDelete={handleDelete}
-                        showDeleteButton={true}
-                    />
-                    <div className="flex justify-center mt-5">
-                        <Pagination
-                            total={totalPages}
-                            initialPage={1}
-                            page={page}
-                            onChange={(page) => setPage(page)}
-                        />
+            <PageBreadCrumbs items={breadcrumbs} />
+            <div className="flex flex-col">
+                <div className="flex flex-row justify-between items-center">
+                    <h1>Appointments</h1>
+                    <div>
+                        <Link
+                            href={paths.createNewAppointment()}
+                            className="border p-2 mx-1 rounded bg-blue-200 hover:bg-blue-600 hover:text-zinc-200 no-underline"
+                        >
+                            Create Quiz
+                        </Link>
                     </div>
-                </>
-            )}
+                </div>
+                {loading ? (
+                    <FullSkeleton />
+                ) : error ? (
+                    <div>{error}</div>
+                ) : (
+                    <>
+                        <DisplayMessage formStateMessage={formMessage} />
+                        <RenderAppointments
+                            latestAppointments={currentAppointments}
+                            startIndex={indexOfFirstAppointment + 1}
+                            handleDelete={handleDelete}
+                            showDeleteButton={true}
+                        />
+                        <div className="flex justify-center mt-5">
+                            <Pagination
+                                total={totalPages}
+                                initialPage={1}
+                                page={page}
+                                onChange={(page) => setPage(page)}
+                            />
+                        </div>
+                    </>
+                )}
+            </div>
         </div>
     )
 }

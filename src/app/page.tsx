@@ -1,17 +1,15 @@
 'use client'
-import React, { ReactHTMLElement, useEffect, useRef, useState } from 'react'
-import { Navigate } from 'react-router-dom'
+import React, { useEffect, useRef, useState } from 'react'
 import {
     today,
     DateValue,
     CalendarDate,
     toCalendarDate,
-    parseAbsolute,
     parseAbsoluteToLocal,
     getLocalTimeZone,
 } from '@internationalized/date'
 import { useLocale } from '@react-aria/i18n'
-import { addAppointment, getAppointments } from '@/actions'
+import { getAppointments } from '@/actions'
 import AddAppointment from '@/components/appointment'
 import { Button, Chip, Input } from '@nextui-org/react'
 import { convertToUserTimezone, timeSlots } from '@/utils/converTimeZone'
@@ -62,7 +60,6 @@ const OrderForm = () => {
     const [dateError, setDateError] = useState('')
     const [timezoneError, setTimezoneError] = useState('')
     const [timeSlotError, setTimeSlotError] = useState('')
-    const [generalError, setGeneralError] = useState('')
     const [formStateMessage, setFormStateMessage] = useState('')
     const [availableSlots, setAvailableSlots] = useState(timeSlots)
     const { selectedTimezone, setSelectedTimezone } = useTimezone()
@@ -165,20 +162,6 @@ const OrderForm = () => {
         fetchAppointments()
     }, []) // Empty dependency array ensures this runs only once on mount
 
-    // useEffect(() => {
-    //     // Check to see if this is a redirect back from Checkout
-    //     const query = new URLSearchParams(window.location.search)
-    //     if (query.get('success')) {
-    //         console.log('Order placed! You will receive an email confirmation.')
-    //     }
-
-    //     if (query.get('canceled')) {
-    //         console.log(
-    //             'Order canceled -- continue to shop around and checkout when you’re ready.'
-    //         )
-    //     }
-    // }, [])
-
     // UseEffect to check availability of time slots for the selected date
     useEffect(() => {
         if (!selectedDate) return
@@ -263,7 +246,9 @@ const OrderForm = () => {
 
         if (!selectedItem) {
             // alert('Please select an item.')
-            setFormStateMessage('Please choose a coffee or ebook.')
+            setFormStateMessage(
+                'You need to select a service or product first!'
+            )
             setIsLoading(false)
             return
         }
@@ -376,14 +361,12 @@ const OrderForm = () => {
                     <div className="flex place-content-center">
                         <Chip color="primary">2 </Chip>
                         <span className="mx-5 text-2xl font-bold tracking-tight text-gray-600">
-                            Choose Your Time
+                            Choose Your Time (& enter your email)
                         </span>
                     </div>
                     <AddAppointment
-                        // handleSubmit={handleSubmit}
                         handleDateChange={handleDateChange}
                         handleTimeChange={handleTimeChange}
-                        // selectedDate={selectedDate}
                         pickedTime={pickedTime}
                         newDisabledRanges={newDisabledRanges}
                         availableSlots={availableSlots}

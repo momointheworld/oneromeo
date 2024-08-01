@@ -18,9 +18,9 @@ function Footer() {
             </div>
             <Divider className="my-4" />
             <div className="flex flex-col sm:flex-row w-full sm:w-auto my-5 justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4 text-small">
-                <Link href="/privacy">Privacy Policy</Link>
+                <Link href="/privacy-policy">Privacy Policy</Link>
                 <Divider orientation="vertical" />
-                <Link href="/terms">Terms of Service</Link>
+                <Link href="/terms-of-use">Terms of Use</Link>
                 <Divider orientation="vertical" />
                 <p>© 2024 OneRomeo.com. All Rights Reserved.</p>
             </div>
