@@ -50,7 +50,17 @@ export default async function Dashboard() {
 
     return (
         <div className="flex flex-col">
-            <div className="flex justify-between items-center sm:flex-row">
+            <div className="flex justify-end">
+                <div className="flex items-end">
+                    <Link
+                        href={paths.upload()}
+                        className="border p-2 mx-1 text-slate-100 rounded bg-orange-500 hover:bg-orange-600 no-underline"
+                    >
+                        Upload Files
+                    </Link>
+                </div>
+            </div>
+            <div className="flex justify-between items-center sm:flex-row mt-5 ">
                 <h1 className="text-xl font-bold">Latest Posts</h1>
                 <div className="flex sm:flex-row">
                     <Link

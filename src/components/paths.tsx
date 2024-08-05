@@ -59,6 +59,9 @@ const paths = {
     editQuiz(quizId: string) {
         return `/dashboard/quizzes/${quizId}/edit`
     },
+    upload() {
+        return '/dashboard/upload'
+    },
 }
 
 export default paths

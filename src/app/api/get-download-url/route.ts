@@ -1,4 +1,4 @@
-// /pages/api/generate-download-url.ts
+// /pages/api/get-download-url.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/db' // Adjust the import as necessary
 
