@@ -1,3 +1,4 @@
+import { generateSecureDownloadToken } from '@/utils/generateSecureDownloadToken'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 // Define the Zod schema with validation
@@ -13,8 +14,6 @@ const schema = z
     })
     .superRefine((data, ctx) => {
         const exemptProductId = 'price_1PffWVHcOAKxyg1ZcYyxKX8U'
-
-        console.log('SuperRefine - priceId:', data.priceId) // Log for debugging
 
         if (data.priceId.trim() !== exemptProductId) {
             // Only validate if priceId is not exempt
@@ -77,8 +76,6 @@ export async function POST(req: NextRequest, res: NextResponse) {
         )
     }
 
-    console.log('Validation Passed for priceId:', body.priceId.trim()) // Log the priceId if validation passes
-
     // Proceed with creating checkout session
     try {
         const { priceId, email, timeZone, date, timeSlot } = body
@@ -131,6 +128,13 @@ export async function POST(req: NextRequest, res: NextResponse) {
             },
         ]
 
+        let successUrl = `http://localhost:3000/confirmation?success=true&session_id={CHECKOUT_SESSION_ID}&date=${date}&timeSlot=${timeSlot}&timeZone=${timeZone}&email=${email}`
+        if (priceId === 'price_1PffWVHcOAKxyg1ZcYyxKX8U') {
+            // Generate a token for the ebook
+            const token = await generateSecureDownloadToken(email) // Implement this function as needed
+            successUrl += `&token=${token}`
+        }
+
         const session = await stripeInstance.checkout.sessions.create({
             payment_method_types: ['card', 'alipay'],
             line_items: lineItems,
@@ -142,7 +146,8 @@ export async function POST(req: NextRequest, res: NextResponse) {
             mode: 'payment',
             customer_email: email,
             customer_creation: 'always', // Ensure a new customer object is created
-            success_url: `http://localhost:3000/confirmation?success=true&session_id={CHECKOUT_SESSION_ID}&date=${date}&timeSlot=${timeSlot}&timeZone=${timeZone}&email=${email}`,
+            // success_url: `http://localhost:3000/confirmation?success=true&session_id={CHECKOUT_SESSION_ID}&date=${date}&timeSlot=${timeSlot}&timeZone=${timeZone}&email=${email}`,
+            success_url: successUrl,
             cancel_url: 'http://localhost:3000/',
         })
 

@@ -1,9 +1,14 @@
 import Stripe from 'stripe'
 import { NextRequest, NextResponse } from 'next/server'
-import { addAppointment } from '@/actions'
+import {
+    addAppointment,
+    findTokenByEmail,
+    saveTokenToDatabase,
+} from '@/actions'
 import { isEventProcessed, logProcessedEvent } from '@/actions/eventhelper'
 import { findAppointmentByEmailAndDate } from '@/actions/findAppointmentByEmailAndDate'
 import createCustomerPortalSession from '@/actions/createCustomerPortalSession'
+import { generateSecureDownloadToken } from '@/utils/generateSecureDownloadToken'
 
 export const runtime = 'nodejs'
 export const preferredRegion = 'auto'
@@ -110,6 +115,20 @@ async function handleCheckoutSessionCompleted(
         })
     } else {
         console.warn('Required metadata not found in session')
+        // Generate a secure download token for the ebook
+        const email = session.customer_email || 'guest@example.com'
+        const token = await generateSecureDownloadToken(email)
+        // Check if a token already exists for this email
+        const existingToken = await findTokenByEmail(email)
+        if (existingToken) {
+            console.log('Token already exists:', existingToken.token)
+            return
+        }
+        // Store the token and associated email in your database
+        await saveTokenToDatabase(email, token)
+        // Generate the download URL
+        const downloadUrl = `http://localhost:3000/confirmation?success=true&session_id=${session.id}&token=${token}`
+        console.log('Download URL:', downloadUrl)
     }
 }
 

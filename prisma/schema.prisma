@@ -111,3 +111,20 @@ model ProcessedEvent {
   eventId    String   @unique
   createdAt  DateTime
 }
+
+model Ebook {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  name      String    @unique
+  fileType  String
+  uploadDate DateTime @default(now())
+  fileSize  Int
+}
+
+model DownloadToken {
+  id             String  @id @default(auto()) @map("_id") @db.ObjectId 
+  token          String   @unique
+  email          String   @unique
+  expirationDate DateTime
+  createdAt      DateTime @default(now())
+}
+

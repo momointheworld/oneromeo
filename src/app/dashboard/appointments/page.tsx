@@ -130,7 +130,7 @@ const AllAppointmentsPage = () => {
                             href={paths.createNewAppointment()}
                             className="border p-2 mx-1 rounded bg-blue-200 hover:bg-blue-600 hover:text-zinc-200 no-underline"
                         >
-                            Create Quiz
+                            Create Appointment
                         </Link>
                     </div>
                 </div>
