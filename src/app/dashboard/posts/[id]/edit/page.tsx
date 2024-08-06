@@ -58,7 +58,15 @@ export default function UpdatePostPage() {
     ]
     const [selectedDate, setSelectedDate] = useState<Date | null>(new Date())
     const [title, setTitle] = useState('')
-    const categories = ['About', 'Privacy', 'Terms', 'Blog', 'FAQ', 'Quiz']
+    const categories = [
+        'About',
+        'Privacy',
+        'Terms',
+        'Blog',
+        'FAQ',
+        'Quiz',
+        'Ebook',
+    ]
     const [selectedCategories, setSelectedCategories] = useState<any[]>([])
     const [editorContent, setEditorContent] = useState('')
     const [formState, action] = useFormState(updatePost, { message: '' })

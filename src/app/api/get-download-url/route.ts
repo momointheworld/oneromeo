@@ -1,6 +1,5 @@
-// /pages/api/get-download-url.ts
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/db' // Adjust the import as necessary
+import { db } from '@/db'
 
 export async function POST(request: NextRequest) {
     const { token } = await request.json()

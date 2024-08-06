@@ -52,7 +52,15 @@ function createSlug(title: string) {
 export default function CreatePost() {
     const [selectedDate, setSelectedDate] = useState<Date | null>(new Date())
     const [title, setTitle] = useState('')
-    const categories = ['About', 'Privacy', 'Terms', 'Blog', 'FAQ', 'Quiz']
+    const categories = [
+        'About',
+        'Privacy',
+        'Terms',
+        'Blog',
+        'FAQ',
+        'Quiz',
+        'Ebook',
+    ]
     const [selectedCategories, setSelectedCategories] = useState<string[]>([
         'Blog',
     ]) // Set default category to 'Work'

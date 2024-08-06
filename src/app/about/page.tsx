@@ -1,10 +1,3 @@
-import GridLayout from '@/components/grid'
-import PostsByCategory from '@/components/posts/nav-posts'
-
-export default function AboutPage() {
-    return (
-        <GridLayout>
-            <PostsByCategory categoryName="About" />
-        </GridLayout>
-    )
+export default function aboutPage() {
+    return <div>about page</div>
 }
