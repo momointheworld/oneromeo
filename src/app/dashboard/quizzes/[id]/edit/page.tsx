@@ -11,6 +11,8 @@ import {
     CardSkeleton,
     FullSkeleton,
 } from '@/components/common/skeleton-loading'
+import router from 'next/router'
+import { Button, Input, Textarea } from '@nextui-org/react'
 
 interface AnswerDataProps {
     id: string
@@ -25,10 +27,18 @@ interface QuestionDataProps {
     answers: AnswerDataProps[]
 }
 
-interface fetchedQuiz {
+interface ResultDataProps {
+    id: string
+    minPoints: number
+    maxPoints: number
+    resultText: string
+}
+
+interface FetchedQuiz {
     id: string
     quizName: string
     questions: QuestionDataProps[]
+    results: ResultDataProps[] // Add results to quiz data
 }
 
 interface Breadcrumb {
@@ -37,10 +47,13 @@ interface Breadcrumb {
 }
 
 export default function ModifyQuizzes() {
-    const [quiz, setQuiz] = useState<fetchedQuiz | null>(null)
+    const [quiz, setQuiz] = useState<FetchedQuiz | null>(null)
     const [questions, setQuestions] = useState<QuestionDataProps[]>([])
-    // const [addQuestion, setAddQuestion] = useState<boolean>(false);
     const [answers, setAnswers] = useState<AnswerDataProps[][]>([])
+    const [results, setResults] = useState<ResultDataProps[]>([]) // State for results
+    const [isAddQLoading, setIsAddQLoading] = useState(false)
+    const [isAddResultLoading, setIsAddResultLoading] = useState(false)
+    const [isSubmitLoading, setIsSubmitLoading] = useState(false)
     const params = useParams()
     const id = params.id?.toString()
     const [formStateMessage, setFormStateMessage] = useState('')
@@ -49,18 +62,32 @@ export default function ModifyQuizzes() {
         { href: paths.showAllQuizzes(), text: 'Quizzes' },
         { href: paths.editQuiz(id), text: 'Edit Quiz' },
     ]
-
     useEffect(() => {
         const fetchData = async () => {
             try {
                 if (!id) return
+
                 // Get quiz data
                 const fetchedQuiz = await actions.getQuiz({ id })
                 setQuiz(fetchedQuiz)
 
                 // Get questions data
                 const fetchedQuestions = await actions.getQuestions(id)
+                if (fetchedQuestions.length === 0) {
+                    setFormStateMessage('No questions found for this quiz.')
+                    setQuestions([]) // Ensure questions state is cleared
+                    return // Exit early if no questions are found
+                }
                 setQuestions(fetchedQuestions)
+
+                // Get results data
+                const fetchedResults = await actions.getResults(id)
+                if (fetchedResults.length === 0) {
+                    setFormStateMessage('No results found for this quiz.')
+                    setResults([]) // Ensure results state is cleared
+                } else {
+                    setResults(fetchedResults) // Set results data if available
+                }
 
                 // Loop through questions to get answers for each question
                 const allAnswers: AnswerDataProps[][] = []
@@ -74,12 +101,9 @@ export default function ModifyQuizzes() {
                 setFormStateMessage(`Error fetching data: ${error}`)
             }
         }
+
         fetchData()
     }, [id])
-
-    // console.log(quiz);
-    // console.log(questions);
-    // console.log(answers);
 
     // Update quiz name
     const handleQuizNameChange = (
@@ -124,12 +148,42 @@ export default function ModifyQuizzes() {
         setAnswers(updatedAnswers)
     }
 
+    // Update result min points
+    const handleResultMinPointsChange = (
+        index: number,
+        event: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        const updatedResults = [...results]
+        updatedResults[index].minPoints = parseInt(event.target.value)
+        setResults(updatedResults)
+    }
+
+    // Update result max points
+    const handleResultMaxPointsChange = (
+        index: number,
+        event: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        const updatedResults = [...results]
+        updatedResults[index].maxPoints = parseInt(event.target.value)
+        setResults(updatedResults)
+    }
+
+    // Update result text
+    const handleResultTextChange = (
+        index: number,
+        event: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        const updatedResults = [...results]
+        updatedResults[index].resultText = event.target.value
+        setResults(updatedResults)
+    }
+
     const handleAddQuestion = async () => {
         setFormStateMessage('Adding question...')
+        setIsAddQLoading(true)
         try {
-            // Create a new question on the server
             const newQuestionData = await actions.createQuestion({
-                quizId: quiz?.id || '', // Use optional chaining to access quiz.id safely
+                quizId: quiz?.id || '',
                 text: '',
                 answers: [
                     { text: '', points: 0 },
@@ -138,12 +192,11 @@ export default function ModifyQuizzes() {
                     { text: '', points: 0 },
                 ],
             })
+            setIsAddQLoading(false)
             setFormStateMessage(
                 'Question added successfully. Close to continue'
             )
-            // Update the local state with the newly created question
             setQuestions((prevQuestions) => [...prevQuestions, newQuestionData])
-            // Reset the answers state to empty arrays
             setAnswers((prevAnswers) => [
                 ...prevAnswers,
                 newQuestionData.answers,
@@ -151,109 +204,151 @@ export default function ModifyQuizzes() {
         } catch (error) {
             if (error instanceof Error) {
                 setFormStateMessage(error.message)
+                setIsAddQLoading(false)
             } else {
                 setFormStateMessage('Something went wrong, try again later.')
+                setIsAddQLoading(false)
             }
         }
     }
 
     const handleDeleteQuestion = async (id: string) => {
         setFormStateMessage('Loading...')
+        setIsSubmitLoading(true)
         try {
             await actions.deleteQuestion(id)
-            // Update the local state with the newly created question
             setQuestions((prevQuestions) =>
                 prevQuestions.filter((question) => question.id !== id)
             )
+            setIsSubmitLoading(false)
             setFormStateMessage(
                 'Question deleted successfully. Close to continue.'
             )
         } catch (error) {
             console.error('Error deleting a question:', error)
             setFormStateMessage(`Error deleting a question ${error}`)
+            setIsSubmitLoading(false)
         }
     }
 
-    // Handle form submission (update data)
+    const handleAddResult = async () => {
+        setFormStateMessage('Adding result...')
+        setIsAddResultLoading(true)
+        try {
+            if (!quiz) {
+                throw new Error('Quiz data is not available.')
+            }
+
+            // Create a new result using your actions
+            const newResultData = await actions.createResult({
+                quizId: quiz.id, // Use the current quiz ID
+                minPoints: 0, // Default value, can be updated later
+                maxPoints: 0, // Default value, can be updated later
+                resultText: '', // Default value, can be updated later
+            })
+
+            // Update state with the new result
+            setResults((prevResults) => [...prevResults, newResultData])
+
+            setFormStateMessage('Result added successfully.')
+        } catch (error) {
+            if (error instanceof Error) {
+                setFormStateMessage(error.message)
+            } else {
+                setFormStateMessage('Something went wrong, try again later.')
+            }
+        } finally {
+            setIsAddResultLoading(false)
+        }
+    }
+
+    const handleDeleteResult = async (id: string) => {
+        setFormStateMessage('Loading...')
+        try {
+            await actions.deleteResult(id) // Call your API action to delete the result
+            setResults((prevResults) =>
+                prevResults.filter((result) => result.id !== id)
+            )
+            setFormStateMessage(
+                'Result deleted successfully. Close to continue.'
+            )
+        } catch (error) {
+            console.error('Error deleting a result:', error)
+            setFormStateMessage(`Error deleting a result ${error}`)
+        }
+    }
+
     const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
         setFormStateMessage('Updating quiz...')
+        setIsSubmitLoading(true)
         try {
             if (!quiz) {
-                setFormStateMessage('Quiz data is not available.')
                 throw new Error('Quiz data is not available.')
             }
+
             // Update answers
-            // for (let i = 0; i < answers.length; i++) {
-            //     for (const answer of answers[i]) {
-            //     await actions.updateAnswer(answer.id, { text: answer.text, points: answer.points });
-            //     setFormStateMessage('Answers updated successfully, please hold.');
-            // }
-            // }
-            for (const answerList of answers) {
-                for (const answer of answerList) {
+            await Promise.all(
+                answers.flat().map(async (answer) => {
                     if (answer.id) {
                         await actions.updateAnswer(answer.id, {
                             text: answer.text,
                             points: answer.points,
                         })
-                        setFormStateMessage(
-                            'Answers updated successfully, please hold.'
-                        )
-                    } else {
-                        console.log('Answer not found, skipping update.')
                     }
-                }
-            }
+                })
+            )
 
             // Update questions
-            for (const question of questions) {
-                // Check if the question exists before updating it
-                const existingQuestion = questions.find(
-                    (q) => q.id === question.id
-                )
-                if (existingQuestion) {
-                    await actions.updateQuestion(question.id, {
-                        text: question.text,
-                    })
-                    setFormStateMessage(
-                        'Questions updated successfully, please hold.'
-                    )
-                }
-            }
+            await Promise.all(
+                questions.map(async (question) => {
+                    if (question.id) {
+                        await actions.updateQuestion(question.id, {
+                            text: question.text,
+                        })
+                    }
+                })
+            )
 
+            // Update results
+            await Promise.all(
+                results.map(async (result) => {
+                    if (result.id) {
+                        await actions.updateResult(result.id, {
+                            minPoints: result.minPoints,
+                            maxPoints: result.maxPoints,
+                            resultText: result.resultText,
+                        })
+                    }
+                })
+            )
+            setIsSubmitLoading(false)
+            setFormStateMessage('Quiz data updated successfully...reloading')
             // Update quiz
             await actions.updateQuiz(id, { quizName: quiz.quizName })
-            console.log('Data updated successfully!')
-            setFormStateMessage('Quiz data updated successfully...reloading')
         } catch (error) {
             console.error('Error updating data:', error)
+            setIsSubmitLoading(false)
             setFormStateMessage(
                 'Failed to update quiz data, please refresh the page!'
             )
         }
     }
 
-    if (!quiz || !questions || !answers) {
+    if (!quiz || !questions || !answers || !results) {
         return (
             <div className="gap-3">
                 <CardSkeleton />
             </div>
         )
     }
-
     return (
         <>
             <PageBreadcrumbs items={breadcrumbs} />
-            <DisplayMessage
-                formStateMessage={formStateMessage}
-                actions={function (): Promise<FormData> {
-                    throw new Error('Function not implemented.')
-                }}
-            />
+            <DisplayMessage formStateMessage={formStateMessage} />
             <div className="flex justify-center">
                 <div className="flex flex-col justify-center lg:w-2/3 md:w-full content-evenly">
-                    {/* quiz title */}
+                    {/* Quiz title */}
                     {quiz && (
                         <div className="flex flex-row">
                             <label className="text-nowrap self-center">
@@ -267,7 +362,7 @@ export default function ModifyQuizzes() {
                             />
                         </div>
                     )}
-                    {/* questions */}
+                    {/* Questions */}
                     {questions.map((question, questionIndex) => (
                         <div
                             key={question.id}
@@ -289,12 +384,12 @@ export default function ModifyQuizzes() {
                                     }
                                 />
                             </div>
-                            {/* answers */}
+                            {/* Answers */}
                             {answers[questionIndex]?.map(
                                 (answer, answerIndex) => (
                                     <div
                                         key={answer.id}
-                                        className="flex flex-row my-2 p-3 rounded "
+                                        className="flex flex-row my-2 p-3 rounded"
                                     >
                                         <label className="text-nowrap px-2 content-evenly">
                                             {String.fromCharCode(
@@ -343,24 +438,113 @@ export default function ModifyQuizzes() {
                                     </div>
                                 )
                             )}
-                            {/* delete question button */}
-                            <FormButton
+                            {/* Delete question button */}
+                            <Button
                                 onClick={() =>
                                     handleDeleteQuestion(question.id)
                                 }
                                 color="danger"
+                                variant="ghost"
                             >
                                 Delete Question
-                            </FormButton>
+                            </Button>
                         </div>
                     ))}
+                    {/* Results */}
+                    <div className="my-5 p-5 border-slate-300 bg-slate-200 rounded">
+                        <h3 className="font-bold">Results</h3>
+                        {results.map((result, resultIndex) => (
+                            <div
+                                key={result.id}
+                                className="flex flex-col my-3 p-3 rounded"
+                            >
+                                <div className="flex flex-row">
+                                    <label className="text-nowrap px-2 self-center">
+                                        Min Points:
+                                    </label>
+                                    <Input
+                                        type="number"
+                                        defaultValue={result.minPoints.toString()}
+                                        className="border rounded p-2 mx-5 w-full"
+                                        onChange={(e) =>
+                                            handleResultMinPointsChange(
+                                                resultIndex,
+                                                e
+                                            )
+                                        }
+                                    />
+                                </div>
+                                <div className="flex flex-row">
+                                    <label className="text-nowrap px-2 self-center">
+                                        Max Points:
+                                    </label>
+                                    <Input
+                                        type="number"
+                                        defaultValue={result.maxPoints.toString()}
+                                        className="border rounded p-2 mx-5 w-full"
+                                        onChange={(e) =>
+                                            handleResultMaxPointsChange(
+                                                resultIndex,
+                                                e
+                                            )
+                                        }
+                                    />
+                                </div>
+                                <div className="flex flex-row">
+                                    <label className="text-nowrap px-2 self-center">
+                                        Result Text:
+                                    </label>
+                                    <Textarea
+                                        type="textarea"
+                                        value={result.resultText}
+                                        className="border rounded p-2 mx-5 w-full"
+                                        onChange={(e) =>
+                                            handleResultTextChange(
+                                                resultIndex,
+                                                e
+                                            )
+                                        }
+                                    />
+                                </div>
+                                {/* Delete result button */}
+                                <Button
+                                    onClick={() =>
+                                        handleDeleteResult(result.id)
+                                    }
+                                    color="danger"
+                                    variant="ghost"
+                                >
+                                    Delete Result
+                                </Button>
+                            </div>
+                        ))}
+                    </div>
+
                     <div className="flex gap-4 justify-center">
-                        <FormButton onClick={handleAddQuestion}>
+                        <Button
+                            color="primary"
+                            variant="ghost"
+                            onClick={handleAddQuestion}
+                            isLoading={isAddQLoading}
+                        >
                             Add Question
-                        </FormButton>
-                        <FormButton onClick={handleSubmit}>
+                        </Button>
+                        <Button
+                            color="primary"
+                            variant="ghost"
+                            onClick={handleAddResult}
+                            isLoading={isAddResultLoading}
+                        >
+                            Add Result
+                        </Button>
+                        <Button
+                            color="primary"
+                            variant="ghost"
+                            onClick={handleSubmit}
+                            isLoading={isSubmitLoading}
+                        >
                             Save Changes
-                        </FormButton>
+                        </Button>
                     </div>
                 </div>
             </div>
