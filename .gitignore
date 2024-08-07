@@ -1,36 +1,41 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Node modules
+node_modules/
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
-.yarn/install-state.gz
+# Build output
+.next/
+out/
 
-# testing
-/coverage
+# Local environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
+# Log files
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# local env files
-.env*.local
+# OS-specific files
+.DS_Store
+Thumbs.db
 
-# vercel
-.vercel
+# IDE-specific files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
 
-# typescript
+# Optional: Coverage directory for test coverage reports
+coverage/
+
+# Optional: Storybook static build
+.storybook-out/
+
+# Optional: Dependency directories
+.pnp/
+.pnp.js
+
+# Optional: TypeScript build artifacts
 *.tsbuildinfo
-next-env.d.ts

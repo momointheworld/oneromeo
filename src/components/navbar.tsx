@@ -124,41 +124,50 @@ interface ItemProps {
 
 const NavbarComp = () => {
     const pathName = usePathname()
-    const [activeMenuItem, setActiveMenuItem] = useState<ItemProps | null>(null)
+    // const [activeMenuItem, setActiveMenuItem] = useState<ItemProps | null>(null)
+    const [activeMenuItems, setActiveMenuItems] = useState<ItemProps[]>([])
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const session = useSession()
 
     useEffect(() => {
-        const findActiveItem = (
+        const findActiveItems = (
             path: string,
             items: ItemProps[]
-        ): ItemProps | null => {
+        ): ItemProps[] => {
+            let activeItems: ItemProps[] = []
+
             for (const item of items) {
                 if (item.href === path) {
-                    return item
+                    activeItems.push(item)
                 }
                 if (item.children) {
-                    const childItem = findActiveItem(path, item.children)
-                    if (childItem) {
-                        return childItem
+                    const childActiveItems = findActiveItems(
+                        path,
+                        item.children
+                    )
+                    if (childActiveItems.length > 0) {
+                        activeItems.push(item, ...childActiveItems)
                     }
                 }
             }
-            return null
+
+            return activeItems
         }
 
-        const activeItem = findActiveItem(pathName, menuItems)
-        if (activeItem) {
-            setActiveMenuItem(activeItem)
-        }
+        const activeItems = findActiveItems(pathName, menuItems)
+        setActiveMenuItems(activeItems)
     }, [pathName])
 
     const handleMenuItemClick = (item: ItemProps) => {
-        console.log('Clicked item:', item) // Debug: log clicked item
-        setActiveMenuItem(item)
+        setActiveMenuItems([item])
         setIsMenuOpen(false)
     }
-    console.log('Active menu item:', activeMenuItem) // Debug: log active menu item
+
+    const isActive = (item: ItemProps) => {
+        return activeMenuItems.some(
+            (i) => i === item || (i.children && i.children.includes(item))
+        )
+    }
 
     return (
         <Suspense fallback={<CardSkeleton />}>
@@ -185,15 +194,26 @@ const NavbarComp = () => {
                             <Dropdown key={index}>
                                 <NavbarItem
                                     key={index}
-                                    isActive={item === activeMenuItem}
+                                    isActive={isActive(item)}
                                 >
                                     <DropdownTrigger>
+                                        {/* Button is the Parent Nav Item */}
                                         <Button
                                             disableRipple
-                                            className="p-0 bg-transparent data-[hover=true]:bg-transparent text-lg"
+                                            className={`p-0 bg-transparent data-[hover=true]:bg-transparent self-start text-lg ${
+                                                activeMenuItems.includes(item)
+                                                    ? 'font-bold'
+                                                    : ''
+                                            }`}
                                             endContent={icons.dropDownIcon}
                                             radius="sm"
                                             variant="light"
+                                            // Highlight the Parent Nav item if child is active
+                                            color={
+                                                activeMenuItems.includes(item)
+                                                    ? 'primary'
+                                                    : 'default'
+                                            }
                                         >
                                             {item.title}
                                         </Button>
@@ -226,7 +246,9 @@ const NavbarComp = () => {
                                             <Link
                                                 className="text-lg"
                                                 color={
-                                                    child === activeMenuItem
+                                                    activeMenuItems.includes(
+                                                        child
+                                                    )
                                                         ? 'primary'
                                                         : 'foreground'
                                                 }
@@ -239,14 +261,11 @@ const NavbarComp = () => {
                                 </DropdownMenu>
                             </Dropdown>
                         ) : (
-                            <NavbarItem
-                                key={index}
-                                isActive={item === activeMenuItem}
-                            >
+                            <NavbarItem key={index} isActive={isActive(item)}>
                                 <Link
                                     className="text-lg"
                                     color={
-                                        item === activeMenuItem
+                                        activeMenuItems.includes(item)
                                             ? 'primary'
                                             : 'foreground'
                                     }
@@ -270,15 +289,26 @@ const NavbarComp = () => {
                             <Dropdown key={`${item.title}-${index}`}>
                                 <NavbarMenuItem
                                     key={index}
-                                    isActive={item === activeMenuItem}
+                                    isActive={isActive(item)}
                                 >
                                     <DropdownTrigger>
+                                        {/* Button is the Parent Nav Item */}
                                         <Button
                                             disableRipple
-                                            className="p-0 bg-transparent data-[hover=true]:bg-transparent self-start text-lg"
+                                            className={`p-0 bg-transparent data-[hover=true]:bg-transparent self-start text-lg ${
+                                                activeMenuItems.includes(item)
+                                                    ? 'font-bold'
+                                                    : ''
+                                            }`}
                                             endContent={icons.rightIcon}
                                             radius="sm"
                                             variant="light"
+                                            // Highlight the Parent Nav item if child is active
+                                            color={
+                                                activeMenuItems.includes(item)
+                                                    ? 'primary'
+                                                    : 'default'
+                                            }
                                         >
                                             {item.title}
                                         </Button>
@@ -299,7 +329,7 @@ const NavbarComp = () => {
                                                     ? icons.meIcon
                                                     : icons.bookIcon
                                             }
-                                            textValue={child.title} // Add textValue prop here
+                                            textValue={child.title}
                                             onClick={() => {
                                                 // Navigate directly on DropdownItem click
                                                 handleMenuItemClick(child)
@@ -309,7 +339,9 @@ const NavbarComp = () => {
                                         >
                                             <Link
                                                 color={
-                                                    child === activeMenuItem
+                                                    activeMenuItems.includes(
+                                                        child
+                                                    )
                                                         ? 'primary'
                                                         : 'foreground'
                                                 }
@@ -326,7 +358,7 @@ const NavbarComp = () => {
                             <NavbarMenuItem key={`${item.title}-${index}`}>
                                 <Link
                                     color={
-                                        item === activeMenuItem
+                                        activeMenuItems.includes(item)
                                             ? 'primary'
                                             : 'foreground'
                                     }
