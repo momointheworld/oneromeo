@@ -40,7 +40,7 @@ const menuItems = [
         href: '/about',
         children: [
             { title: 'Me', href: '/about/me' },
-            { title: 'My Ebook', href: '/about/my-ebook' },
+            { title: 'My eBook', href: '/about/my-ebook' },
         ],
     },
     { title: 'FAQ', href: '/faq' },
@@ -211,7 +211,7 @@ const NavbarComp = () => {
                                             // Highlight the Parent Nav item if child is active
                                             color={
                                                 activeMenuItems.includes(item)
-                                                    ? 'primary'
+                                                    ? 'warning'
                                                     : 'default'
                                             }
                                         >
@@ -249,7 +249,7 @@ const NavbarComp = () => {
                                                     activeMenuItems.includes(
                                                         child
                                                     )
-                                                        ? 'primary'
+                                                        ? 'warning'
                                                         : 'foreground'
                                                 }
                                                 href={child.href}
@@ -266,7 +266,7 @@ const NavbarComp = () => {
                                     className="text-lg"
                                     color={
                                         activeMenuItems.includes(item)
-                                            ? 'primary'
+                                            ? 'warning'
                                             : 'foreground'
                                     }
                                     href={item.href}
@@ -306,7 +306,7 @@ const NavbarComp = () => {
                                             // Highlight the Parent Nav item if child is active
                                             color={
                                                 activeMenuItems.includes(item)
-                                                    ? 'primary'
+                                                    ? 'warning'
                                                     : 'default'
                                             }
                                         >
@@ -342,7 +342,7 @@ const NavbarComp = () => {
                                                     activeMenuItems.includes(
                                                         child
                                                     )
-                                                        ? 'primary'
+                                                        ? 'warning'
                                                         : 'foreground'
                                                 }
                                                 className="flex items-center w-full text-lg"
@@ -359,7 +359,7 @@ const NavbarComp = () => {
                                 <Link
                                     color={
                                         activeMenuItems.includes(item)
-                                            ? 'primary'
+                                            ? 'warning'
                                             : 'foreground'
                                     }
                                     className="w-full text-lg"

@@ -54,7 +54,6 @@
 
 'use server'
 import { db } from '@/db'
-import { Quiz } from '@prisma/client'
 import { notFound } from 'next/navigation'
 import { cache } from 'react'
 

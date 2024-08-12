@@ -588,12 +588,16 @@ export default function NewQuiz() {
                                             )}
                                             :
                                         </label>
-                                        <input
+                                        <Textarea
                                             type="text"
                                             id={`answer${questionIndex}${answerIndex}`}
                                             name={`answer${questionIndex}${answerIndex}`}
                                             value={answer.text}
-                                            className="border rounded p-2 w-full"
+                                            className="border rounded px-2"
+                                            classNames={{
+                                                base: 'max-w-full',
+                                                input: 'resize-y min-h-[40px]',
+                                            }}
                                             onChange={(e) =>
                                                 handleAnswerChange(
                                                     questionIndex,
@@ -714,7 +718,11 @@ export default function NewQuiz() {
                                                 e.target.value
                                             )
                                         }
-                                        className="border rounded p-2"
+                                        className="border rounded p-2 "
+                                        classNames={{
+                                            base: 'max-w-full',
+                                            input: 'resize-y min-h-[40px]',
+                                        }}
                                         required
                                     />
                                 </div>

@@ -1,22 +1,22 @@
 import { generateSecureDownloadToken } from '@/utils/generateSecureDownloadToken'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-// Define the Zod schema with validation
+
 const schema = z
     .object({
         priceId: z
             .string()
             .min(1, 'You need to select a service or product first!'),
-        email: z.string().email('(please enter a valid email address'),
+        email: z.string().email('please enter a valid email address'),
         timeZone: z.string().optional(),
         date: z.string().optional(),
         timeSlot: z.string().optional(),
+        couponCode: z.string().optional(), // Added couponCode field
     })
     .superRefine((data, ctx) => {
-        const exemptProductId = 'price_1PffWVHcOAKxyg1ZcYyxKX8U'
+        const exemptProductId = ebookPriceId
 
         if (data.priceId.trim() !== exemptProductId) {
-            // Only validate if priceId is not exempt
             if (!data.timeZone) {
                 ctx.addIssue({
                     code: z.ZodIssueCode.custom,
@@ -39,12 +39,14 @@ const schema = z
                 })
             }
         } else {
-            // When exempt, no need to validate optional fields
             console.log('Exempt product - skipping optional field validation')
         }
     })
 
 const stripeInstance = require('stripe')(process.env.STRIPE_SECRET_KEY)
+const singleSessionPriceId = process.env.NEXT_PUBLIC_SINGLE_SESSION_PRICEID
+const bundlePriceId = process.env.NEXT_PUBLIC_BUNDLE_PRICEID
+const ebookPriceId = process.env.NEXT_PUBLIC_EBOOK_PRICEID
 
 export async function POST(req: NextRequest, res: NextResponse) {
     const body = await req.json()
@@ -59,6 +61,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
         const timezoneError = flattenedErrors.fieldErrors.timeZone || []
         const dateError = flattenedErrors.fieldErrors.date || []
         const timeSlotError = flattenedErrors.fieldErrors.timeSlot || []
+        const couponCodeError = flattenedErrors.fieldErrors.couponCode || [] // Added couponCodeError
         console.log('Flattened Errors:', flattenedErrors.fieldErrors)
 
         return new Response(
@@ -68,6 +71,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
                     dateError,
                     timezoneError,
                     timeSlotError,
+                    couponCodeError, // Added couponCodeError
                 },
             }),
             {
@@ -78,7 +82,45 @@ export async function POST(req: NextRequest, res: NextResponse) {
 
     // Proceed with creating checkout session
     try {
-        const { priceId, email, timeZone, date, timeSlot } = body
+        const { priceId, email, timeZone, date, timeSlot, couponCode } = body
+        console.log('Request Body:', {
+            priceId,
+            email,
+            timeZone,
+            date,
+            timeSlot,
+            couponCode,
+        })
+
+        // Define the promotionCodeId within a block scope
+        let promotionCodeId: string | null = null
+
+        if (body.couponCode) {
+            const promotionCodes = await stripeInstance.promotionCodes.list({
+                active: true,
+                code: body.couponCode,
+            })
+            console.log('Stripe Promotion Codes:', promotionCodes.data)
+
+            promotionCodeId =
+                promotionCodes.data.length > 0
+                    ? promotionCodes.data[0].id
+                    : null
+
+            if (!promotionCodeId) {
+                // Add an error to the couponCodeError array
+                const couponCodeError = ['Invalid coupon code']
+
+                return new Response(
+                    JSON.stringify({
+                        errors: {
+                            couponCodeError,
+                        },
+                    }),
+                    { status: 400 }
+                )
+            }
+        }
 
         const customFields = []
         if (date) {
@@ -115,21 +157,40 @@ export async function POST(req: NextRequest, res: NextResponse) {
             appointment_timeZone: timeZone || '',
         }
 
-        const adjustableQuantityPriceId = 'price_1PckCSHcOAKxyg1Z0WStpNJl'
+        // const adjustableQuantityPriceId = singleSessionPriceId
 
         const lineItems = [
             {
                 price: priceId,
                 adjustable_quantity:
-                    priceId === adjustableQuantityPriceId
+                    priceId === singleSessionPriceId
                         ? { enabled: true, minimum: 1, maximum: 4 }
                         : undefined,
                 quantity: 1,
             },
         ]
 
+        // Mapping of coupon codes to promotion code IDs from environment variables
+        const couponToPromotionCodeMap: { [key: string]: string } = {
+            QUIZ24: process.env.COUPON_CODE_QUIZ24 || '',
+            // Add more mappings as needed
+        }
+
+        // Lookup the promotion code ID from the coupon code
+        const promotionCode = couponCode
+            ? couponToPromotionCodeMap[couponCode]
+            : null
+
+        console.log('Mapped Promotion Code:', promotionCode)
+
+        const discounts =
+            priceId === singleSessionPriceId &&
+            (promotionCode || promotionCodeId)
+                ? [{ promotion_code: promotionCode || promotionCodeId }] // Use the mapped promotion code ID
+                : []
+
         let successUrl = `http://localhost:3000/confirmation?success=true&session_id={CHECKOUT_SESSION_ID}&date=${date}&timeSlot=${timeSlot}&timeZone=${timeZone}&email=${email}`
-        if (priceId === 'price_1PffWVHcOAKxyg1ZcYyxKX8U') {
+        if (priceId === ebookPriceId) {
             // Generate a token for the ebook
             const token = await generateSecureDownloadToken(email) // Implement this function as needed
             successUrl += `&token=${token}`
@@ -142,6 +203,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
             custom_text: {
                 submit: { message: '**$1 ≈ HK$ 7.80**' },
             },
+            discounts: discounts,
             metadata,
             mode: 'payment',
             customer_email: email,

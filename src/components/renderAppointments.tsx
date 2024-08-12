@@ -82,6 +82,7 @@ const RenderAppointments: React.FC<RenderAppointmentsProps> = ({
                             <td className="p-2 md:border md:border-gray-300 text-left block md:table-cell">
                                 <Button
                                     color="danger"
+                                    variant="ghost"
                                     onClick={() =>
                                         handleDelete && handleDelete(app.id)
                                     }

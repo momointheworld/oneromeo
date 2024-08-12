@@ -17,7 +17,7 @@ import {
 import { useLocale } from '@react-aria/i18n'
 import { I18nProvider } from '@react-aria/i18n'
 import DisplayMessage from '@/components/common/message'
-import SelectTimezone from '@/components/timezoneSelector'
+import SelectTimezone from '@/components/timeZoneSelector'
 import { useDate } from '@/hooks/useDate'
 import { useEmail } from '@/hooks/useEmail'
 
@@ -85,65 +85,63 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
     }
 
     return (
-        <>
-            <div className="max-w-md mx-auto bg-white shadow-lg rounded-lg p-6">
-                <div>
-                    <SelectTimezone
+        <div className="max-w-md mx-auto bg-white shadow-lg rounded-lg p-6">
+            <div>
+                <SelectTimezone
+                    isDisabled={isDisabled}
+                    isTimezoneInvalid={isTimezoneInvalid}
+                    aria-label="Select your time zone"
+                    timezoneError={timezoneError}
+                />
+                <I18nProvider locale="en-US">
+                    <DatePicker
+                        label="Appointment day"
+                        aria-label="Appointment day"
+                        isDateUnavailable={isDateUnavailable}
+                        minValue={startDate}
+                        value={selectedDate}
+                        onChange={handleDateChange}
+                        className="w-full mb-4"
                         isDisabled={isDisabled}
-                        isTimezoneInvalid={isTimezoneInvalid}
-                        aria-label="Select your time zone"
-                        timezoneError={timezoneError}
+                        isInvalid={isDateInvalid}
+                        errorMessage={dateError}
                     />
-                    <I18nProvider locale="en-US">
-                        <DatePicker
-                            label="Appointment day"
-                            aria-label="Appointment day"
-                            isDateUnavailable={isDateUnavailable}
-                            minValue={startDate}
-                            value={selectedDate}
-                            onChange={handleDateChange}
-                            className="w-full mb-4"
-                            isDisabled={isDisabled}
-                            isInvalid={isDateInvalid}
-                            errorMessage={dateError}
-                        />
-                    </I18nProvider>
-                </div>
-                <div className="max-w-md mx-auto flex w-full flex-wrap md:flex-nowrap gap-4">
-                    <Select
-                        aria-label="Select a time slot" // Provide aria-label for accessibility
-                        placeholder="Select a time slot"
-                        className="max-w-md  mb-4"
-                        isDisabled={!selectedDate}
-                        items={availableSlots}
-                        selectedKeys={[pickedTime]}
-                        errorMessage={timeSlotError}
-                        isInvalid={isTimeSlotInvalid}
-                        onChange={handleTimeChange}
-                    >
-                        {/* slot has key and label, label is what is being updated, while key is still the default value */}
-                        {availableSlots.map((slot) => (
-                            <SelectItem key={slot.label} value={slot.label}>
-                                {slot.label}
-                            </SelectItem>
-                        ))}
-                    </Select>
-                </div>
-                <div className="">
-                    {' '}
-                    <Input
-                        type="email"
-                        aria-label="Enter your email" // Provide aria-label for accessibility
-                        placeholder="Enter your email"
-                        value={email}
-                        onValueChange={setEmail}
-                        isInvalid={isEmailInvalid}
-                        errorMessage={emailError}
-                    />
-                </div>
-                <DisplayMessage formStateMessage={formStateMessage} />
+                </I18nProvider>
             </div>
-        </>
+            <div className="max-w-md mx-auto flex w-full flex-wrap md:flex-nowrap gap-4">
+                <Select
+                    aria-label="Select a time slot" // Provide aria-label for accessibility
+                    placeholder="Select a time slot"
+                    className="max-w-md  mb-4"
+                    isDisabled={!selectedDate}
+                    items={availableSlots}
+                    selectedKeys={[pickedTime]}
+                    errorMessage={timeSlotError}
+                    isInvalid={isTimeSlotInvalid}
+                    onChange={handleTimeChange}
+                >
+                    {/* slot has key and label, label is what is being updated, while key is still the default value */}
+                    {availableSlots.map((slot) => (
+                        <SelectItem key={slot.label} value={slot.label}>
+                            {slot.label}
+                        </SelectItem>
+                    ))}
+                </Select>
+            </div>
+            <div>
+                {' '}
+                <Input
+                    type="email"
+                    aria-label="Enter your email" // Provide aria-label for accessibility
+                    placeholder="Enter your email"
+                    value={email}
+                    onValueChange={setEmail}
+                    isInvalid={isEmailInvalid}
+                    errorMessage={emailError}
+                />
+            </div>
+            <DisplayMessage formStateMessage={formStateMessage} />
+        </div>
     )
 }
 

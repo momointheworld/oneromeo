@@ -24,7 +24,7 @@ export default function RootLayout({
             <body className={`${inter.className} mx-10`}>
                 <Providers>
                     <Header />
-                    <main className="prose md:container mx-auto mt-10 p-10 rounded-md">
+                    <main className="prose md:container mx-auto mt-10 rounded-md">
                         {children}
                     </main>
                     <Footer />

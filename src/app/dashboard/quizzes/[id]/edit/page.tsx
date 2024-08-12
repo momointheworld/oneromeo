@@ -76,7 +76,7 @@ export default function ModifyQuizzes() {
                 if (fetchedQuestions.length === 0) {
                     setFormStateMessage('No questions found for this quiz.')
                     setQuestions([]) // Ensure questions state is cleared
-                    return // Exit early if no questions are found
+                    // return // Exit early if no questions are found
                 }
                 setQuestions(fetchedQuestions)
 
@@ -335,6 +335,45 @@ export default function ModifyQuizzes() {
         }
     }
 
+    const handleQuizDelete = async () => {
+        if (!quiz) {
+            setFormStateMessage('No quiz data available to delete.')
+            return
+        }
+
+        // Check if there are associated questions or results
+        if (questions.length > 0 || results.length > 0) {
+            setFormStateMessage(
+                'Quiz cannot be deleted because it has associated questions or results.'
+            )
+            return
+        }
+
+        // Confirm deletion
+        if (
+            !confirm(
+                'Are you sure you want to delete this quiz? This action cannot be undone.'
+            )
+        ) {
+            return
+        }
+
+        setFormStateMessage('Deleting quiz...')
+        setIsSubmitLoading(true)
+
+        try {
+            // Call the API action to delete the quiz
+            await actions.deleteQuiz(quiz.id)
+        } catch (error) {
+            console.error('Error deleting the quiz:', error)
+            setFormStateMessage(
+                error instanceof Error ? error.message : 'Error deleting quiz.'
+            )
+        } finally {
+            setIsSubmitLoading(false)
+        }
+    }
+
     if (!quiz || !questions || !answers || !results) {
         return (
             <div className="gap-3">
@@ -345,7 +384,7 @@ export default function ModifyQuizzes() {
     return (
         <>
             <PageBreadcrumbs items={breadcrumbs} />
-            <DisplayMessage formStateMessage={formStateMessage} />
+
             <div className="flex justify-center">
                 <div className="flex flex-col justify-center lg:w-2/3 md:w-full content-evenly">
                     {/* Quiz title */}
@@ -397,10 +436,14 @@ export default function ModifyQuizzes() {
                                             )}
                                             :
                                         </label>
-                                        <input
+                                        <Textarea
                                             type="text"
                                             value={answer.text}
-                                            className="border rounded p-2 w-full"
+                                            className="border rounded p-2 mx-5"
+                                            classNames={{
+                                                base: 'max-w-full',
+                                                input: 'resize-y min-h-[40px]',
+                                            }}
                                             onChange={(e) =>
                                                 handleAnswerTextChange(
                                                     questionIndex,
@@ -498,6 +541,10 @@ export default function ModifyQuizzes() {
                                         type="textarea"
                                         value={result.resultText}
                                         className="border rounded p-2 mx-5 w-full"
+                                        classNames={{
+                                            base: 'max-w-full',
+                                            input: 'resize-y min-h-[40px]',
+                                        }}
                                         onChange={(e) =>
                                             handleResultTextChange(
                                                 resultIndex,
@@ -546,6 +593,16 @@ export default function ModifyQuizzes() {
                             Save Changes
                         </Button>
                     </div>
+
+                    <Button
+                        color="danger"
+                        variant="ghost"
+                        className="mt-5"
+                        onClick={handleQuizDelete}
+                    >
+                        Delete Quiz
+                    </Button>
+                    <DisplayMessage formStateMessage={formStateMessage} />
                 </div>
             </div>
         </>

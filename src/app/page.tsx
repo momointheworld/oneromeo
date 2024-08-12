@@ -11,7 +11,7 @@ import {
 import { useLocale } from '@react-aria/i18n'
 import { getAppointments } from '@/actions'
 import AddAppointment from '@/components/appointment'
-import { Button, Chip, Input } from '@nextui-org/react'
+import { Button, Card, Chip, Input } from '@nextui-org/react'
 import { convertToUserTimezone, timeSlots } from '@/utils/converTimeZone'
 import { useTimezone } from '@/hooks/useTimezone'
 import { useDate } from '@/hooks/useDate'
@@ -41,10 +41,17 @@ const OrderForm = () => {
         csrTimeSlot: string
         email: string
     }
+    const singleSessionPriceId = process.env.NEXT_PUBLIC_SINGLE_SESSION_PRICEID
+    const bundlePriceId = process.env.NEXT_PUBLIC_BUNDLE_PRICEID
+    const ebookPriceId = process.env.NEXT_PUBLIC_EBOOK_PRICEID
 
     const [selectedItem, setSelectedItem] = useState<Item | null>(null)
     const { selectedPriceId, setSelectedPriceId } = useSelectedItem()
+    const [singleSession, setSingleSession] = useState(false)
     const [isAppointmentAvailable, setIsAppointmentAvailable] = useState(true)
+    const [secondStepTitle, setSecondStepTitle] = useState(
+        'Choose Time & Email'
+    )
 
     let now = today(getLocalTimeZone())
     let startDate = now.add({ days: 1 }) // Tomorrow
@@ -52,15 +59,20 @@ const OrderForm = () => {
     let endDate = now.add({ days: 30 }) // Two weeks from tomorrow
     const appointmentRef = useRef<HTMLDivElement>(null) // Create a ref for the Appointment component
     const { email, setEmail } = useEmail()
+    const [couponCode, setCouponCode] = useState('')
     const [isEmailInvalid, setIsEmailInvalid] = useState(false)
     const [isDateInvalid, setIsDateInvalid] = useState(false)
     const [isTimezoneInvalid, setIsTimezoneInvalid] = useState(false)
     const [isTimeSlotInvalid, setIsTimeSlotInvalid] = useState(false)
+    const [isCouponInvalid, setIsCouponInvalid] = useState(false)
     const [emailError, setEmailError] = useState('')
     const [dateError, setDateError] = useState('')
     const [timezoneError, setTimezoneError] = useState('')
     const [timeSlotError, setTimeSlotError] = useState('')
+    const [couponCodeError, setCouponCodeError] = useState('')
     const [formStateMessage, setFormStateMessage] = useState('')
+    const [showNote, setShowNote] = useState(false)
+    const [note, setNote] = useState('')
     const [availableSlots, setAvailableSlots] = useState(timeSlots)
     const { selectedTimezone, setSelectedTimezone } = useTimezone()
     const { selectedDate, setSelectedDate } = useDate()
@@ -98,11 +110,11 @@ const OrderForm = () => {
         {
             imgSrc: productImg,
             imgAlt: '',
-            title: 'Ebook',
+            title: 'eBook',
             price: 'USD 1.25',
             priceId: 'price_1PffWVHcOAKxyg1ZcYyxKX8U',
             description:
-                'I’ve been typing away for hours, days, and weeks, but it’s finally here — my debut novel is out now! Not in a Million Years!',
+                'I’ve been typing away for hours, days, and weeks, but it‘s finally here - Not in a Million Years!',
         },
     ]
 
@@ -198,19 +210,35 @@ const OrderForm = () => {
     const resetAppointment = () => {
         setSelectedTimezone(''), setSelectedDate(null), setPickedTime('')
     }
-
     // get the product information
     const handleItemClick: React.MouseEventHandler<HTMLButtonElement> = (e) => {
         const priceId = e.currentTarget.getAttribute('data-price-id')
         const item = items.find((item) => item.priceId === priceId) || null
         setSelectedItem(item)
         setSelectedPriceId(priceId)
-        if (priceId === 'price_1PffWVHcOAKxyg1ZcYyxKX8U') {
+        setShowNote(false)
+
+        // Set `singleSession` to true if the priceId matches `singleSessionPriceId`
+        if (priceId === singleSessionPriceId) {
+            setSingleSession(true)
+        } else {
+            setSingleSession(false)
+        }
+
+        if (priceId === ebookPriceId) {
             setIsAppointmentAvailable(false)
             resetAppointment()
+            setSecondStepTitle('Enter Your Email')
         } else {
+            setSecondStepTitle('Choose Time & Email')
             setIsAppointmentAvailable(true)
         }
+
+        if (priceId === bundlePriceId) {
+            setShowNote(true)
+            setNote('At this stage, you can only book one time slot.')
+        }
+
         // Scroll to the Appointment component
         if (appointmentRef.current) {
             appointmentRef.current.scrollIntoView({ behavior: 'smooth' })
@@ -274,57 +302,96 @@ const OrderForm = () => {
                 email,
                 selectedTimezone,
                 orderDate,
-                label
+                label,
+                couponCode || '' // Default to empty string if coupon is undefined
             )
 
             if (result.error) {
-                const errorString = result.error
-                const fieldErrors = parseErrors(errorString)
-                console.log(fieldErrors)
-                // Display specific error messages and update state
-                switch (true) {
-                    case !!fieldErrors.emailError:
+                // console.log(fieldErrors)
+                // // Display specific error messages and update state
+                // switch (true) {
+                //     case !!fieldErrors.emailError:
+                //         setIsEmailInvalid(true)
+                //         setEmailError(fieldErrors.emailError)
+                //         break
+                //     default:
+                //         setIsEmailInvalid(false)
+                //         setEmailError('')
+                //         break
+                // }
+
+                // switch (true) {
+                //     case !!fieldErrors.timezoneError:
+                //         setIsTimezoneInvalid(true)
+                //         setTimezoneError(fieldErrors.timezoneError)
+                //         break
+                //     default:
+                //         setIsTimezoneInvalid(false)
+                //         setTimezoneError('')
+                //         break
+                // }
+
+                // switch (true) {
+                //     case !!fieldErrors.dateError:
+                //         setIsDateInvalid(true)
+                //         setDateError(fieldErrors.dateError)
+                //         break
+                //     default:
+                //         setIsDateInvalid(false)
+                //         setDateError('')
+                //         break
+                // }
+
+                // switch (true) {
+                //     case !!fieldErrors.timeSlotError:
+                //         setIsTimeSlotInvalid(true)
+                //         setTimeSlotError(fieldErrors.timeSlotError)
+                //         break
+                //     default:
+                //         setIsTimeSlotInvalid(false)
+                //         setTimeSlotError('')
+                //         break
+                // }
+
+                // switch (true) {
+                //     case !!fieldErrors.couponCodeError:
+                //         setIsCouponInvalid(true)
+                //         setCouponCodeError(fieldErrors.couponCodeError)
+                //         break
+                //     default:
+                //         setIsCouponInvalid(false)
+                //         setCouponCodeError('')
+                //         break
+                // }
+
+                //Split the error string to separate ones.
+                const errors = result.error.split(' | ')
+
+                // Process errors and update state accordingly
+                errors.forEach((error) => {
+                    if (error.startsWith('Email Error:')) {
                         setIsEmailInvalid(true)
-                        setEmailError(fieldErrors.emailError)
-                        break
-                    default:
-                        setIsEmailInvalid(false)
-                        setEmailError('')
-                        break
-                }
-
-                switch (true) {
-                    case !!fieldErrors.timezoneError:
+                        setEmailError(error.replace('Email Error: ', ''))
+                    }
+                    if (error.startsWith('Timezone Error:')) {
                         setIsTimezoneInvalid(true)
-                        setTimezoneError(fieldErrors.timezoneError)
-                        break
-                    default:
-                        setIsTimezoneInvalid(false)
-                        setTimezoneError('')
-                        break
-                }
-
-                switch (true) {
-                    case !!fieldErrors.dateError:
+                        setTimezoneError(error.replace('Timezone Error: ', ''))
+                    }
+                    if (error.startsWith('Date Error:')) {
                         setIsDateInvalid(true)
-                        setDateError(fieldErrors.dateError)
-                        break
-                    default:
-                        setIsDateInvalid(false)
-                        setDateError('')
-                        break
-                }
-
-                switch (true) {
-                    case !!fieldErrors.timeSlotError:
+                        setDateError(error.replace('Date Error: ', ''))
+                    }
+                    if (error.startsWith('Time Slot Error:')) {
                         setIsTimeSlotInvalid(true)
-                        setTimeSlotError(fieldErrors.timeSlotError)
-                        break
-                    default:
-                        setIsTimeSlotInvalid(false)
-                        setTimeSlotError('')
-                        break
-                }
+                        setTimeSlotError(error.replace('Time Slot Error: ', ''))
+                    }
+                    if (error.startsWith('Coupon Code Error:')) {
+                        setIsCouponInvalid(true)
+                        setCouponCodeError(
+                            error.replace('Coupon Code Error: ', '')
+                        )
+                    }
+                })
 
                 // Log the errors for debugging
                 console.error('Checkout error:', result.error)
@@ -340,9 +407,7 @@ const OrderForm = () => {
                 setFormStateMessage('Failed to proceed with the checkout.')
             }
         } catch (error) {
-            setFormStateMessage(
-                'Failed to add the appointment, try again later.'
-            )
+            setFormStateMessage('Something went wrong, contact support please.')
             console.error('Error adding appointment:', error)
         } finally {
             setIsLoading(false)
@@ -355,13 +420,16 @@ const OrderForm = () => {
 
     return (
         <div>
-            <form onSubmit={handleSubmit} className="flex flex-col gap-y-20">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-y-16">
                 <OrderItems handleItemClick={handleItemClick} items={items} />
                 <div ref={appointmentRef}>
-                    <div className="flex place-content-center">
-                        <Chip color="primary">2 </Chip>
+                    <div className="flex place-content-center mb-12">
+                        <Chip color="primary" size="lg" radius="full">
+                            2{' '}
+                        </Chip>
                         <span className="mx-5 text-2xl font-bold tracking-tight text-gray-600">
-                            Choose Your Time (& enter your email)
+                            {/* Choose Your Time (& enter your email) */}
+                            {secondStepTitle}
                         </span>
                     </div>
                     <AddAppointment
@@ -381,6 +449,29 @@ const OrderForm = () => {
                         timeSlotError={timeSlotError}
                         dateError={dateError}
                     />
+                    {showNote && (
+                        <div className="flex justify-center mt-2 ">
+                            <Card
+                                isBlurred
+                                className="text-pretty text-center bg-blue-100 p-2"
+                            >
+                                {note}
+                            </Card>
+                        </div>
+                    )}
+                    {singleSession && (
+                        <div className="max-w-sm mx-auto rounded-lg p-6">
+                            <Input
+                                type="text"
+                                aria-label="Coupon code" // Provide aria-label for accessibility
+                                placeholder="Coupon code"
+                                value={couponCode}
+                                onChange={(e) => setCouponCode(e.target.value)}
+                                isInvalid={isCouponInvalid}
+                                errorMessage={couponCodeError}
+                            />
+                        </div>
+                    )}
                 </div>
                 <div className=" flex justify-center">
                     <Button isLoading={isLoading} type="submit" color="primary">
