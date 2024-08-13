@@ -17,19 +17,22 @@ import {
     Button,
 } from '@nextui-org/react'
 import Image from 'next/image'
-import Logo from '/public/logo.png'
+import Logo from '/public/logo-circle.png'
 import Profile from '@/components/profile'
 import { useSession } from 'next-auth/react'
 import { CardSkeleton } from './common/skeleton-loading'
 
 const MenuLogo = () => {
     return (
-        <Image
-            className="hidden md:flex justify-self-end pt-3 mx-5 aspect-ratio"
-            src={Logo}
-            alt="sparrow logo"
-            priority
-        />
+        <div className="relative w-16 h-16 flex justify-start items-center p-2 mr-5">
+            <Image
+                className="object-contain" // Ensures the image maintains its aspect ratio
+                src={Logo}
+                alt="One Romeo Logo"
+                priority={true}
+                layout="fill"
+            />
+        </div>
     )
 }
 
@@ -174,6 +177,8 @@ const NavbarComp = () => {
             <Navbar
                 isMenuOpen={isMenuOpen}
                 onMenuOpenChange={(isOpen) => setIsMenuOpen(isOpen)}
+                height="6rem"
+                className="bg-primary text-white rounded"
             >
                 <NavbarContent>
                     <NavbarMenuToggle
@@ -186,7 +191,7 @@ const NavbarComp = () => {
                     </NavbarBrand>
                 </NavbarContent>
                 <NavbarContent
-                    className="hidden sm:flex items-center space-x-4 py-3 px-6 shadow-lg rounded-lg mt-2"
+                    className="hidden sm:flex items-center space-x-4 py-3 px-6 rounded-lg mt-2 text-white"
                     justify="center"
                 >
                     {menuItems.map((item, index) =>
@@ -200,20 +205,14 @@ const NavbarComp = () => {
                                         {/* Button is the Parent Nav Item */}
                                         <Button
                                             disableRipple
-                                            className={`p-0 bg-transparent data-[hover=true]:bg-transparent self-start text-lg ${
+                                            className={`p-0 bg-transparent data-[hover=true]:bg-transparent self-start text-lg text-white ${
                                                 activeMenuItems.includes(item)
-                                                    ? 'font-bold'
+                                                    ? 'font-bold underline'
                                                     : ''
                                             }`}
                                             endContent={icons.dropDownIcon}
                                             radius="sm"
                                             variant="light"
-                                            // Highlight the Parent Nav item if child is active
-                                            color={
-                                                activeMenuItems.includes(item)
-                                                    ? 'warning'
-                                                    : 'default'
-                                            }
                                         >
                                             {item.title}
                                         </Button>
@@ -245,12 +244,12 @@ const NavbarComp = () => {
                                         >
                                             <Link
                                                 className="text-lg"
-                                                color={
+                                                underline={
                                                     activeMenuItems.includes(
                                                         child
                                                     )
-                                                        ? 'warning'
-                                                        : 'foreground'
+                                                        ? 'always'
+                                                        : 'none'
                                                 }
                                                 href={child.href}
                                             >
@@ -263,11 +262,11 @@ const NavbarComp = () => {
                         ) : (
                             <NavbarItem key={index} isActive={isActive(item)}>
                                 <Link
-                                    className="text-lg"
-                                    color={
+                                    className="text-lg text-white"
+                                    underline={
                                         activeMenuItems.includes(item)
-                                            ? 'warning'
-                                            : 'foreground'
+                                            ? 'always'
+                                            : 'none'
                                     }
                                     href={item.href}
                                     onPress={() => handleMenuItemClick(item)}
@@ -295,20 +294,14 @@ const NavbarComp = () => {
                                         {/* Button is the Parent Nav Item */}
                                         <Button
                                             disableRipple
-                                            className={`p-0 bg-transparent data-[hover=true]:bg-transparent self-start text-lg ${
+                                            className={`p-0 bg-transparent data-[hover=true]:bg-transparent self-start text-lg text-primary ${
                                                 activeMenuItems.includes(item)
-                                                    ? 'font-bold'
+                                                    ? 'underline'
                                                     : ''
                                             }`}
                                             endContent={icons.rightIcon}
                                             radius="sm"
                                             variant="light"
-                                            // Highlight the Parent Nav item if child is active
-                                            color={
-                                                activeMenuItems.includes(item)
-                                                    ? 'warning'
-                                                    : 'default'
-                                            }
                                         >
                                             {item.title}
                                         </Button>
@@ -338,12 +331,19 @@ const NavbarComp = () => {
                                             }}
                                         >
                                             <Link
-                                                color={
+                                                // color={
+                                                //     activeMenuItems.includes(
+                                                //         child
+                                                //     )
+                                                //         ? 'danger'
+                                                //         : 'foreground'
+                                                // }
+                                                underline={
                                                     activeMenuItems.includes(
                                                         child
                                                     )
-                                                        ? 'warning'
-                                                        : 'foreground'
+                                                        ? 'always'
+                                                        : 'none'
                                                 }
                                                 className="flex items-center w-full text-lg"
                                                 href={child.href}
@@ -357,10 +357,15 @@ const NavbarComp = () => {
                         ) : (
                             <NavbarMenuItem key={`${item.title}-${index}`}>
                                 <Link
-                                    color={
+                                    // color={
+                                    //     activeMenuItems.includes(item)
+                                    //         ? 'danger'
+                                    //         : 'foreground'
+                                    // }
+                                    underline={
                                         activeMenuItems.includes(item)
-                                            ? 'warning'
-                                            : 'foreground'
+                                            ? 'always'
+                                            : 'none'
                                     }
                                     className="w-full text-lg"
                                     href={item.href}

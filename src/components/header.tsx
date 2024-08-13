@@ -2,7 +2,7 @@ import NavbarComp from './navbar'
 
 function Header() {
     return (
-        <header className="">
+        <header>
             <NavbarComp />
         </header>
     )
