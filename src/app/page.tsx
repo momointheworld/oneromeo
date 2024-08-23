@@ -16,13 +16,14 @@ import { convertToUserTimezone, timeSlots } from '@/utils/converTimeZone'
 import { useTimezone } from '@/hooks/useTimezone'
 import { useDate } from '@/hooks/useDate'
 import OrderItems from '@/components/orderItems'
-import productImg from '/public/logo.png'
-import { StaticImageData } from 'next/image'
+import singleSessionImg from '/public/single-session.png'
+import ebookImg from '/public/ebook-2.png'
+import bundleImg from '/public/bundle-sessions.png'
 import { useEmail } from '@/hooks/useEmail'
 import { useSelectedItem } from '@/hooks/useSelectedItem'
 import checkout from '@/actions/checkout'
 import { revertTimezone } from '@/utils/revertTimeZone'
-import parseErrors from '@/components/common/errorMessage'
+import { StaticImageData } from 'next/image'
 
 const OrderForm = () => {
     interface Item {
@@ -90,7 +91,7 @@ const OrderForm = () => {
 
     const items = [
         {
-            imgSrc: productImg,
+            imgSrc: singleSessionImg,
             imgAlt: '',
             title: 'U Talk, I Listen',
             price: 'USD 5.50',
@@ -99,7 +100,7 @@ const OrderForm = () => {
                 "15-minute session / Buy me a coffee and I'll be the best listener you've ever had :-)",
         },
         {
-            imgSrc: productImg,
+            imgSrc: bundleImg,
             imgAlt: '',
             title: 'U Talk, I Listen (5x)',
             price: 'USD 24.50',
@@ -108,7 +109,7 @@ const OrderForm = () => {
                 'Bundle of 5 x 15-minute sessions / Buy me 5 coffees for a lower price :-)',
         },
         {
-            imgSrc: productImg,
+            imgSrc: ebookImg,
             imgAlt: '',
             title: 'eBook',
             price: 'USD 1.25',
@@ -307,63 +308,6 @@ const OrderForm = () => {
             )
 
             if (result.error) {
-                // console.log(fieldErrors)
-                // // Display specific error messages and update state
-                // switch (true) {
-                //     case !!fieldErrors.emailError:
-                //         setIsEmailInvalid(true)
-                //         setEmailError(fieldErrors.emailError)
-                //         break
-                //     default:
-                //         setIsEmailInvalid(false)
-                //         setEmailError('')
-                //         break
-                // }
-
-                // switch (true) {
-                //     case !!fieldErrors.timezoneError:
-                //         setIsTimezoneInvalid(true)
-                //         setTimezoneError(fieldErrors.timezoneError)
-                //         break
-                //     default:
-                //         setIsTimezoneInvalid(false)
-                //         setTimezoneError('')
-                //         break
-                // }
-
-                // switch (true) {
-                //     case !!fieldErrors.dateError:
-                //         setIsDateInvalid(true)
-                //         setDateError(fieldErrors.dateError)
-                //         break
-                //     default:
-                //         setIsDateInvalid(false)
-                //         setDateError('')
-                //         break
-                // }
-
-                // switch (true) {
-                //     case !!fieldErrors.timeSlotError:
-                //         setIsTimeSlotInvalid(true)
-                //         setTimeSlotError(fieldErrors.timeSlotError)
-                //         break
-                //     default:
-                //         setIsTimeSlotInvalid(false)
-                //         setTimeSlotError('')
-                //         break
-                // }
-
-                // switch (true) {
-                //     case !!fieldErrors.couponCodeError:
-                //         setIsCouponInvalid(true)
-                //         setCouponCodeError(fieldErrors.couponCodeError)
-                //         break
-                //     default:
-                //         setIsCouponInvalid(false)
-                //         setCouponCodeError('')
-                //         break
-                // }
-
                 //Split the error string to separate ones.
                 const errors = result.error.split(' | ')
 
@@ -419,68 +363,82 @@ const OrderForm = () => {
     }
 
     return (
-        <div>
-            <form onSubmit={handleSubmit} className="flex flex-col gap-y-16">
-                <OrderItems handleItemClick={handleItemClick} items={items} />
-                <div ref={appointmentRef}>
-                    <div className="flex place-content-center mb-12">
-                        <Chip color="primary" size="lg" radius="full">
-                            2{' '}
-                        </Chip>
-                        <span className="mx-5 text-2xl font-bold tracking-tight text-gray-600">
-                            {/* Choose Your Time (& enter your email) */}
-                            {secondStepTitle}
-                        </span>
-                    </div>
-                    <AddAppointment
-                        handleDateChange={handleDateChange}
-                        handleTimeChange={handleTimeChange}
-                        pickedTime={pickedTime}
-                        newDisabledRanges={newDisabledRanges}
-                        availableSlots={availableSlots}
-                        formStateMessage={formStateMessage}
-                        isEmailInvalid={isEmailInvalid}
-                        isTimezoneInvalid={isTimezoneInvalid}
-                        isDateInvalid={isDateInvalid}
-                        isTimeSlotInvalid={isTimeSlotInvalid}
-                        isDisabled={!isAppointmentAvailable}
-                        emailError={emailError}
-                        timezoneError={timezoneError}
-                        timeSlotError={timeSlotError}
-                        dateError={dateError}
+        <>
+            <div>
+                <form
+                    onSubmit={handleSubmit}
+                    className="flex flex-col gap-y-16"
+                >
+                    <OrderItems
+                        handleItemClick={handleItemClick}
+                        items={items}
                     />
-                    {showNote && (
-                        <div className="flex justify-center mt-2 ">
-                            <Card
-                                isBlurred
-                                className="text-pretty text-center bg-blue-100 p-2"
-                            >
-                                {note}
-                            </Card>
+                    <div ref={appointmentRef}>
+                        <div className="flex place-content-center mb-12">
+                            <Chip color="primary" size="lg" radius="full">
+                                2{' '}
+                            </Chip>
+                            <span className="mx-5 text-2xl font-bold tracking-tight text-gray-600">
+                                {/* Choose Your Time (& enter your email) */}
+                                {secondStepTitle}
+                            </span>
                         </div>
-                    )}
-                    {singleSession && (
-                        <div className="max-w-sm mx-auto rounded-lg p-6">
-                            <Input
-                                type="text"
-                                aria-label="Coupon code" // Provide aria-label for accessibility
-                                placeholder="Coupon code"
-                                value={couponCode}
-                                onChange={(e) => setCouponCode(e.target.value)}
-                                isInvalid={isCouponInvalid}
-                                errorMessage={couponCodeError}
-                            />
-                        </div>
-                    )}
-                </div>
-                <div className=" flex justify-center">
-                    <Button isLoading={isLoading} type="submit" color="primary">
-                        PROCEED &gt;&gt;
-                    </Button>
-                    {/* Can not use FormButton on client component */}
-                </div>
-            </form>
-        </div>
+                        <AddAppointment
+                            handleDateChange={handleDateChange}
+                            handleTimeChange={handleTimeChange}
+                            pickedTime={pickedTime}
+                            newDisabledRanges={newDisabledRanges}
+                            availableSlots={availableSlots}
+                            formStateMessage={formStateMessage}
+                            isEmailInvalid={isEmailInvalid}
+                            isTimezoneInvalid={isTimezoneInvalid}
+                            isDateInvalid={isDateInvalid}
+                            isTimeSlotInvalid={isTimeSlotInvalid}
+                            isDisabled={!isAppointmentAvailable}
+                            emailError={emailError}
+                            timezoneError={timezoneError}
+                            timeSlotError={timeSlotError}
+                            dateError={dateError}
+                        />
+                        {showNote && (
+                            <div className="flex justify-center mt-2 ">
+                                <Card
+                                    isBlurred
+                                    className="text-pretty text-center bg-blue-100 p-2"
+                                >
+                                    {note}
+                                </Card>
+                            </div>
+                        )}
+                        {singleSession && (
+                            <div className="max-w-sm mx-auto rounded-lg p-6">
+                                <Input
+                                    type="text"
+                                    aria-label="Coupon code" // Provide aria-label for accessibility
+                                    placeholder="Coupon code"
+                                    value={couponCode}
+                                    onChange={(e) =>
+                                        setCouponCode(e.target.value)
+                                    }
+                                    isInvalid={isCouponInvalid}
+                                    errorMessage={couponCodeError}
+                                />
+                            </div>
+                        )}
+                    </div>
+                    <div className=" flex justify-center">
+                        <Button
+                            isLoading={isLoading}
+                            type="submit"
+                            color="primary"
+                        >
+                            PROCEED &gt;&gt;
+                        </Button>
+                        {/* Can not use FormButton on client component */}
+                    </div>
+                </form>
+            </div>
+        </>
     )
 }
 

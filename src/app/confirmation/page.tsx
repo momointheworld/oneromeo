@@ -63,6 +63,9 @@ const ConfirmationPage: React.FC = () => {
             a.href = downloadUrl
             a.download = 'Not-in-a-Million-Years-by-Arnold-Meindertsma.epub'
             a.click()
+            setFormMessage(
+                'Your eBook is being downloaded which might take some seconds.'
+            )
         } else {
             setFormMessage('Download URL is not available.')
         }
@@ -103,7 +106,7 @@ const ConfirmationPage: React.FC = () => {
                 </>
             ) : (
                 <div>
-                    <h1>Thank You for Your Purchase!</h1>
+                    <h1>Thanks, it&apos;s much appreciated. Enjoy the read!</h1>
                     <Button
                         onClick={handleDownload}
                         variant="bordered"
@@ -112,7 +115,7 @@ const ConfirmationPage: React.FC = () => {
                         Download eBook
                     </Button>
                     <p className="text-slate-400">
-                        Download link is valid for one hour
+                        This download link is valid for 1 hour.
                     </p>
                 </div>
             )}

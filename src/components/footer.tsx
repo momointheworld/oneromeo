@@ -27,8 +27,8 @@ const FooterSection: React.FC<FooterSectionProps> = ({ title, links }) => {
 
 const footerLinks = {
     company: [
-        { href: '/about', label: 'About Us' },
-        { href: '/careers', label: 'Careers' },
+        { href: '/about/me', label: 'About Me' },
+        { href: '/about/my-ebook', label: 'My eBook' },
         { href: '/contact', label: 'Contact' },
     ],
     legal: [
@@ -37,7 +37,8 @@ const footerLinks = {
     ],
     support: [
         { href: '/faq', label: 'FAQ' },
-        { href: '/support', label: 'Support Center' },
+        { href: '/quiz', label: 'Quiz' },
+        { href: '/', label: 'Buy Me a Coffee' },
     ],
 }
 
@@ -57,8 +58,8 @@ const Footer = () => {
                             className="w-6 h-6" // Adjust the size as needed
                         />
                         <SocialIcon
-                            url="www.facebook.com"
-                            href="https://www.facebook.com/OneRomeo"
+                            url="www.xiaohongshu.com"
+                            href="https://www.xiaohongshu.com/user/profile/61dbea62000000001000598f"
                             className="w-6 h-6" // Adjust the size as needed
                         />
                     </div>
