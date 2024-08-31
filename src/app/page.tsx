@@ -237,7 +237,9 @@ const OrderForm = () => {
 
         if (priceId === bundlePriceId) {
             setShowNote(true)
-            setNote('At this stage, you can only book one time slot.')
+            setNote(
+                'At this stage, you can only schedule your first appointment.'
+            )
         }
 
         // Scroll to the Appointment component

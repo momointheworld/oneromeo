@@ -79,11 +79,11 @@ export default function ContactPage() {
             ) : (
                 <div>
                     <h1>{`Say hello :)`} </h1>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-6">
+                    {/* contact-bg class added for styling the background in global.css */}
+                    <div className="grid grid-cols-1 sm:grid-cols-5 px-2 contact-bg">
                         <form
                             onSubmit={onSubmit}
-                            className="flex flex-col gap-4 col-span-1 sm:col-start-2 sm:col-span-4 w-full"
+                            className="flex flex-col gap-4 col-span-1 sm:col-start-2 sm:col-span-3 w-full"
                         >
                             <Input
                                 type="email"
@@ -103,7 +103,7 @@ export default function ContactPage() {
                             />
                             <Textarea
                                 name="description"
-                                label="Description"
+                                label="What's on your mind?"
                                 isInvalid={!!errors.description}
                                 errorMessage={errors.description}
                                 required

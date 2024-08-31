@@ -67,7 +67,7 @@ export default async function QuizPage() {
     const quizzes = await db.quiz.findMany({ orderBy: { date: 'desc' } })
 
     const linksWithIcons = quizzes.map((quiz, index) => ({
-        href: `/quiz/${quiz.id}`,
+        href: `/quiz/${quiz.slug}`,
         text: quiz.quizName,
         icon: Object.values(icons)[index % Object.keys(icons).length],
         //map through the icons

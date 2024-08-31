@@ -30,7 +30,6 @@ const MenuLogo = () => {
                 src={Logo}
                 alt="One Romeo Logo"
                 priority={true}
-                layout="fill"
             />
         </div>
     )

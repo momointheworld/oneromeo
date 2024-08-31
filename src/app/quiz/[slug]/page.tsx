@@ -10,11 +10,11 @@ import {
     Progress,
     Radio,
     RadioGroup,
-    Snippet,
     Spacer,
 } from '@nextui-org/react'
-import { usePathname } from 'next/navigation'
+import { useParams, usePathname } from 'next/navigation'
 import PageBreadCrumbs from '@/components/common/breadcrumbs'
+import { getQuizBySlug } from '@/actions/getquiz'
 
 interface AnswerDataProps {
     id: string
@@ -39,6 +39,7 @@ interface ResultDataProps {
 interface FetchedQuiz {
     id: string
     quizName: string
+    slug: string
     questions: QuestionDataProps[]
     results: ResultDataProps[]
 }
@@ -66,6 +67,7 @@ const SingleQuizPage: React.FC = () => {
     ]
     // Extract quizId from pathname
     const quizId = pathname?.split('/').pop() || ''
+    const { slug } = useParams() as { slug: string }
 
     const resultIcon = (
         <svg
@@ -88,7 +90,7 @@ const SingleQuizPage: React.FC = () => {
         if (!quizId) return
         const fetchData = async () => {
             try {
-                const result = await getQuiz({ id: quizId })
+                const result = await getQuizBySlug({ slug })
                 if (result === null) {
                     setError('Quiz not found or failed to fetch.')
                     return
@@ -102,7 +104,7 @@ const SingleQuizPage: React.FC = () => {
             }
         }
         fetchData()
-    }, [quizId])
+    }, [slug])
 
     useEffect(() => {
         if (totalScore !== null && resultsRef.current) {

@@ -502,9 +502,7 @@ export default function NewQuiz() {
     return (
         <>
             <PageBreadcrumbs items={breadcrumbs} />
-            <div className="my-5">
-                <DisplayMessage formStateMessage={formStateMessage} />
-            </div>
+
             <div className="flex justify-center text-center">
                 <div className="flex flex-col lg:w-3/5 md:w-full">
                     <h1>New Quiz</h1>
@@ -751,6 +749,9 @@ export default function NewQuiz() {
                             Save Quiz
                         </Button>
                     </form>
+                    <div className="my-5">
+                        <DisplayMessage formStateMessage={formStateMessage} />
+                    </div>
                 </div>
             </div>
         </>

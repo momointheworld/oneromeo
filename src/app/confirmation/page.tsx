@@ -64,7 +64,7 @@ const ConfirmationPage: React.FC = () => {
             a.download = 'Not-in-a-Million-Years-by-Arnold-Meindertsma.epub'
             a.click()
             setFormMessage(
-                'Your eBook is being downloaded which might take some seconds.'
+                'Just a moment, your eBook is on its way and will be ready in a few seconds.'
             )
         } else {
             setFormMessage('Download URL is not available.')

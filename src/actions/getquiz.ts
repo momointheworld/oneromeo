@@ -114,3 +114,34 @@ export const getQuiz = cache(
         return quiz as FetchedQuiz // Cast quiz to FetchedQuiz type
     }
 )
+
+interface GetQuizBySlugProps {
+    slug: string
+}
+
+export const getQuizBySlug = cache(
+    async (
+        props: GetQuizBySlugProps
+    ): Promise<FetchedQuiz | typeof notFound> => {
+        console.log('getting quiz by slug')
+
+        const { slug } = props
+        const quiz = await db.quiz.findFirst({
+            where: { slug },
+            include: {
+                questions: {
+                    include: {
+                        answers: true,
+                    },
+                },
+                results: true, // Include results in the query
+            },
+        })
+
+        if (!quiz) {
+            return notFound() // Return notFound if quiz is not found
+        }
+
+        return quiz as FetchedQuiz // Cast quiz to FetchedQuiz type
+    }
+)

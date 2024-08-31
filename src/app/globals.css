@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 html, body {
     height: 100%;
     margin: 0;
@@ -71,3 +70,14 @@ footer {
   height: 100%;
 }
 
+ 
+/* contact page background */
+@media (min-width: 640px) { /* This is Tailwind's `sm` breakpoint */
+  .contact-bg {
+      background-image: url('/contact-bgimg.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: right;
+      max-height: 100vh;
+  }
+}

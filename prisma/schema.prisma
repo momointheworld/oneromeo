@@ -76,6 +76,7 @@ model Quiz {
   id        String  @id @default(auto()) @map("_id") @db.ObjectId // Using MongoDB's default _id field
   date      DateTime
   quizName  String
+  slug      String   @unique 
   questions Question[]
   results   Result[]  
 }
