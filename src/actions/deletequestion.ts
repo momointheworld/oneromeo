@@ -47,7 +47,7 @@
 import { db } from '@/db'
 import { redirect } from 'next/navigation'
 import paths from '@/components/paths'
-import { getAnswers } from './getanswers'
+import { getAnswers } from './getAnswers'
 
 export async function deleteQuestion(id: string) {
     try {

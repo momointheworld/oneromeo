@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useEffect, useRef } from 'react'
-import { getQuiz } from '@/actions'
+import { getQuizStats, recordQuizSubmission } from '@/actions'
 import { FullSkeleton } from '@/components/common/skeleton-loading'
 import {
     Button,
@@ -14,7 +14,8 @@ import {
 } from '@nextui-org/react'
 import { useParams, usePathname } from 'next/navigation'
 import PageBreadCrumbs from '@/components/common/breadcrumbs'
-import { getQuizBySlug } from '@/actions/getquiz'
+import { getQuizBySlug } from '@/actions/getQuiz'
+import dynamic from 'next/dynamic'
 
 interface AnswerDataProps {
     id: string
@@ -49,15 +50,24 @@ interface Breadcrumb {
     text: string
 }
 
+interface QuizStats {
+    minPoints: number
+    maxPoints: number
+    count: number
+}
+
 const SingleQuizPage: React.FC = () => {
     const [quiz, setQuiz] = useState<FetchedQuiz | null>(null)
+    const [quizId, setQuizId] = useState<string | null>(null)
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0)
     const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null)
     const [answers, setAnswers] = useState<Record<string, number>>({})
     const [totalScore, setTotalScore] = useState<number | null>(null)
     const [loading, setLoading] = useState<boolean>(true)
+    const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [isSubmitted, setIsSubmitted] = useState<boolean>(false) // Track submission status
+    const [quizStats, setQuizStats] = useState<QuizStats[] | null>(null)
     const resultsRef = useRef<HTMLDivElement>(null) // Ref for results section
     const pathname = usePathname() // Get the current pathname
 
@@ -66,7 +76,7 @@ const SingleQuizPage: React.FC = () => {
         { href: '/quiz', text: 'Current Quiz' },
     ]
     // Extract quizId from pathname
-    const quizId = pathname?.split('/').pop() || ''
+    // const quizId = pathname?.split('/').pop() || ''
     const { slug } = useParams() as { slug: string }
 
     const resultIcon = (
@@ -74,20 +84,19 @@ const SingleQuizPage: React.FC = () => {
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
-            stroke-width="1.5"
+            strokeWidth="1.5"
             stroke="currentColor"
             className="size-10 text-warning"
         >
             <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
+                strokeLinecap="round"
+                strokeLinejoin="round"
                 d="M12 12.75c1.148 0 2.278.08 3.383.237 1.037.146 1.866.966 1.866 2.013 0 3.728-2.35 6.75-5.25 6.75S6.75 18.728 6.75 15c0-1.046.83-1.867 1.866-2.013A24.204 24.204 0 0 1 12 12.75Zm0 0c2.883 0 5.647.508 8.207 1.44a23.91 23.91 0 0 1-1.152 6.06M12 12.75c-2.883 0-5.647.508-8.208 1.44.125 2.104.52 4.136 1.153 6.06M12 12.75a2.25 2.25 0 0 0 2.248-2.354M12 12.75a2.25 2.25 0 0 1-2.248-2.354M12 8.25c.995 0 1.971-.08 2.922-.236.403-.066.74-.358.795-.762a3.778 3.778 0 0 0-.399-2.25M12 8.25c-.995 0-1.97-.08-2.922-.236-.402-.066-.74-.358-.795-.762a3.734 3.734 0 0 1 .4-2.253M12 8.25a2.25 2.25 0 0 0-2.248 2.146M12 8.25a2.25 2.25 0 0 1 2.248 2.146M8.683 5a6.032 6.032 0 0 1-1.155-1.002c.07-.63.27-1.222.574-1.747m.581 2.749A3.75 3.75 0 0 1 15.318 5m0 0c.427-.283.815-.62 1.155-.999a4.471 4.471 0 0 0-.575-1.752M4.921 6a24.048 24.048 0 0 0-.392 3.314c1.668.546 3.416.914 5.223 1.082M19.08 6c.205 1.08.337 2.187.392 3.314a23.882 23.882 0 0 1-5.223 1.082"
             />
         </svg>
     )
-
     useEffect(() => {
-        if (!quizId) return
+        if (!slug) return // Make sure slug is present
         const fetchData = async () => {
             try {
                 const result = await getQuizBySlug({ slug })
@@ -95,7 +104,9 @@ const SingleQuizPage: React.FC = () => {
                     setError('Quiz not found or failed to fetch.')
                     return
                 }
-                setQuiz(result as FetchedQuiz)
+                const quizData = result as FetchedQuiz
+                setQuiz(quizData)
+                setQuizId(quizData.id)
             } catch (error) {
                 setError('Error fetching quiz data.')
                 console.error('Error fetching quiz data:', error)
@@ -106,11 +117,35 @@ const SingleQuizPage: React.FC = () => {
         fetchData()
     }, [slug])
 
+    // useEffect(() => {
+    //     if (totalScore !== null && resultsRef.current) {
+    //         resultsRef.current.scrollIntoView({ behavior: 'smooth' }) // Scroll to results section smoothly
+    //         // fetchQuizStats() // Fetch quiz stats after quiz is completed
+    //     }
+    // }, [totalScore])
     useEffect(() => {
         if (totalScore !== null && resultsRef.current) {
             resultsRef.current.scrollIntoView({ behavior: 'smooth' }) // Scroll to results section smoothly
+
+            if (quizId) {
+                // Check if quizId is not null or undefined
+                const fetchQuizStats = async () => {
+                    try {
+                        const stats = await getQuizStats(quizId)
+                        setQuizStats(stats)
+                    } catch (error) {
+                        console.error('Failed to fetch quiz stats:', error)
+                    }
+                }
+
+                fetchQuizStats() // Call the async function
+            } else {
+                console.warn(
+                    'quizId is null or undefined, cannot fetch quiz stats.'
+                )
+            }
         }
-    }, [totalScore])
+    }, [totalScore, quizId])
 
     const handleAnswerChange = (
         questionId: string,
@@ -124,7 +159,7 @@ const SingleQuizPage: React.FC = () => {
         }))
     }
 
-    const handleNextClick = () => {
+    const handleNextClick = async () => {
         if (isSubmitted) return // Prevent further actions if already submitted
 
         if (!selectedAnswer) {
@@ -150,6 +185,25 @@ const SingleQuizPage: React.FC = () => {
         setTotalScore(score)
     }
 
+    // Use useEffect to handle side effects after totalScore is updated
+    useEffect(() => {
+        if (isSubmitted && quizId && totalScore !== null) {
+            const submitQuiz = async () => {
+                try {
+                    setIsLoading(true)
+                    await recordQuizSubmission(quizId, totalScore)
+
+                    console.log('Quiz submission recorded successfully.')
+                } catch (error) {
+                    console.error('Failed to record quiz submission:', error)
+                }
+                setIsLoading(false)
+            }
+
+            submitQuiz()
+        }
+    }, [isSubmitted, quizId, totalScore])
+
     const currentQuestion = quiz?.questions[currentQuestionIndex]
     const answerOptions = ['A', 'B', 'C', 'D']
 
@@ -169,6 +223,15 @@ const SingleQuizPage: React.FC = () => {
     const minFullScore = Math.min(
         ...(quiz?.results.map((result) => result.maxPoints) || [0])
     )
+
+    // Dynamically import the BarChart component
+    const LazyBarChart = dynamic(() => import('@/components/barChart'), {
+        loading: () => (
+            <div className="flex justify-center text-slate-600">
+                Loading chart...
+            </div>
+        ),
+    })
 
     return (
         <div className="p-6 max-w-4xl mx-auto">
@@ -204,7 +267,17 @@ const SingleQuizPage: React.FC = () => {
                                             key={answer.id}
                                             className="flex items-center gap-2"
                                         >
-                                            <RadioGroup aria-label="Select your favorite city">
+                                            <RadioGroup
+                                                aria-label="Select your favorite city"
+                                                value={selectedAnswer}
+                                                onChange={() =>
+                                                    handleAnswerChange(
+                                                        currentQuestion.id,
+                                                        answer.id,
+                                                        answer.points
+                                                    )
+                                                }
+                                            >
                                                 <label
                                                     htmlFor={answer.id}
                                                     className="ml-2"
@@ -213,13 +286,6 @@ const SingleQuizPage: React.FC = () => {
                                                         id={answer.id}
                                                         name={`question-${currentQuestion.id}`}
                                                         value={answer.id}
-                                                        onChange={() =>
-                                                            handleAnswerChange(
-                                                                currentQuestion.id,
-                                                                answer.id,
-                                                                answer.points
-                                                            )
-                                                        }
                                                     />
                                                     {answerOptions[ansIndex]}:{' '}
                                                     {answer.text}
@@ -270,22 +336,23 @@ const SingleQuizPage: React.FC = () => {
                                     <p>
                                         It seems like you need a little help.
                                         Use{' '}
-                                        <Chip
-                                            radius="sm"
-                                            variant="flat"
-                                            size="lg"
-                                            color="warning"
-                                        >
+                                        <span className="bg-warning-200 rounded-md p-2">
                                             QUIZ24
-                                        </Chip>{' '}
+                                        </span>{' '}
                                         at checkout to get 10% off a single
                                         listening session.
                                     </p>
-                                    <p className="italic text-gray-600">
+                                    <p className="italic text-gray-400 text-sm">
                                         Please note: This offer does not apply
                                         to bundle purchases.
                                     </p>
                                 </div>
+                            )}
+                            {quizStats && (
+                                <LazyBarChart
+                                    stats={quizStats}
+                                    isLoading={isLoading}
+                                />
                             )}
                         </div>
                     )}

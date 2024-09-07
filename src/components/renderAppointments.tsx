@@ -1,6 +1,6 @@
 import React from 'react'
-import { format } from 'date-fns'
 import { Button } from '@nextui-org/react'
+import { format as formatZonedTime, toZonedTime } from 'date-fns-tz'
 
 interface Appointment {
     id: string
@@ -54,7 +54,17 @@ const RenderAppointments: React.FC<RenderAppointmentsProps> = ({
         </thead>
         <tbody className="block md:table-row-group">
             {latestAppointments.map((app, index) => {
-                const formattedDate = format(new Date(app.date), 'MMMM d, yyyy')
+                const timeZone = 'Asia/Bangkok'
+                // Convert UTC date to Asia/Bangkok timezone
+                const zonedDate = toZonedTime(new Date(app.date), timeZone)
+
+                // Format the date in Asia/Bangkok timezone
+                const formattedDate = formatZonedTime(
+                    zonedDate,
+                    'MMMM d, yyyy',
+                    { timeZone }
+                )
+
                 return (
                     <tr
                         key={app.id}

@@ -36,11 +36,11 @@ interface AddAppointmentProps {
     pickedTime: string
     formStateMessage: string
     isEmailInvalid: boolean
-    isTimezoneInvalid: boolean
+    // isTimezoneInvalid: boolean
     isDateInvalid: boolean
     isTimeSlotInvalid: boolean
     isDisabled: boolean
-    timezoneError: string
+    // timezoneError: string
     emailError: string
     dateError: string
     timeSlotError: string
@@ -54,11 +54,11 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
     pickedTime,
     formStateMessage,
     isEmailInvalid,
-    isTimezoneInvalid,
+    // isTimezoneInvalid,
     isDateInvalid,
     isTimeSlotInvalid,
     isDisabled,
-    timezoneError,
+    // timezoneError,
     emailError,
     dateError,
     timeSlotError,
@@ -87,12 +87,6 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
     return (
         <div className="max-w-md mx-auto bg-white shadow-lg rounded-lg p-6">
             <div>
-                <SelectTimezone
-                    isDisabled={isDisabled}
-                    isTimezoneInvalid={isTimezoneInvalid}
-                    aria-label="Select your time zone"
-                    timezoneError={timezoneError}
-                />
                 <I18nProvider locale="en-US">
                     <DatePicker
                         label="Appointment day"

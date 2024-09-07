@@ -11,6 +11,7 @@ import { log } from 'console'
 import DisplayMessage from '@/components/common/message'
 import paths from '@/components/paths'
 import PageBreadCrumbs from '@/components/common/breadcrumbs'
+import { format, toZonedTime } from 'date-fns-tz'
 
 interface Appointment {
     id: string
@@ -49,7 +50,7 @@ const AllAppointmentsPage = () => {
                 const formattedAppointments: Appointment[] = data.map(
                     (appointment) => ({
                         id: appointment.id,
-                        date: new Date(appointment.date),
+                        date: appointment.date,
                         timeZone: appointment.timeZone,
                         thTimeSlot: appointment.thTimeSlot,
                         csrTimeSlot: appointment.csrTimeSlot,
@@ -163,3 +164,6 @@ const AllAppointmentsPage = () => {
 }
 
 export default AllAppointmentsPage
+function utcToZonedTime(date: string, timeZone: string) {
+    throw new Error('Function not implemented.')
+}

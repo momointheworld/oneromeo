@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
     today,
@@ -50,11 +50,9 @@ export default function CreateNewAppointment() {
     const [availableSlots, setAvailableSlots] = useState(timeSlots)
     const [isEmailInvalid, setIsEmailInvalid] = useState(false)
     const [isDateInvalid, setIsDateInvalid] = useState(false)
-    const [isTimezoneInvalid, setIsTimezoneInvalid] = useState(false)
     const [isTimeSlotInvalid, setIsTimeSlotInvalid] = useState(false)
     const [emailError, setEmailError] = useState('')
     const [dateError, setDateError] = useState('')
-    const [timezoneError, setTimezoneError] = useState('')
     const [timeSlotError, setTimeSlotError] = useState('')
     const { selectedTimezone, setSelectedTimezone } = useTimezone()
     const { selectedDate, setSelectedDate } = useDate()
@@ -97,7 +95,7 @@ export default function CreateNewAppointment() {
                 // Find dates that have three slots taken
                 const unavailableDates: Date[] = []
                 dateSlotsMap.forEach((slots, date) => {
-                    if (slots.length === 3) {
+                    if (slots.length === 2) {
                         unavailableDates.push(new Date(date))
                     }
                 })
@@ -129,8 +127,9 @@ export default function CreateNewAppointment() {
     // UseEffect to check availability of time slots for the selected date
     useEffect(() => {
         if (!selectedDate) return
-
-        const selectedDateStr = new Date(selectedDate.toString()).toDateString()
+        const selectedDateStr = selectedDate
+            .toDate('asia/bangkok')
+            .toDateString()
 
         const takenSlots = appointments
             .filter(
@@ -150,10 +149,10 @@ export default function CreateNewAppointment() {
                 selectedDate.month - 1,
                 selectedDate.day
             )
+
             const convertedSlots = convertToUserTimezone(
                 newAvailableSlots,
-                dateObj,
-                selectedTimezone
+                dateObj
             )
             setAvailableSlots(convertedSlots)
         }
@@ -162,15 +161,13 @@ export default function CreateNewAppointment() {
     // Function to handle date change
     const handleDateChange = (date: DateValue | null) => {
         setSelectedDate(date)
-        // checkTimeSlots(date)
         setPickedTime('')
 
         if (date) {
             const dateObj = new Date(date.year, date.month - 1, date.day)
             const convertedSlots = convertToUserTimezone(
                 availableSlots,
-                dateObj,
-                selectedTimezone
+                dateObj
             )
             setAvailableSlots(convertedSlots)
         }
@@ -188,11 +185,9 @@ export default function CreateNewAppointment() {
         // Reset error states
         setIsDateInvalid(false)
         setIsTimeSlotInvalid(false)
-        setIsTimezoneInvalid(false)
         setIsEmailInvalid(false)
         setDateError('')
         setTimeSlotError('')
-        setTimezoneError('')
         setEmailError('')
 
         if (!selectedDate) {
@@ -205,11 +200,6 @@ export default function CreateNewAppointment() {
             setTimeSlotError('Please choose a time slot')
             setIsLoading(false)
             return
-        } else if (!selectedTimezone) {
-            setIsTimezoneInvalid(true)
-            setTimezoneError('Please choose a time zone')
-            setIsLoading(false)
-            return
         } else if (!email) {
             setIsEmailInvalid(true)
             setEmailError('Invalid email')
@@ -217,30 +207,39 @@ export default function CreateNewAppointment() {
             return
         }
 
-        if (selectedDate && pickedTime && selectedTimezone) {
-            const dateStr = new Date(selectedDate.toString())
-            // Convert the customer time slot label to the Thai time slot label
-            let thTimeSlot = revertTimezone(
-                pickedTime,
-                dateStr,
-                selectedTimezone
+        if (selectedDate && pickedTime) {
+            const localTimezone =
+                Intl.DateTimeFormat().resolvedOptions().timeZone
+
+            // convert to the local time zone
+            // const dateObj = selectedDate?.toDate(localTimezone)
+            const dateObj = selectedDate.toDate('asia/bangkok')
+
+            const updatedTimeSlots = convertToUserTimezone(timeSlots, dateObj)
+            let thTimeSlot = updatedTimeSlots.find(
+                (slot) => slot.label === pickedTime
             )
+            console.log(pickedTime)
+
+            console.log(thTimeSlot)
 
             if (!thTimeSlot || !thTimeSlot.label) {
                 thTimeSlot = {
-                    key: '09:30 PM - 09:45 PM',
-                    start: '09:30',
-                    end: '09:45',
+                    key: '05:30 PM - 05:45 PM',
+                    start: '05:30',
+                    end: '05:45',
                     period: 'PM',
-                    label: '09:30 PM - 09:45 PM', // Default label, can be updated after conversion
+                    label: '05:30 PM - 05:45 PM', // Default label, can be updated after conversion
                 }
             }
-            const thLabel = thTimeSlot.label
+            // label is updated while key is unchanged
+            const thLabel = thTimeSlot.key
             const label = `${pickedTime} (${thLabel})`
+
             try {
                 await addAppointment({
-                    timeZone: selectedTimezone,
-                    date: dateStr,
+                    timeZone: localTimezone,
+                    date: dateObj,
                     thTimeSlot: thLabel,
                     csrTimeSlot: pickedTime,
                     email,
@@ -281,10 +280,8 @@ export default function CreateNewAppointment() {
                             formStateMessage={formStateMessage}
                             isDisabled={false}
                             isEmailInvalid={isEmailInvalid}
-                            isTimezoneInvalid={isTimezoneInvalid}
                             isDateInvalid={isDateInvalid}
                             isTimeSlotInvalid={isTimeSlotInvalid}
-                            timezoneError={timezoneError}
                             emailError={emailError}
                             dateError={dateError}
                             timeSlotError={timeSlotError}

@@ -63,12 +63,10 @@ const OrderForm = () => {
     const [couponCode, setCouponCode] = useState('')
     const [isEmailInvalid, setIsEmailInvalid] = useState(false)
     const [isDateInvalid, setIsDateInvalid] = useState(false)
-    const [isTimezoneInvalid, setIsTimezoneInvalid] = useState(false)
     const [isTimeSlotInvalid, setIsTimeSlotInvalid] = useState(false)
     const [isCouponInvalid, setIsCouponInvalid] = useState(false)
     const [emailError, setEmailError] = useState('')
     const [dateError, setDateError] = useState('')
-    const [timezoneError, setTimezoneError] = useState('')
     const [timeSlotError, setTimeSlotError] = useState('')
     const [couponCodeError, setCouponCodeError] = useState('')
     const [formStateMessage, setFormStateMessage] = useState('')
@@ -143,10 +141,10 @@ const OrderForm = () => {
                         .push(appointment.thTimeSlot)
                 })
 
-                // Find dates that have three slots taken
+                // Find dates that have two slots taken
                 const unavailableDates: Date[] = []
                 dateSlotsMap.forEach((slots, date) => {
-                    if (slots.length === 3) {
+                    if (slots.length === 2) {
                         unavailableDates.push(new Date(date))
                     }
                 })
@@ -160,6 +158,9 @@ const OrderForm = () => {
                 const calendarDates = zonedDateTimeDates.map((date) =>
                     toCalendarDate(date)
                 )
+
+                console.log(dateSlotsMap)
+                console.log(calendarDates)
 
                 // Update disabledRanges with the new unavailable dates as CalendarDate
                 setNewDisabledRanges(() => [
@@ -178,8 +179,9 @@ const OrderForm = () => {
     // UseEffect to check availability of time slots for the selected date
     useEffect(() => {
         if (!selectedDate) return
-
-        const selectedDateStr = new Date(selectedDate.toString()).toDateString()
+        const selectedDateStr = selectedDate
+            .toDate('asia/bangkok')
+            .toDateString()
 
         const takenSlots = appointments
             .filter(
@@ -201,8 +203,7 @@ const OrderForm = () => {
             )
             const convertedSlots = convertToUserTimezone(
                 newAvailableSlots,
-                dateObj,
-                selectedTimezone
+                dateObj
             )
             setAvailableSlots(convertedSlots)
         }
@@ -258,8 +259,7 @@ const OrderForm = () => {
             const dateObj = new Date(date.year, date.month - 1, date.day)
             const convertedSlots = convertToUserTimezone(
                 availableSlots,
-                dateObj,
-                selectedTimezone
+                dateObj
             )
             setAvailableSlots(convertedSlots)
         }
@@ -285,25 +285,29 @@ const OrderForm = () => {
         }
 
         try {
-            // Prepare the values to be sent to the server
-            const dateStr = selectedDate
-                ? new Date(selectedDate.toString())
-                : null
-            const orderDate = selectedDate ? selectedDate.toString() : ''
+            const localTimezone =
+                Intl.DateTimeFormat().resolvedOptions().timeZone
+            // convert to the local time zone
+            const dateString = selectedDate?.toDate(localTimezone)
+            const orderDate = dateString ? dateString.toDateString() : ''
 
-            // Convert the customer time slot label to the Thai time slot label
-            const thTimeSlot =
-                pickedTime && dateStr && selectedTimezone
-                    ? revertTimezone(pickedTime, dateStr, selectedTimezone)
+            let updatedTimeSlots = dateString
+                ? convertToUserTimezone(timeSlots, dateString)
+                : []
+            let thTimeSlot =
+                pickedTime && dateString
+                    ? updatedTimeSlots.find((slot) => slot.label === pickedTime)
                     : null
-            const thLabel = thTimeSlot ? thTimeSlot.label : ''
+
+            // label is updated while key is unchanged
+            const thLabel = thTimeSlot ? thTimeSlot.key : ''
             const label = thLabel ? `${pickedTime} (${thLabel})` : ''
 
             // Call the checkout function to interact with the server
             const result = await checkout(
                 selectedItem.priceId,
                 email,
-                selectedTimezone,
+                localTimezone,
                 orderDate,
                 label,
                 couponCode || '' // Default to empty string if coupon is undefined
@@ -318,10 +322,6 @@ const OrderForm = () => {
                     if (error.startsWith('Email Error:')) {
                         setIsEmailInvalid(true)
                         setEmailError(error.replace('Email Error: ', ''))
-                    }
-                    if (error.startsWith('Timezone Error:')) {
-                        setIsTimezoneInvalid(true)
-                        setTimezoneError(error.replace('Timezone Error: ', ''))
                     }
                     if (error.startsWith('Date Error:')) {
                         setIsDateInvalid(true)
@@ -393,12 +393,12 @@ const OrderForm = () => {
                             availableSlots={availableSlots}
                             formStateMessage={formStateMessage}
                             isEmailInvalid={isEmailInvalid}
-                            isTimezoneInvalid={isTimezoneInvalid}
+                            // isTimezoneInvalid={isTimezoneInvalid}
                             isDateInvalid={isDateInvalid}
                             isTimeSlotInvalid={isTimeSlotInvalid}
                             isDisabled={!isAppointmentAvailable}
                             emailError={emailError}
-                            timezoneError={timezoneError}
+                            // timezoneError={timezoneError}
                             timeSlotError={timeSlotError}
                             dateError={dateError}
                         />

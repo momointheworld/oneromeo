@@ -79,6 +79,8 @@ model Quiz {
   slug      String   @unique 
   questions Question[]
   results   Result[]  
+  submissions  QuizSubmission[]  // Add this to track submissions
+
 }
 
 // Define the Question model
@@ -107,6 +109,15 @@ model Result {
   resultText String // Text description for this result
   quiz     Quiz    @relation(fields: [quizId], references: [id])
   quizId   String
+}
+
+// track submissions
+model QuizSubmission {
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId // MongoDB's default _id field
+  quiz     Quiz     @relation(fields: [quizId], references: [id])
+  quizId   String
+  score    Int
+  createdAt DateTime @default(now())
 }
 
 model Appointment {

@@ -17,10 +17,22 @@ const ConfirmationPage: React.FC = () => {
     const token = searchParams.get('token')
     const email = searchParams.get('email')
     const timeSlot = searchParams.get('timeSlot')
-    const date = searchParams.get('date')
+    const dateParam = searchParams.get('date')
     const [downloadUrl, setDownloadUrl] = useState<string | null>(null)
     const [loading, setLoading] = useState(true)
     const [formMessage, setFormMessage] = useState('')
+
+    // Convert the date string to a Date object
+    const date = dateParam ? new Date(dateParam) : null
+
+    // Format the date as "Month Day, Year"
+    const formattedDate = date
+        ? date.toLocaleDateString('en-US', {
+              month: 'long', // "September"
+              day: 'numeric', // "10"
+              year: 'numeric', // "2024"
+          })
+        : ''
 
     useEffect(() => {
         const fetchDownloadUrl = async () => {
@@ -93,7 +105,7 @@ const ConfirmationPage: React.FC = () => {
                                 <td>
                                     <strong>Your appointment is on:</strong>
                                 </td>
-                                <td>{date}</td>
+                                <td>{formattedDate}</td>
                             </tr>
                             <tr>
                                 <td>

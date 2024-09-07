@@ -1,29 +1,39 @@
 'use server'
 import { db } from '@/db'
-import { notFound } from 'next/navigation'
 
-export const getQuizStats = async (quizId: string) => {
+interface QuizStats {
+    minPoints: number
+    maxPoints: number
+    count: number
+}
+
+export const getQuizStats = async (quizId: string): Promise<QuizStats[]> => {
     try {
-        // Fetch average score and total participants from the database
-        const averageScoreData = await db.quizSubmission.aggregate({
-            _avg: {
-                score: true,
-            },
-            where: {
-                quizId: quizId,
-            },
+        // Fetch results
+        const results = await db.result.findMany({
+            where: { quizId },
         })
 
-        const totalParticipants = await db.quizSubmission.count({
-            where: {
-                quizId: quizId,
-            },
-        })
+        const stats = await Promise.all(
+            results.map(async (result) => {
+                const count = await db.quizSubmission.count({
+                    where: {
+                        quizId,
+                        score: {
+                            gte: result.minPoints,
+                            lte: result.maxPoints,
+                        },
+                    },
+                })
+                return {
+                    minPoints: result.minPoints,
+                    maxPoints: result.maxPoints,
+                    count,
+                }
+            })
+        )
 
-        return {
-            averageScore: averageScoreData._avg.score || 0,
-            totalParticipants: totalParticipants,
-        }
+        return stats
     } catch (error) {
         console.error('Error fetching quiz stats:', error)
         throw new Error('Failed to fetch quiz stats')

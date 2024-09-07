@@ -7,14 +7,24 @@ import { db } from '@/db'
 
 const MONGODB_URI = process.env.DATABASE_URL as string
 
+// Remove the deprecated config object
+// export const runtime = 'nodejs'
+// export const preferredRegion = 'auto'
+
+// export const config = {
+//     api: {
+//         bodyParser: false,
+//     },
+// }
+
 export const runtime = 'nodejs'
 export const preferredRegion = 'auto'
 
-export const config = {
-    api: {
-        bodyParser: false,
-    },
-}
+export const dynamic = 'auto'
+export const revalidate = false
+export const fetchCache = 'auto'
+export const dynamicParams = true
+
 export const POST = async (req: NextRequest) => {
     const client = new MongoClient(MONGODB_URI)
     const bucket = new GridFSBucket(client.db(), { bucketName: 'fileBucket' })

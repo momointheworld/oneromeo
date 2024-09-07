@@ -5,7 +5,7 @@ import {
     findTokenByEmail,
     saveTokenToDatabase,
 } from '@/actions'
-import { isEventProcessed, logProcessedEvent } from '@/actions/eventhelper'
+import { isEventProcessed, logProcessedEvent } from '@/actions/eventHelper'
 import { findAppointmentByEmailAndDate } from '@/actions/findAppointmentByEmailAndDate'
 import createCustomerPortalSession from '@/actions/createCustomerPortalSession'
 import { generateSecureDownloadToken } from '@/utils/generateSecureDownloadToken'
@@ -23,7 +23,7 @@ interface CheckAppointmentProps {
     csrTimeSlot: string
 }
 
-export const handleAppointment = async ({
+const handleAppointment = async ({
     session,
     date,
     appointment_timeZone,
@@ -105,7 +105,7 @@ async function handleCheckoutSessionCompleted(
         let [csrTimeSlot, thTimeSlot] = appointment_timeSlot.split(' (')
         thTimeSlot = thTimeSlot.replace(')', '')
 
-        const date = new Date(`${appointment_date}T00:00:00Z`)
+        const date = new Date(appointment_date)
         await handleAppointment({
             session,
             date,
