@@ -5,7 +5,9 @@ import {
     today,
     DateValue,
     CalendarDate,
+    ZonedDateTime,
     toCalendarDate,
+    parseAbsolute,
     parseAbsoluteToLocal,
     getLocalTimeZone,
 } from '@internationalized/date'
@@ -68,7 +70,62 @@ export default function CreateNewAppointment() {
         [endDate.add({ days: 1 }), now.add({ days: 365 })], // All dates after two weeks from tomorrow
     ]
 
-    // Fetch appointments and update disabledRanges on component mount
+    // // Fetch appointments and update disabledRanges on component mount
+    // useEffect(() => {
+    //     const fetchAppointments = async () => {
+    //         try {
+    //             const data = await getAppointments()
+    //             setAppointments(data)
+
+    //             // Get all dates from the appointments
+    //             const dateSlotsMap = new Map()
+
+    //             data.forEach((appointment) => {
+    //                 const appointmentDate = new Date(
+    //                     appointment.date
+    //                 ).toDateString()
+
+    //                 if (!dateSlotsMap.has(appointmentDate)) {
+    //                     dateSlotsMap.set(appointmentDate, [])
+    //                 }
+
+    //                 dateSlotsMap
+    //                     .get(appointmentDate)
+    //                     .push(appointment.thTimeSlot)
+    //             })
+
+    //             // Find dates that have three slots taken
+    //             const unavailableDates: Date[] = []
+    //             dateSlotsMap.forEach((slots, date) => {
+    //                 if (slots.length === 2) {
+    //                     unavailableDates.push(new Date(date))
+    //                 }
+    //             })
+
+    //             // Convert unavailableDates to ZonedDateTime
+    //             const zonedDateTimeDates = unavailableDates.map((date) =>
+    //                 parseAbsoluteToLocal(date.toISOString())
+    //             )
+
+    //             // Convert ZonedDateTime to CalendarDate
+    //             const calendarDates = zonedDateTimeDates.map((date) =>
+    //                 toCalendarDate(date)
+    //             )
+
+    //             // Update disabledRanges with the new unavailable dates as CalendarDate
+    //             setNewDisabledRanges(() => [
+    //                 ...disabledRanges,
+    //                 // ...calendarDates.map((date) => [date, date]),
+    //             ])
+    //         } catch (error) {
+    //             console.error('Error fetching appointments:', error)
+    //         }
+    //     }
+
+    //     // Fetch appointments when component mounts
+    //     fetchAppointments()
+    // }, []) // Empty dependency array ensures this runs only once on mount
+
     useEffect(() => {
         const fetchAppointments = async () => {
             try {
@@ -79,36 +136,42 @@ export default function CreateNewAppointment() {
                 const dateSlotsMap = new Map()
 
                 data.forEach((appointment) => {
-                    const appointmentDate = new Date(
-                        appointment.date
-                    ).toDateString()
+                    // Convert the appointment date to Asia/Bangkok timezone
+                    const appointmentDate = parseAbsolute(
+                        new Date(appointment.date).toISOString(),
+                        'Asia/Bangkok'
+                    )
 
-                    if (!dateSlotsMap.has(appointmentDate)) {
-                        dateSlotsMap.set(appointmentDate, [])
+                    const appointmentDateString = appointmentDate.toString()
+                    const isoDate = appointmentDateString.replace(
+                        /\[.*?\]/g,
+                        ''
+                    )
+
+                    if (!dateSlotsMap.has(isoDate)) {
+                        dateSlotsMap.set(isoDate, [])
                     }
 
-                    dateSlotsMap
-                        .get(appointmentDate)
-                        .push(appointment.thTimeSlot)
+                    dateSlotsMap.get(isoDate).push(appointment.thTimeSlot)
                 })
 
-                // Find dates that have three slots taken
-                const unavailableDates: Date[] = []
+                // Find dates that have two slots taken
+                const unavailableDates: ZonedDateTime[] = [] // Change the type to ZonedDateTime[]
                 dateSlotsMap.forEach((slots, date) => {
                     if (slots.length === 2) {
-                        unavailableDates.push(new Date(date))
+                        unavailableDates.push(
+                            parseAbsolute(date, 'Asia/Bangkok')
+                        )
                     }
                 })
 
-                // Convert unavailableDates to ZonedDateTime
-                const zonedDateTimeDates = unavailableDates.map((date) =>
-                    parseAbsoluteToLocal(date.toISOString())
+                // Convert ZonedDateTime (in Bangkok) to CalendarDate
+                const calendarDates = unavailableDates.map((zonedDateTime) =>
+                    toCalendarDate(zonedDateTime)
                 )
 
-                // Convert ZonedDateTime to CalendarDate
-                const calendarDates = zonedDateTimeDates.map((date) =>
-                    toCalendarDate(date)
-                )
+                console.log(dateSlotsMap)
+                console.log(calendarDates) // Now you will see the calendar dates
 
                 // Update disabledRanges with the new unavailable dates as CalendarDate
                 setNewDisabledRanges(() => [
