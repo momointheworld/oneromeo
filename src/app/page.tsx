@@ -7,6 +7,7 @@ import {
     ZonedDateTime,
     toCalendarDate,
     parseAbsolute,
+    GregorianCalendar,
     getLocalTimeZone,
 } from '@internationalized/date'
 import { useLocale } from '@react-aria/i18n'
@@ -23,7 +24,6 @@ import bundleImg from '/public/bundle-sessions.png'
 import { useEmail } from '@/hooks/useEmail'
 import { useSelectedItem } from '@/hooks/useSelectedItem'
 import checkout from '@/actions/checkout'
-import { revertTimezone } from '@/utils/revertTimeZone'
 import { StaticImageData } from 'next/image'
 
 const OrderForm = () => {
@@ -74,7 +74,7 @@ const OrderForm = () => {
     const [showNote, setShowNote] = useState(false)
     const [note, setNote] = useState('')
     const [availableSlots, setAvailableSlots] = useState(timeSlots)
-    const { selectedTimezone, setSelectedTimezone } = useTimezone()
+    // const { selectedTimezone, setSelectedTimezone } = useTimezone()
     const { selectedDate, setSelectedDate } = useDate()
     const [pickedTime, setPickedTime] = useState('')
     const [isLoading, setIsLoading] = useState(false)
@@ -118,65 +118,6 @@ const OrderForm = () => {
         },
     ]
 
-    // // Fetch appointments and update disabledRanges on component mount
-    // useEffect(() => {
-    //     const fetchAppointments = async () => {
-    //         try {
-    //             const data = await getAppointments()
-    //             setAppointments(data)
-
-    //             // Get all dates from the appointments
-    //             const dateSlotsMap = new Map()
-
-    //             data.forEach((appointment) => {
-    //                 const appointmentDate = new Date(
-    //                     appointment.date
-    //                 ).toDateString()
-
-    //                 if (!dateSlotsMap.has(appointmentDate)) {
-    //                     dateSlotsMap.set(appointmentDate, [])
-    //                 }
-
-    //                 dateSlotsMap
-    //                     .get(appointmentDate)
-    //                     .push(appointment.thTimeSlot)
-    //             })
-
-    //             // Find dates that have two slots taken
-    //             const unavailableDates: Date[] = []
-    //             dateSlotsMap.forEach((slots, date) => {
-    //                 if (slots.length === 2) {
-    //                     unavailableDates.push(new Date(date))
-    //                 }
-    //             })
-
-    //             // Convert unavailableDates to ZonedDateTime
-    //             const zonedDateTimeDates = unavailableDates.map((date) =>
-    //                 parseAbsolute(date.toISOString(), 'asia/bangkok')
-    //             )
-
-    //             // Convert ZonedDateTime to CalendarDate
-    //             const calendarDates = zonedDateTimeDates.map((date) =>
-    //                 toCalendarDate(date)
-    //             )
-
-    //             console.log(dateSlotsMap)
-    //             // console.log(calendarDates)
-
-    //             // Update disabledRanges with the new unavailable dates as CalendarDate
-    //             setNewDisabledRanges(() => [
-    //                 ...disabledRanges,
-    //                 ...calendarDates.map((date) => [date, date]),
-    //             ])
-    //         } catch (error) {
-    //             console.error('Error fetching appointments:', error)
-    //         }
-    //     }
-
-    //     // Fetch appointments when component mounts
-    //     fetchAppointments()
-    // }, []) // Empty dependency array ensures this runs only once on mount
-
     useEffect(() => {
         const fetchAppointments = async () => {
             try {
@@ -187,11 +128,7 @@ const OrderForm = () => {
                 const dateSlotsMap = new Map()
 
                 data.forEach((appointment) => {
-                    // Convert the appointment date to Asia/Bangkok timezone
-                    const appointmentDate = parseAbsolute(
-                        new Date(appointment.date).toISOString(),
-                        'Asia/Bangkok'
-                    )
+                    const appointmentDate = new Date(appointment.date)
 
                     const appointmentDateString = appointmentDate.toString()
                     const isoDate = appointmentDateString.replace(
@@ -206,23 +143,26 @@ const OrderForm = () => {
                     dateSlotsMap.get(isoDate).push(appointment.thTimeSlot)
                 })
 
-                // Find dates that have two slots taken
-                const unavailableDates: ZonedDateTime[] = [] // Change the type to ZonedDateTime[]
+                const unavailableDates: Date[] = [] // Use Date or string instead of ZonedDateTime
                 dateSlotsMap.forEach((slots, date) => {
                     if (slots.length === 2) {
-                        unavailableDates.push(
-                            parseAbsolute(date, 'Asia/Bangkok')
-                        )
+                        unavailableDates.push(new Date(date)) // Just push the date without conversion
                     }
                 })
 
-                // Convert ZonedDateTime (in Bangkok) to CalendarDate
-                const calendarDates = unavailableDates.map((zonedDateTime) =>
-                    toCalendarDate(zonedDateTime)
-                )
+                // Convert Date to CalendarDate using the Gregorian calendar
+                const calendarDates = unavailableDates.map((date) => {
+                    const calendarDate: CalendarDate = new CalendarDate(
+                        new GregorianCalendar(),
+                        date.getUTCFullYear(),
+                        date.getUTCMonth() + 1,
+                        date.getUTCDate()
+                    )
+                    return calendarDate
+                })
 
                 console.log(dateSlotsMap)
-                console.log(calendarDates) // Now you will see the calendar dates
+                console.log(calendarDates)
 
                 // Update disabledRanges with the new unavailable dates as CalendarDate
                 setNewDisabledRanges(() => [
@@ -269,10 +209,10 @@ const OrderForm = () => {
             )
             setAvailableSlots(convertedSlots)
         }
-    }, [selectedDate, appointments, selectedTimezone])
+    }, [selectedDate, appointments])
 
     const resetAppointment = () => {
-        setSelectedTimezone(''), setSelectedDate(null), setPickedTime('')
+        setSelectedDate(null), setPickedTime('')
     }
     // get the product information
     const handleItemClick: React.MouseEventHandler<HTMLButtonElement> = (e) => {
@@ -351,7 +291,10 @@ const OrderForm = () => {
                 Intl.DateTimeFormat().resolvedOptions().timeZone
             // convert to the local time zone
             const dateString = selectedDate?.toDate(localTimezone)
-            const orderDate = dateString ? dateString.toDateString() : ''
+            // const orderDate = dateString ? dateString.toDateString() : ''
+            const orderDate = dateString
+                ? new Date(dateString).toISOString() // Convert to UTC ISO String
+                : ''
 
             let updatedTimeSlots = dateString
                 ? convertToUserTimezone(timeSlots, dateString)

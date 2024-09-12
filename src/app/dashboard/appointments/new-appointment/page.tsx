@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
     today,
@@ -7,8 +7,8 @@ import {
     CalendarDate,
     ZonedDateTime,
     toCalendarDate,
+    GregorianCalendar,
     parseAbsolute,
-    parseAbsoluteToLocal,
     getLocalTimeZone,
 } from '@internationalized/date'
 import { useLocale } from '@react-aria/i18n'
@@ -17,11 +17,11 @@ import { convertToUserTimezone, timeSlots } from '@/utils/converTimeZone'
 import { useTimezone } from '@/hooks/useTimezone'
 import { useDate } from '@/hooks/useDate'
 import { useEmail } from '@/hooks/useEmail'
-import { revertTimezone } from '@/utils/revertTimeZone'
 import AddAppointment from '@/components/appointment'
 import FormButton from '@/components/common/formbutton'
 import paths from '@/components/paths'
 import PageBreadCrumbs from '@/components/common/breadcrumbs'
+import { format, toZonedTime } from 'date-fns-tz'
 
 interface Breadcrumb {
     href: string
@@ -56,7 +56,7 @@ export default function CreateNewAppointment() {
     const [emailError, setEmailError] = useState('')
     const [dateError, setDateError] = useState('')
     const [timeSlotError, setTimeSlotError] = useState('')
-    const { selectedTimezone, setSelectedTimezone } = useTimezone()
+    // const { selectedTimezone, setSelectedTimezone } = useTimezone()
     const { selectedDate, setSelectedDate } = useDate()
     const [pickedTime, setPickedTime] = useState('')
     const [isLoading, setIsLoading] = useState(false)
@@ -70,62 +70,6 @@ export default function CreateNewAppointment() {
         [endDate.add({ days: 1 }), now.add({ days: 365 })], // All dates after two weeks from tomorrow
     ]
 
-    // // Fetch appointments and update disabledRanges on component mount
-    // useEffect(() => {
-    //     const fetchAppointments = async () => {
-    //         try {
-    //             const data = await getAppointments()
-    //             setAppointments(data)
-
-    //             // Get all dates from the appointments
-    //             const dateSlotsMap = new Map()
-
-    //             data.forEach((appointment) => {
-    //                 const appointmentDate = new Date(
-    //                     appointment.date
-    //                 ).toDateString()
-
-    //                 if (!dateSlotsMap.has(appointmentDate)) {
-    //                     dateSlotsMap.set(appointmentDate, [])
-    //                 }
-
-    //                 dateSlotsMap
-    //                     .get(appointmentDate)
-    //                     .push(appointment.thTimeSlot)
-    //             })
-
-    //             // Find dates that have three slots taken
-    //             const unavailableDates: Date[] = []
-    //             dateSlotsMap.forEach((slots, date) => {
-    //                 if (slots.length === 2) {
-    //                     unavailableDates.push(new Date(date))
-    //                 }
-    //             })
-
-    //             // Convert unavailableDates to ZonedDateTime
-    //             const zonedDateTimeDates = unavailableDates.map((date) =>
-    //                 parseAbsoluteToLocal(date.toISOString())
-    //             )
-
-    //             // Convert ZonedDateTime to CalendarDate
-    //             const calendarDates = zonedDateTimeDates.map((date) =>
-    //                 toCalendarDate(date)
-    //             )
-
-    //             // Update disabledRanges with the new unavailable dates as CalendarDate
-    //             setNewDisabledRanges(() => [
-    //                 ...disabledRanges,
-    //                 // ...calendarDates.map((date) => [date, date]),
-    //             ])
-    //         } catch (error) {
-    //             console.error('Error fetching appointments:', error)
-    //         }
-    //     }
-
-    //     // Fetch appointments when component mounts
-    //     fetchAppointments()
-    // }, []) // Empty dependency array ensures this runs only once on mount
-
     useEffect(() => {
         const fetchAppointments = async () => {
             try {
@@ -136,11 +80,7 @@ export default function CreateNewAppointment() {
                 const dateSlotsMap = new Map()
 
                 data.forEach((appointment) => {
-                    // Convert the appointment date to Asia/Bangkok timezone
-                    const appointmentDate = parseAbsolute(
-                        new Date(appointment.date).toISOString(),
-                        'Asia/Bangkok'
-                    )
+                    const appointmentDate = new Date(appointment.date)
 
                     const appointmentDateString = appointmentDate.toString()
                     const isoDate = appointmentDateString.replace(
@@ -155,23 +95,26 @@ export default function CreateNewAppointment() {
                     dateSlotsMap.get(isoDate).push(appointment.thTimeSlot)
                 })
 
-                // Find dates that have two slots taken
-                const unavailableDates: ZonedDateTime[] = [] // Change the type to ZonedDateTime[]
+                const unavailableDates: Date[] = [] // Use Date or string instead of ZonedDateTime
                 dateSlotsMap.forEach((slots, date) => {
                     if (slots.length === 2) {
-                        unavailableDates.push(
-                            parseAbsolute(date, 'Asia/Bangkok')
-                        )
+                        unavailableDates.push(new Date(date)) // Just push the date without conversion
                     }
                 })
 
-                // Convert ZonedDateTime (in Bangkok) to CalendarDate
-                const calendarDates = unavailableDates.map((zonedDateTime) =>
-                    toCalendarDate(zonedDateTime)
-                )
+                // Convert Date to CalendarDate using the Gregorian calendar
+                const calendarDates = unavailableDates.map((date) => {
+                    const calendarDate: CalendarDate = new CalendarDate(
+                        new GregorianCalendar(),
+                        date.getUTCFullYear(),
+                        date.getUTCMonth() + 1,
+                        date.getUTCDate()
+                    )
+                    return calendarDate
+                })
 
                 console.log(dateSlotsMap)
-                console.log(calendarDates) // Now you will see the calendar dates
+                console.log(calendarDates)
 
                 // Update disabledRanges with the new unavailable dates as CalendarDate
                 setNewDisabledRanges(() => [
@@ -205,7 +148,7 @@ export default function CreateNewAppointment() {
         const newAvailableSlots = timeSlots.filter(
             (slot) => !takenSlots.includes(slot.label)
         )
-        // setAvailableSlots(newAvailableSlots)
+
         if (selectedDate) {
             const dateObj = new Date(
                 selectedDate.year,
@@ -219,7 +162,7 @@ export default function CreateNewAppointment() {
             )
             setAvailableSlots(convertedSlots)
         }
-    }, [selectedDate, appointments, selectedTimezone])
+    }, [selectedDate, appointments])
 
     // Function to handle date change
     const handleDateChange = (date: DateValue | null) => {

@@ -164,6 +164,3 @@ const AllAppointmentsPage = () => {
 }
 
 export default AllAppointmentsPage
-function utcToZonedTime(date: string, timeZone: string) {
-    throw new Error('Function not implemented.')
-}
