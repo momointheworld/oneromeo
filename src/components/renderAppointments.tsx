@@ -3,12 +3,13 @@ import { Button } from '@nextui-org/react'
 import { format as formatZonedTime, toZonedTime } from 'date-fns-tz'
 
 interface Appointment {
-    id: string
-    date: Date
-    thTimeSlot: string
-    csrTimeSlot: string
-    timeZone: string
+    thDate: Date
+    thTime: string
+    csrDate: Date
+    csrTime: string
+    csrTimeZone: string
     email: string
+    createdAt: Date
 }
 
 interface RenderAppointmentsProps {

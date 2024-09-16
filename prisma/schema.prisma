@@ -121,13 +121,17 @@ model QuizSubmission {
 }
 
 model Appointment {
-  id           String     @id @default(auto()) @map("_id") @db.ObjectId 
-  timeZone     String
-  date         DateTime
-  thTimeSlot   String
-  csrTimeSlot  String
-  email        String
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  csrTimeZone  String     // Customer's timezone (e.g., 'America/New_York')
+  date         DateTime   // Full appointment date in UTC
+  thDate       DateTime   // Date in Thai timezone (e.g., '2024-09-23')
+  thTime       String     // Time in Thai timezone (24-hour format, e.g., '14:30')
+  csrDate      DateTime   // Date in customer's timezone (e.g., '2024-09-23')
+  csrTime      String     // Time in customer's timezone (24-hour format, e.g., '02:30')
+  email        String     // Customer's email
+  createdAt    DateTime   @default(now()) // Timestamp of when the appointment was created
 }
+
 
 model ProcessedEvent {
   id         String   @id @default(auto()) @map("_id") @db.ObjectId 
