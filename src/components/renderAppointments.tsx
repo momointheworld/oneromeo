@@ -3,6 +3,7 @@ import { Button } from '@nextui-org/react'
 import { format as formatZonedTime, toZonedTime } from 'date-fns-tz'
 
 interface Appointment {
+    id: string
     thDate: Date
     thTime: string
     csrDate: Date
@@ -32,16 +33,16 @@ const RenderAppointments: React.FC<RenderAppointmentsProps> = ({
                     Index
                 </th>
                 <th className="bg-gray-200 p-2 text-gray-600 font-bold md:border md:border-gray-300 text-left block md:table-cell">
-                    Appointment Date
+                    Created
                 </th>
                 <th className="bg-gray-200 p-2 text-gray-600 font-bold md:border md:border-gray-300 text-left block md:table-cell">
-                    TH Time Slot
+                    TH Date
                 </th>
                 <th className="bg-gray-200 p-2 text-gray-600 font-bold md:border md:border-gray-300 text-left block md:table-cell">
-                    Customer Timezone
+                    Csr Timezone
                 </th>
                 <th className="bg-gray-200 p-2 text-gray-600 font-bold md:border md:border-gray-300 text-left block md:table-cell">
-                    Customer Time Slot
+                    Csr Date
                 </th>
                 <th className="bg-gray-200 p-2 text-gray-600 font-bold md:border md:border-gray-300 text-left block md:table-cell">
                     Email
@@ -55,17 +56,6 @@ const RenderAppointments: React.FC<RenderAppointmentsProps> = ({
         </thead>
         <tbody className="block md:table-row-group">
             {latestAppointments.map((app, index) => {
-                const timeZone = 'Asia/Bangkok'
-                // Convert UTC date to Asia/Bangkok timezone
-                const zonedDate = toZonedTime(new Date(app.date), timeZone)
-
-                // Format the date in Asia/Bangkok timezone
-                const formattedDate = formatZonedTime(
-                    zonedDate,
-                    'MMMM d, yyyy',
-                    { timeZone }
-                )
-
                 return (
                     <tr
                         key={app.id}
@@ -75,17 +65,19 @@ const RenderAppointments: React.FC<RenderAppointmentsProps> = ({
                             {startIndex + index}
                         </td>
                         <td className="p-2 md:border md:border-gray-300 text-left block md:table-cell">
-                            {formattedDate}
+                            {app.createdAt.toDateString()}
                         </td>
                         <td className="p-2 md:border md:border-gray-300 text-left block md:table-cell">
-                            {app.thTimeSlot}
+                            {app.thDate.toDateString()} | {app.thTime}
+                        </td>
+
+                        <td className="p-2 md:border md:border-gray-300 text-left block md:table-cell">
+                            {app.csrTimeZone}
                         </td>
                         <td className="p-2 md:border md:border-gray-300 text-left block md:table-cell">
-                            {app.timeZone}
+                            {app.csrDate.toDateString()} | {app.csrTime}
                         </td>
-                        <td className="p-2 md:border md:border-gray-300 text-left block md:table-cell">
-                            {app.csrTimeSlot}
-                        </td>
+
                         <td className="p-2 md:border md:border-gray-300 text-left block md:table-cell">
                             {app.email}
                         </td>
