@@ -17,6 +17,7 @@ import {
 import { useLocale } from '@react-aria/i18n'
 import { I18nProvider } from '@react-aria/i18n'
 import DisplayMessage from '@/components/common/message'
+import { convertToUserTimezone, timeSlots } from '@/utils/converTimeZone'
 import SelectTimezone from '@/components/timeZoneSelector'
 import { useDate } from '@/hooks/useDate'
 import { useEmail } from '@/hooks/useEmail'
@@ -65,36 +66,65 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
 }) => {
     let now = today(getLocalTimeZone())
     let startDate = now.add({ days: 1 }) // Tomorrow
+    let endDate = now.add({ days: 30 })
     let { locale } = useLocale()
     const [isLoading, setIsLoading] = useState(false)
     const { selectedDate, setSelectedDate } = useDate()
-    // const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([])
     const { email, setEmail } = useEmail()
-
     const isDateUnavailable = (date: DateValue): boolean => {
         // Convert DateValue to CalendarDate
         const dateToCompare = new CalendarDate(date.year, date.month, date.day)
 
-        // Check if the date falls within any of the disabled ranges
-        return newDisabledRanges.some(
-            ([startDate, endDate]) =>
-                dateToCompare.compare(startDate) >= 0 &&
-                dateToCompare.compare(endDate) <= 0
+        // Get current date and the date 30 days from now
+        const today = new Date()
+        const thirtyDaysFromNow = new Date(today)
+        thirtyDaysFromNow.setDate(today.getDate() + 30)
+
+        // Convert timeSlots to user timezone
+        const newSlots = convertToUserTimezone(timeSlots)
+
+        // Extract unique dates from the converted slots within the next 30 days
+        const dateSet = new Set<string>()
+        newSlots.forEach((slot) => {
+            const slotDate = new Date(slot.date)
+            if (slotDate >= today && slotDate <= thirtyDaysFromNow) {
+                const formattedDate = slotDate.toISOString().split('T')[0] // Extract yyyy-MM-dd
+                dateSet.add(formattedDate)
+            }
+        })
+
+        // Convert date strings to CalendarDate objects
+        const availableDates: CalendarDate[] = Array.from(dateSet).map(
+            (dateString) => {
+                const [year, month, day] = dateString.split('-').map(Number)
+                return new CalendarDate(year, month, day)
+            }
+        )
+
+        // Check if the date is within the next 30 days and is not in the unavailableDates
+        const isWithinRange =
+            dateToCompare.compare(
+                new CalendarDate(
+                    today.getFullYear(),
+                    today.getMonth() + 1,
+                    today.getDate()
+                )
+            ) >= 0 &&
+            dateToCompare.compare(
+                new CalendarDate(
+                    thirtyDaysFromNow.getFullYear(),
+                    thirtyDaysFromNow.getMonth() + 1,
+                    thirtyDaysFromNow.getDate()
+                )
+            ) <= 0
+
+        return (
+            isWithinRange &&
+            !availableDates.some(
+                (availableDate) => availableDate.compare(dateToCompare) === 0
+            )
         )
     }
-    // const isDateUnavailable = (date: DateValue) => {
-    //     // Disable all dates except Tuesday (2) and Friday (5)
-    //     const dayOfWeek = new Date(date.year, date.month - 1, date.day).getDay()
-    //     const isWeekdayUnavailable = dayOfWeek !== 2 && dayOfWeek !== 5
-
-    //     // Combine with other disabled ranges
-    //     const isInDisabledRange = newDisabledRanges.some(
-    //         (interval) =>
-    //             date.compare(interval[0]) >= 0 && date.compare(interval[1]) <= 0
-    //     )
-
-    //     return isWeekdayUnavailable || isInDisabledRange
-    // }
 
     return (
         <div className="max-w-md mx-auto bg-white shadow-lg rounded-lg p-6">
@@ -105,6 +135,7 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
                         aria-label="Appointment day"
                         isDateUnavailable={isDateUnavailable}
                         minValue={startDate}
+                        maxValue={endDate}
                         value={selectedDate}
                         onChange={handleDateChange}
                         className="w-full mb-4"

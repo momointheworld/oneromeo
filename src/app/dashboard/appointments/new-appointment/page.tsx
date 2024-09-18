@@ -71,128 +71,75 @@ export default function CreateNewAppointment() {
     const [pickedTime, setPickedTime] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const [appointments, setAppointments] = useState<Appointment[]>([]) // State to store fetched appointments
-    const [newDisabledRanges, setNewDisabledRanges] = useState<
-        CalendarDate[][]
-    >([])
-    // const [newDisabledRanges, setNewDisabledRanges] = useState<[CalendarDate, CalendarDate][]>([])
+    // const [newDisabledRanges, setNewDisabledRanges] = useState<
+    //     CalendarDate[][]
+    // >([])
 
-    // let disabledRanges = [
-    //     [now.add({ days: -365 }), now], // All dates before today
-    //     [endDate.add({ days: 1 }), now.add({ days: 365 })], // All dates after two weeks from tomorrow
-    // ]
     useEffect(() => {
-        const fetchAppointments = async () => {
+        const fetchAndUpdateSlots = async () => {
             try {
+                // Fetch appointments data
                 const data = await getAppointments()
                 setAppointments(data)
 
-                // Convert predefined time slots to user timezone
-                const convertedSlots = convertToUserTimezone(timeSlots)
+                // Convert timeSlots to user timezone
+                const newSlots = convertToUserTimezone(timeSlots)
 
-                // Get all dates from the appointments
-                const dateSlotsMap = new Map<string, string[]>()
-
-                data.forEach((appointment) => {
-                    const appointmentDate = new Date(appointment.csrDate)
-                    const appointmentDateString = appointmentDate
-                        .toISOString()
-                        .split('T')[0] // ISO string in yyyy-MM-dd format
-
-                    if (!dateSlotsMap.has(appointmentDateString)) {
-                        dateSlotsMap.set(appointmentDateString, [])
-                    }
-
-                    // Retrieve the slots array safely
-                    const slots = dateSlotsMap.get(appointmentDateString)
-                    if (slots) {
-                        slots.push(appointment.csrTime)
-                    }
+                // Extract unique dates from the converted slots
+                const dateSet = new Set<string>()
+                newSlots.forEach((slot) => {
+                    const date = new Date(slot.date).toISOString().split('T')[0] // Extract yyyy-MM-dd
+                    dateSet.add(date)
                 })
 
-                // Determine unavailable dates based on appointments
-                const unavailableDates: Date[] = []
-                dateSlotsMap.forEach((slots, date) => {
-                    if (slots.length === 2) {
-                        unavailableDates.push(new Date(date)) // Date in yyyy-MM-dd format
-                    }
-                })
-
-                // Convert Date to CalendarDate using the Gregorian calendar
-                const calendarDates = unavailableDates.map((date) => {
-                    const calendarDate: CalendarDate = new CalendarDate(
-                        new GregorianCalendar(),
-                        date.getUTCFullYear(),
-                        date.getUTCMonth() + 1,
-                        date.getUTCDate()
+                if (selectedDate) {
+                    // Convert the selectedDate to a Date object
+                    const selectedDateObj = new Date(
+                        selectedDate.year,
+                        selectedDate.month - 1,
+                        selectedDate.day
                     )
-                    return calendarDate
-                })
 
-                // Update disabledRanges with the new unavailable dates as CalendarDate
-                setNewDisabledRanges(() => [
-                    ...calendarDates.map((date) => [date, date]),
-                ])
+                    // Filter appointments that match the latest month
+                    const takenSlots = appointments
+                        .filter((appointment) => {
+                            const appointmentDate = new Date(
+                                appointment.csrDate
+                            ) // Assuming 'csrDate' is a Date string
+                            return (
+                                appointmentDate.getFullYear() ===
+                                    selectedDateObj.getFullYear() &&
+                                appointmentDate.getMonth()
+                            ) // Compare year and latest month
+                        })
+                        .map((appointment) => appointment.csrTime)
 
-                // Filter converted slots based on unavailable dates
-                const updatedAvailableSlots = convertedSlots.filter(
-                    (slot) =>
-                        !unavailableDates.some(
-                            (unavailableDate) =>
-                                slot.date.toISOString().split('T')[0] ===
-                                unavailableDate.toISOString().split('T')[0]
-                        )
-                )
-                setAvailableSlots(updatedAvailableSlots)
+                    // Filter out the unavailable time slots for the selected date
+                    const newAvailableSlots = newSlots.filter((slot) => {
+                        const slotDate = new Date(slot.date)
+
+                        // Check if the slot date matches the selected date (year, month, and day)
+                        const isSameDate =
+                            slotDate.getFullYear() ===
+                                selectedDateObj.getFullYear() &&
+                            slotDate.getMonth() ===
+                                selectedDateObj.getMonth() &&
+                            slotDate.getDate() === selectedDateObj.getDate()
+
+                        // Check if the time slot is not taken
+                        return isSameDate && !takenSlots.includes(slot.time)
+                    })
+
+                    // Update available slots in the state
+                    setAvailableSlots(newAvailableSlots)
+                }
             } catch (error) {
                 console.error('Error fetching appointments:', error)
             }
         }
 
-        // Fetch appointments when component mounts
-        fetchAppointments()
-    }, [])
-
-    useEffect(() => {
-        if (!selectedDate) return
-
-        // Convert the selectedDate to a Date object
-        const selectedDateObj = new Date(
-            selectedDate.year,
-            selectedDate.month - 1,
-            selectedDate.day
-        )
-
-        // Filter appointments that match the selected date
-        const takenSlots = appointments
-            .filter((appointment) => {
-                const appointmentDate = new Date(appointment.csrDate) // Assuming 'csrDate' is a Date string
-                return (
-                    appointmentDate.getFullYear() ===
-                        selectedDateObj.getFullYear() &&
-                    appointmentDate.getMonth() === selectedDateObj.getMonth() &&
-                    appointmentDate.getDate() === selectedDateObj.getDate()
-                ) // Compare year, month, and day
-            })
-            .map((appointment) => appointment.csrTime) // Assuming 'csrTime' holds the booked time slot in 'HH:mm' format
-
-        // Filter out the unavailable time slots for the selected date
-        const newAvailableSlots = convertToUserTimezone(
-            timeSlots.filter((slot) => {
-                const slotDate = new Date(slot.date)
-                // Check if the slot date matches the selected date
-                const isSameDate =
-                    slotDate.getFullYear() === selectedDateObj.getFullYear() &&
-                    slotDate.getMonth() === selectedDateObj.getMonth() &&
-                    slotDate.getDate() === selectedDateObj.getDate()
-
-                // Check if the time slot is not taken
-                return isSameDate && !takenSlots.includes(slot.time)
-            })
-        )
-
-        // Update available slots in the state
-        setAvailableSlots(newAvailableSlots)
-    }, [selectedDate, appointments])
+        fetchAndUpdateSlots()
+    }, [selectedDate]) // Include `timeSlots` in the dependency array
 
     const handleDateChange = (date: DateValue | null) => {
         setSelectedDate(date) // Store the selected date
@@ -294,7 +241,7 @@ export default function CreateNewAppointment() {
                         <AddAppointment
                             handleDateChange={handleDateChange}
                             handleTimeChange={handleTimeChange}
-                            newDisabledRanges={newDisabledRanges}
+                            // newDisabledRanges={newDisabledRanges}
                             availableSlots={availableSlots}
                             pickedTime={pickedTime}
                             formStateMessage={formStateMessage}

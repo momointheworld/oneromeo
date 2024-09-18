@@ -13,8 +13,8 @@ const getNextTuesdayOrFriday = (startDate: Date) => {
     let currentDate = startDate
     const tuesdaysAndFridays: Date[] = []
 
-    // Loop through the next 2 months (roughly 60 days)
-    for (let i = 0; i < 60; i++) {
+    // Loop through the next 2 months (roughly 30 days)
+    for (let i = 0; i < 30; i++) {
         if (isTuesday(currentDate) || isFriday(currentDate)) {
             tuesdaysAndFridays.push(new Date(currentDate)) // Push a copy of the date
         }
