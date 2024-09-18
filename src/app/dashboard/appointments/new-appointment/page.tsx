@@ -8,6 +8,8 @@ import {
     ZonedDateTime,
     toCalendarDate,
     GregorianCalendar,
+    parseDateTime,
+    parseDate,
     parseAbsolute,
     getLocalTimeZone,
 } from '@internationalized/date'
@@ -34,14 +36,22 @@ const breadcrumbs: Breadcrumb[] = [
     { href: paths.createNewAppointment(), text: `New Appointment` },
 ]
 
+interface TimeSlot {
+    time: string
+    date: Date
+}
+
+interface Appointment {
+    thDate: Date
+    thTime: string
+    csrDate: Date
+    csrTime: string
+    csrTimeZone: string
+    email: string
+    createdAt: Date
+}
+
 export default function CreateNewAppointment() {
-    interface AppointmentData {
-        timeZone: string
-        date: Date
-        thTimeSlot: string
-        csrTimeSlot: string
-        email: string
-    }
     const router = useRouter()
     let now = today(getLocalTimeZone())
     let startDate = now.add({ days: 1 }) // Tomorrow
@@ -49,7 +59,7 @@ export default function CreateNewAppointment() {
     let endDate = now.add({ days: 30 }) // Two weeks from tomorrow
     const { email, setEmail } = useEmail()
     const [formStateMessage, setFormStateMessage] = useState('')
-    const [availableSlots, setAvailableSlots] = useState(timeSlots)
+    const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([])
     const [isEmailInvalid, setIsEmailInvalid] = useState(false)
     const [isDateInvalid, setIsDateInvalid] = useState(false)
     const [isTimeSlotInvalid, setIsTimeSlotInvalid] = useState(false)
@@ -60,45 +70,50 @@ export default function CreateNewAppointment() {
     const { selectedDate, setSelectedDate } = useDate()
     const [pickedTime, setPickedTime] = useState('')
     const [isLoading, setIsLoading] = useState(false)
-    const [appointments, setAppointments] = useState<AppointmentData[]>([]) // State to store fetched appointments
+    const [appointments, setAppointments] = useState<Appointment[]>([]) // State to store fetched appointments
     const [newDisabledRanges, setNewDisabledRanges] = useState<
         CalendarDate[][]
     >([])
+    // const [newDisabledRanges, setNewDisabledRanges] = useState<[CalendarDate, CalendarDate][]>([])
 
-    let disabledRanges = [
-        [now.add({ days: -365 }), now], // All dates before today
-        [endDate.add({ days: 1 }), now.add({ days: 365 })], // All dates after two weeks from tomorrow
-    ]
-
+    // let disabledRanges = [
+    //     [now.add({ days: -365 }), now], // All dates before today
+    //     [endDate.add({ days: 1 }), now.add({ days: 365 })], // All dates after two weeks from tomorrow
+    // ]
     useEffect(() => {
         const fetchAppointments = async () => {
             try {
                 const data = await getAppointments()
                 setAppointments(data)
 
+                // Convert predefined time slots to user timezone
+                const convertedSlots = convertToUserTimezone(timeSlots)
+
                 // Get all dates from the appointments
-                const dateSlotsMap = new Map()
+                const dateSlotsMap = new Map<string, string[]>()
 
                 data.forEach((appointment) => {
-                    const appointmentDate = new Date(appointment.date)
+                    const appointmentDate = new Date(appointment.csrDate)
+                    const appointmentDateString = appointmentDate
+                        .toISOString()
+                        .split('T')[0] // ISO string in yyyy-MM-dd format
 
-                    const appointmentDateString = appointmentDate.toString()
-                    const isoDate = appointmentDateString.replace(
-                        /\[.*?\]/g,
-                        ''
-                    )
-
-                    if (!dateSlotsMap.has(isoDate)) {
-                        dateSlotsMap.set(isoDate, [])
+                    if (!dateSlotsMap.has(appointmentDateString)) {
+                        dateSlotsMap.set(appointmentDateString, [])
                     }
 
-                    dateSlotsMap.get(isoDate).push(appointment.thTimeSlot)
+                    // Retrieve the slots array safely
+                    const slots = dateSlotsMap.get(appointmentDateString)
+                    if (slots) {
+                        slots.push(appointment.csrTime)
+                    }
                 })
 
-                const unavailableDates: Date[] = [] // Use Date or string instead of ZonedDateTime
+                // Determine unavailable dates based on appointments
+                const unavailableDates: Date[] = []
                 dateSlotsMap.forEach((slots, date) => {
                     if (slots.length === 2) {
-                        unavailableDates.push(new Date(date)) // Just push the date without conversion
+                        unavailableDates.push(new Date(date)) // Date in yyyy-MM-dd format
                     }
                 })
 
@@ -113,14 +128,21 @@ export default function CreateNewAppointment() {
                     return calendarDate
                 })
 
-                console.log(dateSlotsMap)
-                console.log(calendarDates)
-
                 // Update disabledRanges with the new unavailable dates as CalendarDate
                 setNewDisabledRanges(() => [
-                    ...disabledRanges,
                     ...calendarDates.map((date) => [date, date]),
                 ])
+
+                // Filter converted slots based on unavailable dates
+                const updatedAvailableSlots = convertedSlots.filter(
+                    (slot) =>
+                        !unavailableDates.some(
+                            (unavailableDate) =>
+                                slot.date.toISOString().split('T')[0] ===
+                                unavailableDate.toISOString().split('T')[0]
+                        )
+                )
+                setAvailableSlots(updatedAvailableSlots)
             } catch (error) {
                 console.error('Error fetching appointments:', error)
             }
@@ -128,55 +150,55 @@ export default function CreateNewAppointment() {
 
         // Fetch appointments when component mounts
         fetchAppointments()
-    }, []) // Empty dependency array ensures this runs only once on mount
+    }, [])
 
-    // UseEffect to check availability of time slots for the selected date
     useEffect(() => {
         if (!selectedDate) return
-        const selectedDateStr = selectedDate
-            .toDate('asia/bangkok')
-            .toDateString()
 
-        const takenSlots = appointments
-            .filter(
-                (appointment) =>
-                    new Date(appointment.date).toDateString() ===
-                    selectedDateStr
-            )
-            .map((appointment) => appointment.thTimeSlot)
-
-        const newAvailableSlots = timeSlots.filter(
-            (slot) => !takenSlots.includes(slot.label)
+        // Convert the selectedDate to a Date object
+        const selectedDateObj = new Date(
+            selectedDate.year,
+            selectedDate.month - 1,
+            selectedDate.day
         )
 
-        if (selectedDate) {
-            const dateObj = new Date(
-                selectedDate.year,
-                selectedDate.month - 1,
-                selectedDate.day
-            )
+        // Filter appointments that match the selected date
+        const takenSlots = appointments
+            .filter((appointment) => {
+                const appointmentDate = new Date(appointment.csrDate) // Assuming 'csrDate' is a Date string
+                return (
+                    appointmentDate.getFullYear() ===
+                        selectedDateObj.getFullYear() &&
+                    appointmentDate.getMonth() === selectedDateObj.getMonth() &&
+                    appointmentDate.getDate() === selectedDateObj.getDate()
+                ) // Compare year, month, and day
+            })
+            .map((appointment) => appointment.csrTime) // Assuming 'csrTime' holds the booked time slot in 'HH:mm' format
 
-            const convertedSlots = convertToUserTimezone(
-                newAvailableSlots,
-                dateObj
-            )
-            setAvailableSlots(convertedSlots)
-        }
+        // Filter out the unavailable time slots for the selected date
+        const newAvailableSlots = convertToUserTimezone(
+            timeSlots.filter((slot) => {
+                const slotDate = new Date(slot.date)
+                // Check if the slot date matches the selected date
+                const isSameDate =
+                    slotDate.getFullYear() === selectedDateObj.getFullYear() &&
+                    slotDate.getMonth() === selectedDateObj.getMonth() &&
+                    slotDate.getDate() === selectedDateObj.getDate()
+
+                // Check if the time slot is not taken
+                return isSameDate && !takenSlots.includes(slot.time)
+            })
+        )
+
+        // Update available slots in the state
+        setAvailableSlots(newAvailableSlots)
     }, [selectedDate, appointments])
 
-    // Function to handle date change
     const handleDateChange = (date: DateValue | null) => {
-        setSelectedDate(date)
-        setPickedTime('')
-
-        if (date) {
-            const dateObj = new Date(date.year, date.month - 1, date.day)
-            const convertedSlots = convertToUserTimezone(
-                availableSlots,
-                dateObj
-            )
-            setAvailableSlots(convertedSlots)
-        }
+        setSelectedDate(date) // Store the selected date
+        const newSlots = convertToUserTimezone(timeSlots)
+        setAvailableSlots(newSlots)
+        console.log(newSlots)
     }
 
     const handleTimeChange = (e: {
@@ -184,8 +206,9 @@ export default function CreateNewAppointment() {
     }) => {
         setPickedTime(e.target.value)
     }
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault() // Prevent default form submission
+        e.preventDefault()
         setIsLoading(true)
 
         // Reset error states
@@ -196,6 +219,7 @@ export default function CreateNewAppointment() {
         setTimeSlotError('')
         setEmailError('')
 
+        // Validate inputs
         if (!selectedDate) {
             setIsDateInvalid(true)
             setDateError('Please choose a date')
@@ -213,56 +237,46 @@ export default function CreateNewAppointment() {
             return
         }
 
-        if (selectedDate && pickedTime) {
-            const localTimezone =
-                Intl.DateTimeFormat().resolvedOptions().timeZone
+        // Get the user's timezone
+        const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
-            // convert to the local time zone
-            // const dateObj = selectedDate?.toDate(localTimezone)
-            const dateObj = selectedDate.toDate('asia/bangkok')
+        // Convert selected date to the local time zone
+        const selectedDateObj = new Date(
+            selectedDate.year,
+            selectedDate.month - 1,
+            selectedDate.day
+        )
 
-            const updatedTimeSlots = convertToUserTimezone(timeSlots, dateObj)
-            let thTimeSlot = updatedTimeSlots.find(
-                (slot) => slot.label === pickedTime
+        // Get UTC date (raw date without any conversion)
+        const utcDate = selectedDateObj.toISOString()
+
+        // Current timestamp for appointment creation
+        const createdAt = new Date().toISOString()
+
+        try {
+            // Send appointment data to the server
+            await addAppointment({
+                csrTimeZone: userTimeZone, // User's timezone
+                thDate,
+                thTime,
+                csrDate: csrTime,
+                email,
+                createdAt,
+            })
+
+            // Reset form state after successful submission
+            setSelectedDate(null)
+            setPickedTime('')
+            setAvailableSlots(timeSlots)
+            setFormStateMessage('Appointment added successfully.')
+            router.push(paths.showAllAppointments())
+        } catch (error) {
+            setFormStateMessage(
+                'Failed to add the appointment, try again later.'
             )
-            console.log(pickedTime)
-
-            console.log(thTimeSlot)
-
-            if (!thTimeSlot || !thTimeSlot.label) {
-                thTimeSlot = {
-                    key: '05:30 PM - 05:45 PM',
-                    start: '05:30',
-                    end: '05:45',
-                    period: 'PM',
-                    label: '05:30 PM - 05:45 PM', // Default label, can be updated after conversion
-                }
-            }
-            // label is updated while key is unchanged
-            const thLabel = thTimeSlot.key
-            const label = `${pickedTime} (${thLabel})`
-
-            try {
-                await addAppointment({
-                    timeZone: localTimezone,
-                    date: dateObj,
-                    thTimeSlot: thLabel,
-                    csrTimeSlot: pickedTime,
-                    email,
-                })
-                setSelectedDate(null)
-                setPickedTime('')
-                setAvailableSlots(timeSlots)
-                setFormStateMessage('Appointment added successfully.')
-                router.push(paths.showAllAppointments())
-            } catch (error) {
-                setFormStateMessage(
-                    'Failed to add the appointment, try again later.'
-                )
-                console.error('Error adding appointment:', error)
-            } finally {
-                setIsLoading(false)
-            }
+            console.error('Error adding appointment:', error)
+        } finally {
+            setIsLoading(false)
         }
     }
 

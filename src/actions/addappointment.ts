@@ -4,25 +4,30 @@ import { db } from '@/db'
 import { revalidatePath } from 'next/cache'
 
 interface AppointmentData {
-    timeZone: string
-    date: Date
-    thTimeSlot: string
-    csrTimeSlot: string
+    thDate: Date
+    thTime: string
+    csrDate: Date
+    csrTime: string
+    csrTimeZone: string
     email: string
+    createdAt: Date
 }
 
 export async function addAppointment(formData: AppointmentData) {
-    const { timeZone, date, thTimeSlot, csrTimeSlot, email } = formData
-    console.log(timeZone, date, thTimeSlot, csrTimeSlot, email)
+    const { thDate, thTime, csrDate, csrTime, csrTimeZone, email, createdAt } =
+        formData
+    console.log(thDate, thTime, csrDate, csrTime, csrTimeZone, email, createdAt)
 
     try {
         const appointment = await db.appointment.create({
             data: {
-                timeZone,
-                date,
-                thTimeSlot,
-                csrTimeSlot,
+                thDate,
+                thTime,
+                csrDate,
+                csrTime,
+                csrTimeZone,
                 email,
+                createdAt: new Date(),
             },
         })
 

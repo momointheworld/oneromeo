@@ -22,8 +22,8 @@ import { useDate } from '@/hooks/useDate'
 import { useEmail } from '@/hooks/useEmail'
 
 interface TimeSlot {
-    key: string
-    label: string
+    time: string
+    date: Date
 }
 
 interface AddAppointmentProps {
@@ -68,21 +68,33 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
     let { locale } = useLocale()
     const [isLoading, setIsLoading] = useState(false)
     const { selectedDate, setSelectedDate } = useDate()
+    // const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([])
     const { email, setEmail } = useEmail()
 
-    const isDateUnavailable = (date: DateValue) => {
-        // Disable all dates except Tuesday (2) and Friday (5)
-        const dayOfWeek = new Date(date.year, date.month - 1, date.day).getDay()
-        const isWeekdayUnavailable = dayOfWeek !== 2 && dayOfWeek !== 5
+    const isDateUnavailable = (date: DateValue): boolean => {
+        // Convert DateValue to CalendarDate
+        const dateToCompare = new CalendarDate(date.year, date.month, date.day)
 
-        // Combine with other disabled ranges
-        const isInDisabledRange = newDisabledRanges.some(
-            (interval) =>
-                date.compare(interval[0]) >= 0 && date.compare(interval[1]) <= 0
+        // Check if the date falls within any of the disabled ranges
+        return newDisabledRanges.some(
+            ([startDate, endDate]) =>
+                dateToCompare.compare(startDate) >= 0 &&
+                dateToCompare.compare(endDate) <= 0
         )
-
-        return isWeekdayUnavailable || isInDisabledRange
     }
+    // const isDateUnavailable = (date: DateValue) => {
+    //     // Disable all dates except Tuesday (2) and Friday (5)
+    //     const dayOfWeek = new Date(date.year, date.month - 1, date.day).getDay()
+    //     const isWeekdayUnavailable = dayOfWeek !== 2 && dayOfWeek !== 5
+
+    //     // Combine with other disabled ranges
+    //     const isInDisabledRange = newDisabledRanges.some(
+    //         (interval) =>
+    //             date.compare(interval[0]) >= 0 && date.compare(interval[1]) <= 0
+    //     )
+
+    //     return isWeekdayUnavailable || isInDisabledRange
+    // }
 
     return (
         <div className="max-w-md mx-auto bg-white shadow-lg rounded-lg p-6">
@@ -116,8 +128,8 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
                 >
                     {/* slot has key and label, label is what is being updated, while key is still the default value */}
                     {availableSlots.map((slot) => (
-                        <SelectItem key={slot.label} value={slot.label}>
-                            {slot.label}
+                        <SelectItem key={slot.time} value={slot.time}>
+                            {slot.time}
                         </SelectItem>
                     ))}
                 </Select>
