@@ -8,16 +8,21 @@ interface TimeSlot {
 
 const predefinedTimes = ['02:30', '14:30'] // Predefined UTC times
 
-// Function to get the next Tuesday or Friday starting from a given date
-const getNextTuesdayOrFriday = (startDate: Date) => {
-    let currentDate = startDate
+// Function to get the next Tuesday or Friday based on UTC
+const getNextTuesdayOrFridayUTC = (startDate: Date) => {
+    let currentDate = new Date(startDate.toISOString()) // Ensure currentDate is in UTC
     const tuesdaysAndFridays: Date[] = []
 
-    // Loop through the next 2 months (roughly 30 days)
+    // Loop through the next 30 days
     for (let i = 0; i < 30; i++) {
-        if (isTuesday(currentDate) || isFriday(currentDate)) {
-            tuesdaysAndFridays.push(new Date(currentDate)) // Push a copy of the date
+        const utcDay = currentDate.getUTCDay() // Get the day of the week in UTC (0 = Sunday, 1 = Monday, etc.)
+
+        // Check if it's a Tuesday (2) or Friday (5) in UTC
+        if (utcDay === 2 || utcDay === 5) {
+            tuesdaysAndFridays.push(new Date(currentDate)) // Push the UTC date
         }
+
+        // Move to the next day in UTC
         currentDate = addDays(currentDate, 1)
     }
     return tuesdaysAndFridays
@@ -26,7 +31,7 @@ const getNextTuesdayOrFriday = (startDate: Date) => {
 // Generate timeslots for the upcoming Tuesdays and Fridays
 const generateTimeSlots = () => {
     const startDate = new Date() // Start from today's date
-    const dates = getNextTuesdayOrFriday(startDate)
+    const dates = getNextTuesdayOrFridayUTC(startDate)
     const timeSlots: TimeSlot[] = []
 
     dates.forEach((date) => {

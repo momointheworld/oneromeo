@@ -44,7 +44,7 @@ export default async function Dashboard() {
     })
 
     const appointments = await db.appointment.findMany({
-        orderBy: { date: 'desc' },
+        orderBy: { createdAt: 'desc' },
     })
     const latestAppointments = appointments.slice(0, 5) // Get the latest 5 quizzes
 

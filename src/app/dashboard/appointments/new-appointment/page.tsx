@@ -85,6 +85,8 @@ export default function CreateNewAppointment() {
                 // Convert timeSlots to user timezone
                 const newSlots = convertToUserTimezone(timeSlots)
 
+                console.log(newSlots)
+
                 // Extract unique dates from the converted slots
                 const dateSet = new Set<string>()
                 newSlots.forEach((slot) => {

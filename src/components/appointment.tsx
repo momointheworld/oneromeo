@@ -71,59 +71,90 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
     const [isLoading, setIsLoading] = useState(false)
     const { selectedDate, setSelectedDate } = useDate()
     const { email, setEmail } = useEmail()
+
+    // const isDateUnavailable = (date: DateValue): boolean => {
+    //     // Convert DateValue to CalendarDate
+    //     const dateToCompare = new CalendarDate(date.year, date.month, date.day)
+
+    //     // Get current date and the date 30 days from now
+    //     const today = new Date()
+    //     const thirtyDaysFromNow = new Date(today)
+    //     thirtyDaysFromNow.setDate(today.getDate() + 30)
+
+    //     // Convert timeSlots to user timezone
+    //     const newSlots = convertToUserTimezone(timeSlots)
+
+    //     // Extract unique dates from the converted slots within the next 30 days
+    //     const dateSet = new Set<string>()
+    //     newSlots.forEach((slot) => {
+    //         const slotDate = new Date(slot.date)
+    //         if (slotDate >= today && slotDate <= thirtyDaysFromNow) {
+    //             const formattedDate = slotDate.toISOString().split('T')[0] // Extract yyyy-MM-dd
+    //             dateSet.add(formattedDate)
+    //         }
+    //     })
+
+    //     // Convert date strings to CalendarDate objects
+    //     const availableDates: CalendarDate[] = Array.from(dateSet).map(
+    //         (dateString) => {
+    //             const [year, month, day] = dateString.split('-').map(Number)
+    //             return new CalendarDate(year, month, day)
+    //         }
+    //     )
+
+    //     // Check if the date  is not in the unavailableDates
+    //     const isWithinRange =
+    //         dateToCompare.compare(
+    //             new CalendarDate(
+    //                 today.getFullYear(),
+    //                 today.getMonth() + 1,
+    //                 today.getDate()
+    //             )
+    //         ) >= 0 &&
+    //         dateToCompare.compare(
+    //             new CalendarDate(
+    //                 thirtyDaysFromNow.getFullYear(),
+    //                 thirtyDaysFromNow.getMonth() + 1,
+    //                 thirtyDaysFromNow.getDate()
+    //             )
+    //         ) <= 0
+
+    //     return (
+    //         isWithinRange &&
+    //         !availableDates.some(
+    //             (availableDate) => availableDate.compare(dateToCompare) === 0
+    //         )
+    //     )
+    // }
+    const formatDate = (date: Date): string => {
+        // Format date to yyyy-MM-dd in local timezone
+        const year = date.getFullYear()
+        const month = (date.getMonth() + 1).toString().padStart(2, '0')
+        const day = date.getDate().toString().padStart(2, '0')
+        return `${year}-${month}-${day}`
+    }
+
     const isDateUnavailable = (date: DateValue): boolean => {
-        // Convert DateValue to CalendarDate
-        const dateToCompare = new CalendarDate(date.year, date.month, date.day)
+        // Convert timeSlots to user's timezone
+        const userSlots = convertToUserTimezone(timeSlots)
 
-        // Get current date and the date 30 days from now
-        const today = new Date()
-        const thirtyDaysFromNow = new Date(today)
-        thirtyDaysFromNow.setDate(today.getDate() + 30)
-
-        // Convert timeSlots to user timezone
-        const newSlots = convertToUserTimezone(timeSlots)
-
-        // Extract unique dates from the converted slots within the next 30 days
-        const dateSet = new Set<string>()
-        newSlots.forEach((slot) => {
+        // Extract unique dates from the converted slots
+        const availableDatesSet = new Set<string>()
+        userSlots.forEach((slot) => {
             const slotDate = new Date(slot.date)
-            if (slotDate >= today && slotDate <= thirtyDaysFromNow) {
-                const formattedDate = slotDate.toISOString().split('T')[0] // Extract yyyy-MM-dd
-                dateSet.add(formattedDate)
-            }
+            const formattedDate = formatDate(slotDate)
+            availableDatesSet.add(formattedDate)
         })
 
-        // Convert date strings to CalendarDate objects
-        const availableDates: CalendarDate[] = Array.from(dateSet).map(
-            (dateString) => {
-                const [year, month, day] = dateString.split('-').map(Number)
-                return new CalendarDate(year, month, day)
-            }
+        // Convert the input date to a formatted string
+        const formattedInputDate = formatDate(
+            new Date(date.year, date.month - 1, date.day)
         )
 
-        // Check if the date is within the next 30 days and is not in the unavailableDates
-        const isWithinRange =
-            dateToCompare.compare(
-                new CalendarDate(
-                    today.getFullYear(),
-                    today.getMonth() + 1,
-                    today.getDate()
-                )
-            ) >= 0 &&
-            dateToCompare.compare(
-                new CalendarDate(
-                    thirtyDaysFromNow.getFullYear(),
-                    thirtyDaysFromNow.getMonth() + 1,
-                    thirtyDaysFromNow.getDate()
-                )
-            ) <= 0
+        // Check if the formatted input date is in the set of available dates
+        const isUnavailable = !availableDatesSet.has(formattedInputDate)
 
-        return (
-            isWithinRange &&
-            !availableDates.some(
-                (availableDate) => availableDate.compare(dateToCompare) === 0
-            )
-        )
+        return isUnavailable
     }
 
     return (

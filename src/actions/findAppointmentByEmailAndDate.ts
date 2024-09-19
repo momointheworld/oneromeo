@@ -7,7 +7,7 @@ export async function findAppointmentByEmailAndDate(email: string, date: Date) {
         const appointment = await db.appointment.findFirst({
             where: {
                 email: email,
-                date: {
+                createdAt: {
                     gte: new Date(date.setHours(0, 0, 0, 0)),
                     lt: new Date(date.setHours(23, 59, 59, 999)),
                 },
