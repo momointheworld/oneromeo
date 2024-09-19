@@ -71,9 +71,9 @@ export default function CreateNewAppointment() {
     const [pickedTime, setPickedTime] = useState('')
     const [isLoading, setIsLoading] = useState(false)
     const [appointments, setAppointments] = useState<Appointment[]>([]) // State to store fetched appointments
-    // const [newDisabledRanges, setNewDisabledRanges] = useState<
-    //     CalendarDate[][]
-    // >([])
+    const [newDisabledRanges, setNewDisabledRanges] = useState<
+        CalendarDate[][]
+    >([])
 
     useEffect(() => {
         const fetchAndUpdateSlots = async () => {
@@ -105,9 +105,7 @@ export default function CreateNewAppointment() {
                     // Filter appointments that match the latest month
                     const takenSlots = appointments
                         .filter((appointment) => {
-                            const appointmentDate = new Date(
-                                appointment.csrDate
-                            ) // Assuming 'csrDate' is a Date string
+                            const appointmentDate = appointment.csrDate
                             return (
                                 appointmentDate.getFullYear() ===
                                     selectedDateObj.getFullYear() &&
@@ -245,6 +243,7 @@ export default function CreateNewAppointment() {
                             handleTimeChange={handleTimeChange}
                             // newDisabledRanges={newDisabledRanges}
                             availableSlots={availableSlots}
+                            appointments={appointments}
                             pickedTime={pickedTime}
                             formStateMessage={formStateMessage}
                             isDisabled={false}
