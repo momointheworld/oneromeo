@@ -9,6 +9,8 @@ interface Appointment {
     csrDate: Date
     csrTime: string
     csrTimeZone: string
+    utcDate: Date
+    utcTime: string
     email: string
     createdAt: Date
 }
@@ -45,6 +47,9 @@ const RenderAppointments: React.FC<RenderAppointmentsProps> = ({
                     Csr Date
                 </th>
                 <th className="bg-gray-200 p-2 text-gray-600 font-bold md:border md:border-gray-300 text-left block md:table-cell">
+                    UTC Date
+                </th>
+                <th className="bg-gray-200 p-2 text-gray-600 font-bold md:border md:border-gray-300 text-left block md:table-cell">
                     Email
                 </th>
                 {showDeleteButton && (
@@ -77,7 +82,9 @@ const RenderAppointments: React.FC<RenderAppointmentsProps> = ({
                         <td className="p-2 md:border md:border-gray-300 text-left block md:table-cell">
                             {app.csrDate.toDateString()} | {app.csrTime}
                         </td>
-
+                        <td className="p-2 md:border md:border-gray-300 text-left block md:table-cell">
+                            {app.utcDate.toDateString()} | {app.utcTime}
+                        </td>
                         <td className="p-2 md:border md:border-gray-300 text-left block md:table-cell">
                             {app.email}
                         </td>

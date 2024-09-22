@@ -28,13 +28,15 @@ interface TimeSlot {
 }
 
 interface Appointment {
-    thDate: Date
-    thTime: string
-    csrDate: Date
-    csrTime: string
-    csrTimeZone: string
-    email: string
-    createdAt: Date
+    thDate: Date // Date in Thai timezone
+    thTime: string // Time in Thai timezone (24-hour format)
+    csrDate: Date // Date in customer's timezone
+    csrTime: string // Time in customer's timezone (24-hour format)
+    csrTimeZone: string // Customer's timezone
+    utcDate: Date // UTC date
+    utcTime: string // UTC time in 24-hour format
+    email: string // Customer's email
+    createdAt: Date // Timestamp of when the appointment was created
 }
 
 interface AddAppointmentProps {
@@ -83,6 +85,8 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
     const [isLoading, setIsLoading] = useState(false)
     const { selectedDate, setSelectedDate } = useDate()
     const { email, setEmail } = useEmail()
+    // State to hold available slots based on selected date
+    const [filteredSlots, setFilteredSlots] = useState<TimeSlot[]>([])
 
     const formatDate = (date: Date): string => {
         // Format date to yyyy-MM-dd in local timezone
@@ -92,28 +96,37 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
         return `${year}-${month}-${day}`
     }
 
-    // const isDateUnavailable = (date: DateValue): boolean => {
-    //     // Convert timeSlots to user's timezone
-    //     const userSlots = convertToUserTimezone(timeSlots)
+    useEffect(() => {
+        // Update available slots whenever the selected date or appointments change
+        if (selectedDate) {
+            const formattedInputDate = formatDate(
+                new Date(
+                    selectedDate.year,
+                    selectedDate.month - 1,
+                    selectedDate.day
+                )
+            )
 
-    //     // Extract unique dates from the converted slots
-    //     const availableDatesSet = new Set<string>()
-    //     userSlots.forEach((slot) => {
-    //         const slotDate = new Date(slot.date)
-    //         const formattedDate = formatDate(slotDate)
-    //         availableDatesSet.add(formattedDate)
-    //     })
+            // Get the taken slots for the selected date
+            const takenSlotsForDate = appointments
+                .filter((appointment) => {
+                    const appointmentDate = formatDate(appointment.utcDate)
+                    return appointmentDate === formattedInputDate
+                })
+                .map((appointment) => appointment.utcTime)
 
-    //     // Convert the input date to a formatted string
-    //     const formattedInputDate = formatDate(
-    //         new Date(date.year, date.month - 1, date.day)
-    //     )
+            const userSlots = convertToUserTimezone(timeSlots)
+            // Filter available slots to exclude taken slots
+            const newAvailableSlots = userSlots.filter(
+                (slot) => !takenSlotsForDate.includes(slot.time)
+            )
 
-    //     // Check if the formatted input date is in the set of available dates
-    //     const isUnavailable = !availableDatesSet.has(formattedInputDate)
+            setFilteredSlots(newAvailableSlots)
+        } else {
+            setFilteredSlots(availableSlots) // Reset if no date is selected
+        }
+    }, [selectedDate, appointments, availableSlots])
 
-    //     return isUnavailable
-    // }
     const isDateUnavailable = (date: DateValue): boolean => {
         // Convert timeSlots to user's timezone
         const userSlots = convertToUserTimezone(timeSlots)
@@ -142,11 +155,11 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
         // Check if all time slots are taken for the date
         const takenSlotsForDate = appointments
             .filter((appointment) => {
-                const appointmentDate = appointment.csrDate
+                const appointmentDate = appointment.utcDate
                 const formattedAppointmentDate = formatDate(appointmentDate)
                 return formattedAppointmentDate === formattedInputDate
             })
-            .map((appointment) => appointment.csrTime)
+            .map((appointment) => appointment.utcTime)
 
         // Check if all slots are taken based on the converted slots
         const allSlotsTaken = userSlots
@@ -183,8 +196,13 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
                     placeholder="Select a time slot"
                     className="max-w-md  mb-4"
                     isDisabled={!selectedDate}
-                    items={availableSlots}
-                    selectedKeys={[pickedTime]}
+                    items={filteredSlots}
+                    // selectedKeys={[pickedTime]}
+                    selectedKeys={
+                        availableSlots.some((slot) => slot.time === pickedTime)
+                            ? [pickedTime]
+                            : []
+                    }
                     errorMessage={timeSlotError}
                     isInvalid={isTimeSlotInvalid}
                     onChange={handleTimeChange}

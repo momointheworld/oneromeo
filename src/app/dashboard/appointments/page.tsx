@@ -15,11 +15,15 @@ import { format, toZonedTime } from 'date-fns-tz'
 
 interface Appointment {
     id: string
-    date: Date
-    thTimeSlot: string
-    csrTimeSlot: string
-    timeZone: string
+    thDate: Date
+    thTime: string
+    csrDate: Date
+    csrTime: string
+    csrTimeZone: string
+    utcDate: Date
+    utcTime: string
     email: string
+    createdAt: Date
 }
 
 interface Breadcrumb {
@@ -44,23 +48,26 @@ const AllAppointmentsPage = () => {
         const fetchAppointments = async () => {
             try {
                 const data = await getAppointments()
-                console.log(data)
 
                 // Map fetched data to match the Appointment type
                 const formattedAppointments: Appointment[] = data.map(
                     (appointment) => ({
                         id: appointment.id,
-                        date: appointment.date,
-                        timeZone: appointment.timeZone,
-                        thTimeSlot: appointment.thTimeSlot,
-                        csrTimeSlot: appointment.csrTimeSlot,
+                        createdAt: appointment.createdAt,
+                        thDate: appointment.thDate,
+                        thTime: appointment.thTime,
+                        csrDate: appointment.csrDate,
+                        csrTime: appointment.csrTime,
+                        csrTimeZone: appointment.csrTimeZone,
+                        utcDate: appointment.utcDate,
+                        utcTime: appointment.utcTime,
                         email: appointment.email,
                     })
                 )
 
                 // Sort appointments by date in descending order
                 const sortedAppointments = formattedAppointments.sort(
-                    (a, b) => b.date.getTime() - a.date.getTime()
+                    (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
                 )
 
                 setAppointments(sortedAppointments)
@@ -97,16 +104,20 @@ const AllAppointmentsPage = () => {
             const formattedAppointments: Appointment[] =
                 updatedAppointments.map((appointment) => ({
                     id: appointment.id,
-                    date: new Date(appointment.date),
-                    timeZone: appointment.timeZone,
-                    thTimeSlot: appointment.thTimeSlot,
-                    csrTimeSlot: appointment.csrTimeSlot,
+                    createdAt: appointment.createdAt,
+                    thDate: appointment.thDate,
+                    thTime: appointment.thTime,
+                    csrDate: appointment.csrDate,
+                    csrTime: appointment.csrTime,
+                    csrTimeZone: appointment.csrTimeZone,
+                    utcDate: appointment.utcDate,
+                    utcTime: appointment.utcTime,
                     email: appointment.email,
                 }))
 
             // Sort appointments by date in descending order
             const sortedAppointments = formattedAppointments.sort(
-                (a, b) => b.date.getTime() - a.date.getTime()
+                (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
             )
 
             setAppointments(sortedAppointments)

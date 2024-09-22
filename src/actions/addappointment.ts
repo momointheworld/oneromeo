@@ -9,14 +9,35 @@ interface AppointmentData {
     csrDate: Date
     csrTime: string
     csrTimeZone: string
+    utcDate: Date
+    utcTime: string
     email: string
     createdAt: Date
 }
 
 export async function addAppointment(formData: AppointmentData) {
-    const { thDate, thTime, csrDate, csrTime, csrTimeZone, email, createdAt } =
-        formData
-    console.log(thDate, thTime, csrDate, csrTime, csrTimeZone, email, createdAt)
+    const {
+        thDate,
+        thTime,
+        csrDate,
+        csrTime,
+        csrTimeZone,
+        utcDate,
+        utcTime,
+        email,
+        createdAt,
+    } = formData
+    console.log(
+        thDate,
+        thTime,
+        csrDate,
+        csrTime,
+        csrTimeZone,
+        utcDate,
+        utcTime,
+        email,
+        createdAt
+    )
 
     try {
         const appointment = await db.appointment.create({
@@ -26,8 +47,10 @@ export async function addAppointment(formData: AppointmentData) {
                 csrDate,
                 csrTime,
                 csrTimeZone,
+                utcDate,
+                utcTime,
                 email,
-                createdAt: new Date(),
+                createdAt,
             },
         })
 

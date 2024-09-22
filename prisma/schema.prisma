@@ -127,6 +127,8 @@ model Appointment {
   csrTimeZone  String     // Customer's timezone (e.g., 'America/New_York')
   csrDate      DateTime   // Date in customer's timezone (e.g., '2024-09-23')
   csrTime      String     // Time in customer's timezone (24-hour format, e.g., '02:30')
+  utcDate      DateTime   // UTC date (e.g., '2024-09-23T00:00:00Z')
+  utcTime      String     // UTC time in 24-hour format (e.g., '14:30')
   email        String     // Customer's email
   createdAt    DateTime   @default(now()) // Timestamp of when the appointment was created
 }
