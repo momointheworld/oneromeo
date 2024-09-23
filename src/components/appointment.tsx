@@ -101,38 +101,6 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
         return `${year}-${month}-${day}`
     }
 
-    // useEffect(() => {
-    //     // Update available slots whenever the selected date or appointments change
-    //     const timeSlots = generateTimeSlots(appointments)
-    //     if (selectedDate) {
-    //         const formattedInputDate = formatDate(
-    //             new Date(
-    //                 selectedDate.year,
-    //                 selectedDate.month - 1,
-    //                 selectedDate.day
-    //             )
-    //         )
-
-    //         // Get the taken slots for the selected date
-    //         const takenSlotsForDate = appointments
-    //             .filter((appointment) => {
-    //                 const appointmentDate = formatDate(appointment.utcDate)
-    //                 return appointmentDate === formattedInputDate
-    //             })
-    //             .map((appointment) => appointment.utcTime)
-
-    //         const userSlots = convertToUserTimezone(timeSlots)
-    //         // Filter available slots to exclude taken slots
-    //         const newAvailableSlots = userSlots.filter(
-    //             (slot) => !takenSlotsForDate.includes(slot.time)
-    //         )
-
-    //         setFilteredSlots(newAvailableSlots)
-    //     } else {
-    //         setFilteredSlots(availableSlots) // Reset if no date is selected
-    //     }
-    // }, [selectedDate, appointments, availableSlots])
-
     const [appointments, setAppointments] = useState<Appointment[]>([])
     const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([])
 
@@ -150,6 +118,8 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
         const slots = generateTimeSlots(appointments)
         const convertedSlots = convertToUserTimezone(slots)
         setAvailableSlots(convertedSlots)
+
+        console.log(convertedSlots)
 
         // Filter converted slots by selectedDate
         const filteredDateSlots = convertedSlots.filter((slot) => {
@@ -191,50 +161,6 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
         // Return true if all slots are taken (no available slots for that date)
         return allSlotsTaken
     }
-
-    // const isDateUnavailable = (date: DateValue): boolean => {
-    //     // Convert timeSlots to user's timezone
-    //     const userSlots = convertToUserTimezone(timeSlots)
-
-    //     // Extract unique dates from the converted slots
-    //     const availableDatesSet = new Set<string>()
-    //     userSlots.forEach((slot) => {
-    //         const slotDate = new Date(slot.date)
-    //         const formattedDate = formatDate(slotDate)
-    //         availableDatesSet.add(formattedDate)
-    //     })
-
-    //     // Convert the input date to a formatted string
-    //     const formattedInputDate = formatDate(
-    //         new Date(date.year, date.month - 1, date.day)
-    //     )
-
-    //     // Check if the formatted input date is in the set of available dates
-    //     const isAvailableDate = availableDatesSet.has(formattedInputDate)
-
-    //     // If the date is not available based on time slots, consider it unavailable
-    //     if (!isAvailableDate) {
-    //         return true
-    //     }
-
-    //     // Check if all time slots are taken for the date
-    //     const takenSlotsForDate = appointments
-    //         .filter((appointment) => {
-    //             const appointmentDate = appointment.utcDate
-    //             const formattedAppointmentDate = formatDate(appointmentDate)
-    //             return formattedAppointmentDate === formattedInputDate
-    //         })
-    //         .map((appointment) => appointment.utcTime)
-
-    //     // Check if all slots are taken based on the converted slots
-    //     const allSlotsTaken = userSlots
-    //         .filter(
-    //             (slot) => formatDate(new Date(slot.date)) === formattedInputDate
-    //         )
-    //         .every((slot) => takenSlotsForDate.includes(slot.time))
-
-    //     return allSlotsTaken
-    // }
 
     return (
         <div className="max-w-md mx-auto bg-white shadow-lg rounded-lg p-6">

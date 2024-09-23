@@ -77,7 +77,8 @@
 // // Generate and export time slots for the coming Tuesdays and Fridays
 // const timeSlots = generateTimeSlots()
 
-// export { convertToUserTimezone, timeSlots }
+// // export { convertToUserTimezone, timeSlots }
+
 import { format, toZonedTime } from 'date-fns-tz'
 import { addDays } from 'date-fns'
 
@@ -120,6 +121,20 @@ const generateTimeSlots = (
             (app) => `${app.utcDate.toISOString().split('T')[0]}T${app.utcTime}`
         )
     )
+
+    // const takenSlotsSet = new Set(
+    //     appointments.map((app) => {
+    //         // Create a string representation in 'YYYY-MM-DDTHH:mm' format
+    //         const date = app.utcDate // This is a Date object
+    //         return `${date.getUTCFullYear()}-${String(
+    //             date.getUTCMonth() + 1
+    //         ).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}T${
+    //             app.utcTime
+    //         }`
+    //     })
+    // )
+
+    console.log(takenSlotsSet)
 
     dates.forEach((date) => {
         predefinedTimes.forEach((time) => {

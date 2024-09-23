@@ -76,7 +76,7 @@ const OrderForm = () => {
     const [formStateMessage, setFormStateMessage] = useState('')
     const [showNote, setShowNote] = useState(false)
     const [note, setNote] = useState('')
-    const [availableSlots, setAvailableSlots] = useState(timeSlots)
+    // const [availableSlots, setAvailableSlots] = useState(timeSlots)
     // const { selectedTimezone, setSelectedTimezone } = useTimezone()
     const { selectedDate, setSelectedDate } = useDate()
     const [pickedTime, setPickedTime] = useState('')
