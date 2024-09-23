@@ -10,7 +10,10 @@ import {
 import { DateTime } from 'luxon'
 import { useLocale } from '@react-aria/i18n'
 import { addAppointment, getAppointments } from '@/actions'
-import { convertToUserTimezone, timeSlots } from '@/utils/converTimeZone'
+import {
+    convertToUserTimezone,
+    generateTimeSlots,
+} from '@/utils/converTimeZone'
 import { useTimezone } from '@/hooks/useTimezone'
 import { useDate } from '@/hooks/useDate'
 import { useEmail } from '@/hooks/useEmail'
@@ -20,6 +23,8 @@ import paths from '@/components/paths'
 import PageBreadCrumbs from '@/components/common/breadcrumbs'
 import { format, toZonedTime } from 'date-fns-tz'
 import { convertToThaiDateTime } from '@/utils/convertToThaiDateTime'
+// import useConvertToUTC from '@/hooks/useConvertToUTC'
+import { convertToUTC } from '@/utils/convertToUTCDateTime'
 
 interface Breadcrumb {
     href: string
@@ -72,82 +77,52 @@ export default function CreateNewAppointment() {
     const [newDisabledRanges, setNewDisabledRanges] = useState<
         CalendarDate[][]
     >([])
+    // const { convertToUTC } = useConvertToUTC()
 
-    const formatDate = (date: Date): string => {
-        // Format date to yyyy-MM-dd in local timezone
-        const year = date.getFullYear()
-        const month = (date.getMonth() + 1).toString().padStart(2, '0')
-        const day = date.getDate().toString().padStart(2, '0')
-        return `${year}-${month}-${day}`
-    }
-    useEffect(() => {
-        const fetchAppointmentsAndConvertSlots = async () => {
-            try {
-                // Fetch appointments data
-                const data = await getAppointments()
-                setAppointments(data)
+    // useEffect(() => {
+    //     if (selectedDate && availableSlots.length > 0) {
+    //         // Convert the selectedDate to a Date object
+    //         const selectedDateObj = new Date(
+    //             selectedDate.year,
+    //             selectedDate.month - 1,
+    //             selectedDate.day
+    //         )
 
-                // Convert timeSlots to user's timezone
-                const newSlots = convertToUserTimezone(timeSlots)
+    //         // Convert the selected date to a formatted string (yyyy-MM-dd) for comparison
+    //         const formattedSelectedDate = formatDate(selectedDateObj)
 
-                console.log(newSlots)
+    //         // Filter out taken slots for the selected date
+    //         const takenSlots = appointments
+    //             .filter((appointment) => {
+    //                 const appointmentDate = new Date(appointment.utcDate)
+    //                 const formattedAppointmentDate = formatDate(appointmentDate)
 
-                // Store the converted slots
-                setAvailableSlots(newSlots)
-            } catch (error) {
-                console.error('Error fetching appointments:', error)
-            }
-        }
+    //                 // Compare formatted dates to check if the appointment matches the selected date
+    //                 return formattedAppointmentDate === formattedSelectedDate
+    //             })
+    //             .map((appointment) => appointment.utcTime) // Get the times of taken slots
 
-        fetchAppointmentsAndConvertSlots()
-    }, []) // Run when `timeSlots` changes
+    //         // Filter available slots based on the selected date and exclude taken slots
+    //         const newAvailableSlots = availableSlots.filter((slot) => {
+    //             const slotDate = new Date(slot.date)
 
-    useEffect(() => {
-        if (selectedDate && availableSlots.length > 0) {
-            // Convert the selectedDate to a Date object
-            const selectedDateObj = new Date(
-                selectedDate.year,
-                selectedDate.month - 1,
-                selectedDate.day
-            )
+    //             // Check if the slot date matches the selected date (year, month, and day)
+    //             const isSameDate =
+    //                 slotDate.getFullYear() === selectedDateObj.getFullYear() &&
+    //                 slotDate.getMonth() === selectedDateObj.getMonth() &&
+    //                 slotDate.getDate() === selectedDateObj.getDate()
 
-            // Convert the selected date to a formatted string (yyyy-MM-dd) for comparison
-            const formattedSelectedDate = formatDate(selectedDateObj)
+    //             // Check if the time slot is not taken
+    //             return isSameDate && !takenSlots.includes(slot.time)
+    //         })
 
-            // Filter out taken slots for the selected date
-            const takenSlots = appointments
-                .filter((appointment) => {
-                    const appointmentDate = new Date(appointment.thDate)
-                    const formattedAppointmentDate = formatDate(appointmentDate)
-
-                    // Compare formatted dates to check if the appointment matches the selected date
-                    return formattedAppointmentDate === formattedSelectedDate
-                })
-                .map((appointment) => appointment.thTime) // Get the times of taken slots
-
-            // Filter available slots based on the selected date and exclude taken slots
-            const newAvailableSlots = availableSlots.filter((slot) => {
-                const slotDate = new Date(slot.date)
-
-                // Check if the slot date matches the selected date (year, month, and day)
-                const isSameDate =
-                    slotDate.getFullYear() === selectedDateObj.getFullYear() &&
-                    slotDate.getMonth() === selectedDateObj.getMonth() &&
-                    slotDate.getDate() === selectedDateObj.getDate()
-
-                // Check if the time slot is not taken
-                return isSameDate && !takenSlots.includes(slot.time)
-            })
-
-            // Update available slots in the state
-            setAvailableSlots(newAvailableSlots)
-        }
-    }, [selectedDate]) // Dependencies: `selectedDate`, `appointments`, `availableSlots`
+    //         // Update available slots in the state
+    //         setAvailableSlots(newAvailableSlots)
+    //     }
+    // }, [selectedDate]) // Dependencies: `selectedDate`, `appointments`, `availableSlots`
 
     const handleDateChange = (date: DateValue | null) => {
         setSelectedDate(date) // Store the selected date
-        const newSlots = convertToUserTimezone(timeSlots)
-        setAvailableSlots(newSlots)
     }
 
     const handleTimeChange = (e: {
@@ -155,19 +130,6 @@ export default function CreateNewAppointment() {
     }) => {
         setPickedTime(e.target.value)
     }
-
-    const useConvertToUTC = () => {
-        const convertToUTC = (thDate: Date, thTime: string) => {
-            const thaiDateTime = DateTime.fromISO(
-                `${thDate.toISOString().split('T')[0]}T${thTime}`,
-                { zone: 'Asia/Bangkok' }
-            )
-            return thaiDateTime.toUTC()
-        }
-
-        return { convertToUTC }
-    }
-    const { convertToUTC } = useConvertToUTC()
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -218,7 +180,12 @@ export default function CreateNewAppointment() {
         console.log(thaiDate, thaiTime)
 
         // Convert to UTC before submission
-        const utcThDateTime = convertToUTC(thaiDate, thaiTime)
+        // const utcDate = convertToUTC(thaiDate, thaiTime)
+        const { utcDate, utcTime } = convertToUTC(
+            selectedDate,
+            pickedTime,
+            userTimeZone
+        )
 
         try {
             // Send appointment data to the server
@@ -228,8 +195,8 @@ export default function CreateNewAppointment() {
                 thTime: thaiTime,
                 csrDate: selectedDateObj,
                 csrTime: pickedTime,
-                utcDate: utcThDateTime.toJSDate(),
-                utcTime: utcThDateTime.toFormat('HH:mm'),
+                utcDate,
+                utcTime,
                 email,
                 createdAt: new Date(),
             })
@@ -237,7 +204,7 @@ export default function CreateNewAppointment() {
             // Reset form state after successful submission
             setSelectedDate(null)
             setPickedTime('')
-            setAvailableSlots(timeSlots)
+            // setAvailableSlots(timeSlots)
             setFormStateMessage('Appointment added successfully.')
             // router.push(paths.showAllAppointments())
         } catch (error) {
@@ -265,8 +232,8 @@ export default function CreateNewAppointment() {
                             handleDateChange={handleDateChange}
                             handleTimeChange={handleTimeChange}
                             // newDisabledRanges={newDisabledRanges}
-                            availableSlots={availableSlots}
-                            appointments={appointments}
+                            // availableSlots={availableSlots}
+                            // appointments={appointments}
                             pickedTime={pickedTime}
                             formStateMessage={formStateMessage}
                             isDisabled={false}

@@ -12,15 +12,20 @@ import {
     today,
     DateValue,
     CalendarDate,
+    parseDate,
     getLocalTimeZone,
 } from '@internationalized/date'
 import { useLocale } from '@react-aria/i18n'
 import { I18nProvider } from '@react-aria/i18n'
 import DisplayMessage from '@/components/common/message'
-import { convertToUserTimezone, timeSlots } from '@/utils/converTimeZone'
+import {
+    convertToUserTimezone,
+    generateTimeSlots,
+} from '@/utils/converTimeZone'
 import SelectTimezone from '@/components/timeZoneSelector'
 import { useDate } from '@/hooks/useDate'
 import { useEmail } from '@/hooks/useEmail'
+import { getAppointments } from '@/actions'
 
 interface TimeSlot {
     time: string
@@ -28,15 +33,15 @@ interface TimeSlot {
 }
 
 interface Appointment {
-    thDate: Date // Date in Thai timezone
-    thTime: string // Time in Thai timezone (24-hour format)
-    csrDate: Date // Date in customer's timezone
-    csrTime: string // Time in customer's timezone (24-hour format)
-    csrTimeZone: string // Customer's timezone
-    utcDate: Date // UTC date
-    utcTime: string // UTC time in 24-hour format
-    email: string // Customer's email
-    createdAt: Date // Timestamp of when the appointment was created
+    thDate: Date
+    thTime: string
+    csrDate: Date
+    csrTime: string
+    csrTimeZone: string
+    utcDate: Date
+    utcTime: string
+    email: string
+    createdAt: Date
 }
 
 interface AddAppointmentProps {
@@ -44,9 +49,9 @@ interface AddAppointmentProps {
     handleDateChange: (date: DateValue | null) => void
     handleTimeChange: React.ChangeEventHandler<HTMLSelectElement>
     // selectedDate: DateValue | null
-    appointments: Appointment[]
+    // appointments: Appointment[]
     // newDisabledRanges: CalendarDate[][]
-    availableSlots: TimeSlot[]
+    // availableSlots: TimeSlot[]
     pickedTime: string
     formStateMessage: string
     isEmailInvalid: boolean
@@ -64,8 +69,8 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
     handleDateChange,
     handleTimeChange,
     // newDisabledRanges,
-    appointments,
-    availableSlots,
+    // appointments,
+    // availableSlots,
     pickedTime,
     formStateMessage,
     isEmailInvalid,
@@ -96,80 +101,140 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
         return `${year}-${month}-${day}`
     }
 
+    // useEffect(() => {
+    //     // Update available slots whenever the selected date or appointments change
+    //     const timeSlots = generateTimeSlots(appointments)
+    //     if (selectedDate) {
+    //         const formattedInputDate = formatDate(
+    //             new Date(
+    //                 selectedDate.year,
+    //                 selectedDate.month - 1,
+    //                 selectedDate.day
+    //             )
+    //         )
+
+    //         // Get the taken slots for the selected date
+    //         const takenSlotsForDate = appointments
+    //             .filter((appointment) => {
+    //                 const appointmentDate = formatDate(appointment.utcDate)
+    //                 return appointmentDate === formattedInputDate
+    //             })
+    //             .map((appointment) => appointment.utcTime)
+
+    //         const userSlots = convertToUserTimezone(timeSlots)
+    //         // Filter available slots to exclude taken slots
+    //         const newAvailableSlots = userSlots.filter(
+    //             (slot) => !takenSlotsForDate.includes(slot.time)
+    //         )
+
+    //         setFilteredSlots(newAvailableSlots)
+    //     } else {
+    //         setFilteredSlots(availableSlots) // Reset if no date is selected
+    //     }
+    // }, [selectedDate, appointments, availableSlots])
+
+    const [appointments, setAppointments] = useState<Appointment[]>([])
+    const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([])
+
     useEffect(() => {
-        // Update available slots whenever the selected date or appointments change
-        if (selectedDate) {
-            const formattedInputDate = formatDate(
-                new Date(
-                    selectedDate.year,
-                    selectedDate.month - 1,
-                    selectedDate.day
-                )
-            )
-
-            // Get the taken slots for the selected date
-            const takenSlotsForDate = appointments
-                .filter((appointment) => {
-                    const appointmentDate = formatDate(appointment.utcDate)
-                    return appointmentDate === formattedInputDate
-                })
-                .map((appointment) => appointment.utcTime)
-
-            const userSlots = convertToUserTimezone(timeSlots)
-            // Filter available slots to exclude taken slots
-            const newAvailableSlots = userSlots.filter(
-                (slot) => !takenSlotsForDate.includes(slot.time)
-            )
-
-            setFilteredSlots(newAvailableSlots)
-        } else {
-            setFilteredSlots(availableSlots) // Reset if no date is selected
+        const fetchAppointments = async () => {
+            const fetchedAppointments = await getAppointments()
+            setAppointments(fetchedAppointments)
         }
-    }, [selectedDate, appointments, availableSlots])
 
-    const isDateUnavailable = (date: DateValue): boolean => {
-        // Convert timeSlots to user's timezone
-        const userSlots = convertToUserTimezone(timeSlots)
+        fetchAppointments()
+    }, [])
 
-        // Extract unique dates from the converted slots
-        const availableDatesSet = new Set<string>()
-        userSlots.forEach((slot) => {
-            const slotDate = new Date(slot.date)
-            const formattedDate = formatDate(slotDate)
-            availableDatesSet.add(formattedDate)
+    useEffect(() => {
+        // Generate time slots based on appointments or default if empty
+        const slots = generateTimeSlots(appointments)
+        const convertedSlots = convertToUserTimezone(slots)
+        setAvailableSlots(convertedSlots)
+
+        // Filter converted slots by selectedDate
+        const filteredDateSlots = convertedSlots.filter((slot) => {
+            // Create a Date object from selectedDate
+            const selectedDateObj = selectedDate
+                ? new Date(
+                      selectedDate.year,
+                      selectedDate.month - 1,
+                      selectedDate.day
+                  )
+                : null
+
+            // Compare the date parts
+            return (
+                selectedDateObj &&
+                slot.date.toDateString() === selectedDateObj.toDateString()
+            )
         })
 
-        // Convert the input date to a formatted string
+        setFilteredSlots(filteredDateSlots)
+    }, [appointments, selectedDate]) // Add selectedDate to the dependency array
+
+    const isDateUnavailable = (date: DateValue): boolean => {
+        // Convert the input date to a formatted string for comparison
         const formattedInputDate = formatDate(
             new Date(date.year, date.month - 1, date.day)
         )
 
-        // Check if the formatted input date is in the set of available dates
-        const isAvailableDate = availableDatesSet.has(formattedInputDate)
+        // Filter availableSlots for the specific date
+        const slotsForDate = availableSlots.filter((slot) => {
+            const slotDate = new Date(slot.date)
+            const formattedSlotDate = formatDate(slotDate)
+            return formattedSlotDate === formattedInputDate
+        })
 
-        // If the date is not available based on time slots, consider it unavailable
-        if (!isAvailableDate) {
-            return true
-        }
+        // Check if there are any available time slots for that date
+        const allSlotsTaken = slotsForDate.length === 0
 
-        // Check if all time slots are taken for the date
-        const takenSlotsForDate = appointments
-            .filter((appointment) => {
-                const appointmentDate = appointment.utcDate
-                const formattedAppointmentDate = formatDate(appointmentDate)
-                return formattedAppointmentDate === formattedInputDate
-            })
-            .map((appointment) => appointment.utcTime)
-
-        // Check if all slots are taken based on the converted slots
-        const allSlotsTaken = userSlots
-            .filter(
-                (slot) => formatDate(new Date(slot.date)) === formattedInputDate
-            )
-            .every((slot) => takenSlotsForDate.includes(slot.time))
-
+        // Return true if all slots are taken (no available slots for that date)
         return allSlotsTaken
     }
+
+    // const isDateUnavailable = (date: DateValue): boolean => {
+    //     // Convert timeSlots to user's timezone
+    //     const userSlots = convertToUserTimezone(timeSlots)
+
+    //     // Extract unique dates from the converted slots
+    //     const availableDatesSet = new Set<string>()
+    //     userSlots.forEach((slot) => {
+    //         const slotDate = new Date(slot.date)
+    //         const formattedDate = formatDate(slotDate)
+    //         availableDatesSet.add(formattedDate)
+    //     })
+
+    //     // Convert the input date to a formatted string
+    //     const formattedInputDate = formatDate(
+    //         new Date(date.year, date.month - 1, date.day)
+    //     )
+
+    //     // Check if the formatted input date is in the set of available dates
+    //     const isAvailableDate = availableDatesSet.has(formattedInputDate)
+
+    //     // If the date is not available based on time slots, consider it unavailable
+    //     if (!isAvailableDate) {
+    //         return true
+    //     }
+
+    //     // Check if all time slots are taken for the date
+    //     const takenSlotsForDate = appointments
+    //         .filter((appointment) => {
+    //             const appointmentDate = appointment.utcDate
+    //             const formattedAppointmentDate = formatDate(appointmentDate)
+    //             return formattedAppointmentDate === formattedInputDate
+    //         })
+    //         .map((appointment) => appointment.utcTime)
+
+    //     // Check if all slots are taken based on the converted slots
+    //     const allSlotsTaken = userSlots
+    //         .filter(
+    //             (slot) => formatDate(new Date(slot.date)) === formattedInputDate
+    //         )
+    //         .every((slot) => takenSlotsForDate.includes(slot.time))
+
+    //     return allSlotsTaken
+    // }
 
     return (
         <div className="max-w-md mx-auto bg-white shadow-lg rounded-lg p-6">
@@ -194,12 +259,11 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
                 <Select
                     aria-label="Select a time slot" // Provide aria-label for accessibility
                     placeholder="Select a time slot"
-                    className="max-w-md  mb-4"
+                    className="max-w-md mb-4"
                     isDisabled={!selectedDate}
-                    items={filteredSlots}
-                    // selectedKeys={[pickedTime]}
+                    items={filteredSlots} // Use filteredSlots here
                     selectedKeys={
-                        availableSlots.some((slot) => slot.time === pickedTime)
+                        filteredSlots.some((slot) => slot.time === pickedTime)
                             ? [pickedTime]
                             : []
                     }
@@ -207,14 +271,15 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
                     isInvalid={isTimeSlotInvalid}
                     onChange={handleTimeChange}
                 >
-                    {/* slot has key and label, label is what is being updated, while key is still the default value */}
-                    {availableSlots.map((slot) => (
+                    {/* Map over filteredSlots instead of availableSlots */}
+                    {filteredSlots.map((slot) => (
                         <SelectItem key={slot.time} value={slot.time}>
                             {slot.time}
                         </SelectItem>
                     ))}
                 </Select>
             </div>
+
             <div>
                 {' '}
                 <Input

@@ -14,7 +14,10 @@ import { useLocale } from '@react-aria/i18n'
 import { getAppointments } from '@/actions'
 import AddAppointment from '@/components/appointment'
 import { Button, Card, Chip, Input } from '@nextui-org/react'
-import { convertToUserTimezone, timeSlots } from '@/utils/converTimeZone'
+import {
+    convertToUserTimezone,
+    generateTimeSlots,
+} from '@/utils/converTimeZone'
 import { useTimezone } from '@/hooks/useTimezone'
 import { useDate } from '@/hooks/useDate'
 import OrderItems from '@/components/orderItems'
