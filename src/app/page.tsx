@@ -397,8 +397,8 @@ const OrderForm = () => {
                             handleDateChange={handleDateChange}
                             handleTimeChange={handleTimeChange}
                             pickedTime={pickedTime}
-                            newDisabledRanges={newDisabledRanges}
-                            availableSlots={availableSlots}
+                            // newDisabledRanges={newDisabledRanges}
+                            // availableSlots={availableSlots}
                             formStateMessage={formStateMessage}
                             isEmailInvalid={isEmailInvalid}
                             // isTimezoneInvalid={isTimezoneInvalid}

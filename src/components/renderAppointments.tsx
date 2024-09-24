@@ -4,12 +4,12 @@ import { format as formatZonedTime, toZonedTime } from 'date-fns-tz'
 
 interface Appointment {
     id: string
-    thDate: Date
+    thDate: string
     thTime: string
-    csrDate: Date
+    csrDate: string
     csrTime: string
     csrTimeZone: string
-    utcDate: Date
+    utcDate: string
     utcTime: string
     email: string
     createdAt: Date
@@ -41,13 +41,20 @@ const RenderAppointments: React.FC<RenderAppointmentsProps> = ({
                     TH Date
                 </th>
                 <th className="bg-gray-200 p-2 text-gray-600 font-bold md:border md:border-gray-300 text-left block md:table-cell">
+                    TH Time
+                </th>
+                <th className="bg-gray-200 p-2 text-gray-600 font-bold md:border md:border-gray-300 text-left block md:table-cell">
                     Csr Timezone
                 </th>
                 <th className="bg-gray-200 p-2 text-gray-600 font-bold md:border md:border-gray-300 text-left block md:table-cell">
                     Csr Date
                 </th>
+
                 <th className="bg-gray-200 p-2 text-gray-600 font-bold md:border md:border-gray-300 text-left block md:table-cell">
                     UTC Date
+                </th>
+                <th className="bg-gray-200 p-2 text-gray-600 font-bold md:border md:border-gray-300 text-left block md:table-cell">
+                    UTC Time
                 </th>
                 <th className="bg-gray-200 p-2 text-gray-600 font-bold md:border md:border-gray-300 text-left block md:table-cell">
                     Email
@@ -73,17 +80,28 @@ const RenderAppointments: React.FC<RenderAppointmentsProps> = ({
                             {app.createdAt.toDateString()}
                         </td>
                         <td className="p-2 md:border md:border-gray-300 text-left block md:table-cell">
-                            {app.thDate.toDateString()} | {app.thTime}
+                            {app.thDate.split('T')[0]}
                         </td>
-
+                        <td className="p-2 md:border md:border-gray-300 text-left block md:table-cell">
+                            {app.thTime}
+                        </td>
                         <td className="p-2 md:border md:border-gray-300 text-left block md:table-cell">
                             {app.csrTimeZone}
                         </td>
                         <td className="p-2 md:border md:border-gray-300 text-left block md:table-cell">
-                            {app.csrDate.toDateString()} | {app.csrTime}
+                            {app.csrDate}
+                            <br />
+                            <span className="bg-slate-200 p-1">
+                                {' '}
+                                {app.csrDate.split('T')[0]} | {app.csrTime}
+                            </span>
+                        </td>
+
+                        <td className="p-2 md:border md:border-gray-300 text-left block md:table-cell">
+                            {app.utcDate.split('T')[0]}
                         </td>
                         <td className="p-2 md:border md:border-gray-300 text-left block md:table-cell">
-                            {app.utcDate.toDateString()} | {app.utcTime}
+                            {app.utcTime}
                         </td>
                         <td className="p-2 md:border md:border-gray-300 text-left block md:table-cell">
                             {app.email}

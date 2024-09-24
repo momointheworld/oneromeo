@@ -43,15 +43,15 @@ interface TimeSlot {
 }
 
 interface Appointment {
-    thDate: Date // Date in Thai timezone
-    thTime: string // Time in Thai timezone (24-hour format)
-    csrDate: Date // Date in customer's timezone
-    csrTime: string // Time in customer's timezone (24-hour format)
-    csrTimeZone: string // Customer's timezone
-    utcDate: Date // UTC date
-    utcTime: string // UTC time in 24-hour format
-    email: string // Customer's email
-    createdAt: Date // Timestamp of when the appointment was created
+    thDate: string
+    thTime: string
+    csrDate: string
+    csrTime: string
+    csrTimeZone: string
+    utcDate: string
+    utcTime: string
+    email: string
+    createdAt: Date
 }
 
 export default function CreateNewAppointment() {
@@ -131,6 +131,30 @@ export default function CreateNewAppointment() {
         setPickedTime(e.target.value)
     }
 
+    const combineDateAndTimeInZone = (
+        date: Date,
+        time: string,
+        timeZone: string
+    ): string => {
+        const [hours, minutes] = time.split(':').map(Number)
+
+        // Convert the JavaScript Date object to a Luxon DateTime object
+        const dateTime = DateTime.fromJSDate(date).setZone(timeZone, {
+            keepLocalTime: true,
+        })
+
+        // Set the time using hours and minutes
+        const combinedDateTime = dateTime.set({ hour: hours, minute: minutes })
+
+        // Return the ISO string with time zone information or throw an error if it fails
+        const isoString = combinedDateTime.toISO()
+        if (!isoString) {
+            throw new Error(`Invalid date/time conversion for ${timeZone}`)
+        }
+
+        return isoString
+    }
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setIsLoading(true)
@@ -187,15 +211,36 @@ export default function CreateNewAppointment() {
             userTimeZone
         )
 
+        // 1. Thai Date (Asia/Bangkok)
+        const combinedThaiDate = combineDateAndTimeInZone(
+            thaiDate,
+            thaiTime,
+            'Asia/Bangkok'
+        )
+
+        // 2. CSR Date (Local Timezone - user's timezone)
+        const combinedCsrDate = combineDateAndTimeInZone(
+            selectedDateObj,
+            pickedTime,
+            userTimeZone
+        )
+
+        // 3. UTC Date (UTC timezone)
+        const combinedUtcDate = combineDateAndTimeInZone(
+            utcDate,
+            utcTime,
+            'UTC'
+        )
+
         try {
             // Send appointment data to the server
             await addAppointment({
                 csrTimeZone: userTimeZone, // User's timezone
-                thDate: thaiDate,
+                thDate: combinedThaiDate,
                 thTime: thaiTime,
-                csrDate: selectedDateObj,
+                csrDate: combinedCsrDate,
                 csrTime: pickedTime,
-                utcDate,
+                utcDate: combinedUtcDate,
                 utcTime,
                 email,
                 createdAt: new Date(),

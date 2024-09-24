@@ -33,12 +33,12 @@ interface TimeSlot {
 }
 
 interface Appointment {
-    thDate: Date
+    thDate: string
     thTime: string
-    csrDate: Date
+    csrDate: string
     csrTime: string
     csrTimeZone: string
-    utcDate: Date
+    utcDate: string
     utcTime: string
     email: string
     createdAt: Date
