@@ -1,6 +1,11 @@
+import { combineDateAndTimeInZone } from '@/utils/combineDateAndTimeInZone'
+import { convertToThaiDateTime } from '@/utils/convertToThaiDateTime'
+import { convertToUTC } from '@/utils/convertToUTCDateTime'
+import { parseDate } from '@internationalized/date'
 import { generateSecureDownloadToken } from '@/utils/generateSecureDownloadToken'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
+import { toZonedTime } from 'date-fns-tz'
 
 const schema = z
     .object({
@@ -17,13 +22,6 @@ const schema = z
         const exemptProductId = ebookPriceId
 
         if (data.priceId.trim() !== exemptProductId) {
-            if (!data.timeZone) {
-                ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    path: ['timeZone'],
-                    message: 'please make a selection',
-                })
-            }
             if (!data.date) {
                 ctx.addIssue({
                     code: z.ZodIssueCode.custom,
@@ -58,7 +56,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
         // Flatten errors
         const flattenedErrors = parseResult.error.flatten()
         const emailError = flattenedErrors.fieldErrors.email || []
-        const timezoneError = flattenedErrors.fieldErrors.timeZone || []
+        // const timezoneError = flattenedErrors.fieldErrors.timeZone || []
         const dateError = flattenedErrors.fieldErrors.date || []
         const timeSlotError = flattenedErrors.fieldErrors.timeSlot || []
         const couponCodeError = flattenedErrors.fieldErrors.couponCode || [] // Added couponCodeError
@@ -69,7 +67,6 @@ export async function POST(req: NextRequest, res: NextResponse) {
                 errors: {
                     emailError,
                     dateError,
-                    timezoneError,
                     timeSlotError,
                     couponCodeError, // Added couponCodeError
                 },
@@ -82,11 +79,46 @@ export async function POST(req: NextRequest, res: NextResponse) {
 
     // Proceed with creating checkout session
     try {
-        const { priceId, email, timeZone, date, timeSlot, couponCode } = body
+        const { priceId, email, userTimeZone, date, timeSlot, couponCode } =
+            body
+
+        const selectedDateObj = new Date(date.year, date.month - 1, date.day)
+
+        const selectedDateValue = parseDate(date)
+
+        const { thaiDate, thaiTime } = convertToThaiDateTime(
+            selectedDateValue,
+            timeSlot,
+            userTimeZone
+        )
+
+        const { utcDate, utcTime } = convertToUTC(date, timeSlot, userTimeZone)
+
+        // 1. Thai Date (Asia/Bangkok)
+        const combinedThaiDate = combineDateAndTimeInZone(
+            thaiDate,
+            thaiTime,
+            'Asia/Bangkok'
+        )
+
+        // 2. CSR Date (Local Timezone - user's timezone)
+        const combinedCsrDate = combineDateAndTimeInZone(
+            selectedDateObj,
+            timeSlot,
+            userTimeZone
+        )
+
+        // 3. UTC Date (UTC timezone)
+        const combinedUtcDate = combineDateAndTimeInZone(
+            utcDate,
+            utcTime,
+            'UTC'
+        )
+
         console.log('Request Body:', {
             priceId,
             email,
-            timeZone,
+            userTimeZone,
             date,
             timeSlot,
             couponCode,
@@ -123,38 +155,39 @@ export async function POST(req: NextRequest, res: NextResponse) {
         }
 
         const customFields = []
-        if (date) {
+        if (combinedCsrDate) {
             customFields.push({
-                key: 'appointment_date',
+                key: 'appointment_date_time',
                 label: { type: 'custom', custom: 'Appointment day' },
                 type: 'text',
-                text: { default_value: date },
+                text: { default_value: combinedCsrDate },
             })
         }
-        if (timeSlot) {
+        if (combinedThaiDate) {
             customFields.push({
-                key: 'appointment_timeSlot',
+                key: 'th_date_time',
                 label: {
                     type: 'custom',
-                    custom: "Your time (& Arnold's time)",
+                    custom: "Arnold's Date & Time",
                 },
                 type: 'text',
-                text: { default_value: timeSlot },
+                text: { default_value: combinedThaiDate },
             })
         }
-        if (timeZone) {
-            customFields.push({
-                key: 'appointment_timeZone',
-                label: { type: 'custom', custom: 'Your time zone' },
-                type: 'text',
-                text: { default_value: timeZone },
-            })
-        }
+        // if (combinedUtcDate) {
+        //     customFields.push({
+        //         key: 'utc_date_time',
+        //         label: { type: 'custom', custom: 'UTC Date & Time' },
+        //         type: 'text',
+        //         text: { default_value: combinedUtcDate },
+        //     })
+        // }
 
         const metadata = {
-            appointment_date: date || '',
-            appointment_timeSlot: timeSlot || '',
-            appointment_timeZone: timeZone || '',
+            appointment_date_time: combinedCsrDate || '',
+            th_date_time: combinedThaiDate || '',
+            utc_date_time: combinedUtcDate || '',
+            csrTimeZone: userTimeZone || '',
         }
 
         // const adjustableQuantityPriceId = singleSessionPriceId

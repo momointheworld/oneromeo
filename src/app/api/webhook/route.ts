@@ -44,15 +44,17 @@ const handleAppointment = async ({
             )
         }
 
-        console.log(thTimeSlot, csrTimeSlot)
-
         try {
             await addAppointment({
-                timeZone: appointment_timeZone,
-                date: date,
-                thTimeSlot,
-                csrTimeSlot,
+                csrTimeZone,
+                thDate,
+                thTime,
+                csrDate,
+                csrTime,
+                utcDate,
+                utcTime,
                 email: session.customer_email,
+                createdAt: new Date(),
             })
             console.log('Appointment created')
             return NextResponse.json(

@@ -21,6 +21,8 @@ const checkout = async (
                 couponCode, // Use couponCode here
             }),
         })
+        console.log(priceId, email, timeZone, date, timeSlot)
+
         if (!response.ok) {
             const errorData = await response.json()
             console.log('Error Data:', errorData)

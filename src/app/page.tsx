@@ -288,64 +288,32 @@ const OrderForm = () => {
             return
         }
 
-        const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
-        // // convert to the local time zone
-        const dateString = selectedDate?.toDate(localTimezone)
-        // const orderDate = dateString ? dateString.toDateString() : ''
-        const orderDate = dateString
-            ? new Date(dateString).toISOString() // Convert to UTC ISO String
-            : ''
-
         // Get the user's timezone
         const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
-
-        // Convert selected date to the local time zone
+        // // Convert selected date to the local time zone
         const selectedDateObj = new Date(
             selectedDate.year,
             selectedDate.month - 1,
             selectedDate.day
         )
 
-        const { thaiDate, thaiTime } = convertToThaiDateTime(
-            selectedDate,
-            pickedTime,
-            userTimeZone
-        )
-
-        const { utcDate, utcTime } = convertToUTC(
-            selectedDate,
-            pickedTime,
-            userTimeZone
-        )
-
-        // 1. Thai Date (Asia/Bangkok)
-        const combinedThaiDate = combineDateAndTimeInZone(
-            thaiDate,
-            thaiTime,
-            'Asia/Bangkok'
-        )
-
-        // 2. CSR Date (Local Timezone - user's timezone)
+        // CSR Date (Local Timezone - user's timezone)
         const combinedCsrDate = combineDateAndTimeInZone(
             selectedDateObj,
             pickedTime,
             userTimeZone
         )
 
-        // 3. UTC Date (UTC timezone)
-        const combinedUtcDate = combineDateAndTimeInZone(
-            utcDate,
-            utcTime,
-            'UTC'
-        )
         try {
+            console.log(selectedDateObj.toDateString())
+
             // Call the checkout function to interact with the server
             const result = await checkout(
                 selectedItem.priceId,
                 email,
-                localTimezone,
-                orderDate,
-                combinedCsrDate.split('T')[0] + pickedTime,
+                userTimeZone,
+                selectedDateObj.toDateString(),
+                pickedTime,
                 couponCode || '' // Default to empty string if coupon is undefined
             )
 
