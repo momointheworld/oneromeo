@@ -28,6 +28,9 @@ import { useEmail } from '@/hooks/useEmail'
 import { useSelectedItem } from '@/hooks/useSelectedItem'
 import checkout from '@/actions/checkout'
 import { StaticImageData } from 'next/image'
+import { convertToUTC } from '@/utils/convertToUTCDateTime'
+import { convertToThaiDateTime } from '@/utils/convertToThaiDateTime'
+import { combineDateAndTimeInZone } from '@/utils/combineDateAndTimeInZone'
 
 const OrderForm = () => {
     interface Item {
@@ -121,98 +124,98 @@ const OrderForm = () => {
         },
     ]
 
-    useEffect(() => {
-        const fetchAppointments = async () => {
-            try {
-                const data = await getAppointments()
-                setAppointments(data)
+    // useEffect(() => {
+    //     const fetchAppointments = async () => {
+    //         try {
+    //             const data = await getAppointments()
+    //             setAppointments(data)
 
-                // Get all dates from the appointments
-                const dateSlotsMap = new Map()
+    //             // Get all dates from the appointments
+    //             const dateSlotsMap = new Map()
 
-                data.forEach((appointment) => {
-                    const appointmentDate = new Date(appointment.date)
+    //             data.forEach((appointment) => {
+    //                 const appointmentDate = new Date(appointment.date)
 
-                    const appointmentDateString = appointmentDate.toString()
-                    const isoDate = appointmentDateString.replace(
-                        /\[.*?\]/g,
-                        ''
-                    )
+    //                 const appointmentDateString = appointmentDate.toString()
+    //                 const isoDate = appointmentDateString.replace(
+    //                     /\[.*?\]/g,
+    //                     ''
+    //                 )
 
-                    if (!dateSlotsMap.has(isoDate)) {
-                        dateSlotsMap.set(isoDate, [])
-                    }
+    //                 if (!dateSlotsMap.has(isoDate)) {
+    //                     dateSlotsMap.set(isoDate, [])
+    //                 }
 
-                    dateSlotsMap.get(isoDate).push(appointment.thTimeSlot)
-                })
+    //                 dateSlotsMap.get(isoDate).push(appointment.thTimeSlot)
+    //             })
 
-                const unavailableDates: Date[] = [] // Use Date or string instead of ZonedDateTime
-                dateSlotsMap.forEach((slots, date) => {
-                    if (slots.length === 2) {
-                        unavailableDates.push(new Date(date)) // Just push the date without conversion
-                    }
-                })
+    //             const unavailableDates: Date[] = [] // Use Date or string instead of ZonedDateTime
+    //             dateSlotsMap.forEach((slots, date) => {
+    //                 if (slots.length === 2) {
+    //                     unavailableDates.push(new Date(date)) // Just push the date without conversion
+    //                 }
+    //             })
 
-                // Convert Date to CalendarDate using the Gregorian calendar
-                const calendarDates = unavailableDates.map((date) => {
-                    const calendarDate: CalendarDate = new CalendarDate(
-                        new GregorianCalendar(),
-                        date.getUTCFullYear(),
-                        date.getUTCMonth() + 1,
-                        date.getUTCDate()
-                    )
-                    return calendarDate
-                })
+    //             // Convert Date to CalendarDate using the Gregorian calendar
+    //             const calendarDates = unavailableDates.map((date) => {
+    //                 const calendarDate: CalendarDate = new CalendarDate(
+    //                     new GregorianCalendar(),
+    //                     date.getUTCFullYear(),
+    //                     date.getUTCMonth() + 1,
+    //                     date.getUTCDate()
+    //                 )
+    //                 return calendarDate
+    //             })
 
-                console.log(dateSlotsMap)
-                console.log(calendarDates)
+    //             console.log(dateSlotsMap)
+    //             console.log(calendarDates)
 
-                // Update disabledRanges with the new unavailable dates as CalendarDate
-                setNewDisabledRanges(() => [
-                    ...disabledRanges,
-                    ...calendarDates.map((date) => [date, date]),
-                ])
-            } catch (error) {
-                console.error('Error fetching appointments:', error)
-            }
-        }
+    //             // Update disabledRanges with the new unavailable dates as CalendarDate
+    //             setNewDisabledRanges(() => [
+    //                 ...disabledRanges,
+    //                 ...calendarDates.map((date) => [date, date]),
+    //             ])
+    //         } catch (error) {
+    //             console.error('Error fetching appointments:', error)
+    //         }
+    //     }
 
-        // Fetch appointments when component mounts
-        fetchAppointments()
-    }, []) // Empty dependency array ensures this runs only once on mount
+    //     // Fetch appointments when component mounts
+    //     fetchAppointments()
+    // }, []) // Empty dependency array ensures this runs only once on mount
 
-    // UseEffect to check availability of time slots for the selected date
-    useEffect(() => {
-        if (!selectedDate) return
-        const selectedDateStr = selectedDate
-            .toDate('asia/bangkok')
-            .toDateString()
+    // // UseEffect to check availability of time slots for the selected date
+    // useEffect(() => {
+    //     if (!selectedDate) return
+    //     const selectedDateStr = selectedDate
+    //         .toDate('asia/bangkok')
+    //         .toDateString()
 
-        const takenSlots = appointments
-            .filter(
-                (appointment) =>
-                    new Date(appointment.date).toDateString() ===
-                    selectedDateStr
-            )
-            .map((appointment) => appointment.thTimeSlot)
+    //     const takenSlots = appointments
+    //         .filter(
+    //             (appointment) =>
+    //                 new Date(appointment.date).toDateString() ===
+    //                 selectedDateStr
+    //         )
+    //         .map((appointment) => appointment.thTimeSlot)
 
-        const newAvailableSlots = timeSlots.filter(
-            (slot) => !takenSlots.includes(slot.label)
-        )
-        // setAvailableSlots(newAvailableSlots)
-        if (selectedDate) {
-            const dateObj = new Date(
-                selectedDate.year,
-                selectedDate.month - 1,
-                selectedDate.day
-            )
-            const convertedSlots = convertToUserTimezone(
-                newAvailableSlots,
-                dateObj
-            )
-            setAvailableSlots(convertedSlots)
-        }
-    }, [selectedDate, appointments])
+    //     const newAvailableSlots = timeSlots.filter(
+    //         (slot) => !takenSlots.includes(slot.label)
+    //     )
+    //     // setAvailableSlots(newAvailableSlots)
+    //     if (selectedDate) {
+    //         const dateObj = new Date(
+    //             selectedDate.year,
+    //             selectedDate.month - 1,
+    //             selectedDate.day
+    //         )
+    //         const convertedSlots = convertToUserTimezone(
+    //             newAvailableSlots,
+    //             dateObj
+    //         )
+    //         setAvailableSlots(convertedSlots)
+    //     }
+    // }, [selectedDate, appointments])
 
     const resetAppointment = () => {
         setSelectedDate(null), setPickedTime('')
@@ -259,15 +262,6 @@ const OrderForm = () => {
         setSelectedDate(date)
         // checkTimeSlots(date)
         setPickedTime('')
-
-        if (date) {
-            const dateObj = new Date(date.year, date.month - 1, date.day)
-            const convertedSlots = convertToUserTimezone(
-                availableSlots,
-                dateObj
-            )
-            setAvailableSlots(convertedSlots)
-        }
     }
 
     const handleTimeChange = (e: {
@@ -287,37 +281,71 @@ const OrderForm = () => {
             )
             setIsLoading(false)
             return
+        } else if (!selectedDate) {
+            setIsDateInvalid(true)
+            setDateError('Please choose a date')
+            setIsLoading(false)
+            return
         }
 
+        const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+        // // convert to the local time zone
+        const dateString = selectedDate?.toDate(localTimezone)
+        // const orderDate = dateString ? dateString.toDateString() : ''
+        const orderDate = dateString
+            ? new Date(dateString).toISOString() // Convert to UTC ISO String
+            : ''
+
+        // Get the user's timezone
+        const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
+
+        // Convert selected date to the local time zone
+        const selectedDateObj = new Date(
+            selectedDate.year,
+            selectedDate.month - 1,
+            selectedDate.day
+        )
+
+        const { thaiDate, thaiTime } = convertToThaiDateTime(
+            selectedDate,
+            pickedTime,
+            userTimeZone
+        )
+
+        const { utcDate, utcTime } = convertToUTC(
+            selectedDate,
+            pickedTime,
+            userTimeZone
+        )
+
+        // 1. Thai Date (Asia/Bangkok)
+        const combinedThaiDate = combineDateAndTimeInZone(
+            thaiDate,
+            thaiTime,
+            'Asia/Bangkok'
+        )
+
+        // 2. CSR Date (Local Timezone - user's timezone)
+        const combinedCsrDate = combineDateAndTimeInZone(
+            selectedDateObj,
+            pickedTime,
+            userTimeZone
+        )
+
+        // 3. UTC Date (UTC timezone)
+        const combinedUtcDate = combineDateAndTimeInZone(
+            utcDate,
+            utcTime,
+            'UTC'
+        )
         try {
-            const localTimezone =
-                Intl.DateTimeFormat().resolvedOptions().timeZone
-            // convert to the local time zone
-            const dateString = selectedDate?.toDate(localTimezone)
-            // const orderDate = dateString ? dateString.toDateString() : ''
-            const orderDate = dateString
-                ? new Date(dateString).toISOString() // Convert to UTC ISO String
-                : ''
-
-            let updatedTimeSlots = dateString
-                ? convertToUserTimezone(timeSlots, dateString)
-                : []
-            let thTimeSlot =
-                pickedTime && dateString
-                    ? updatedTimeSlots.find((slot) => slot.label === pickedTime)
-                    : null
-
-            // label is updated while key is unchanged
-            const thLabel = thTimeSlot ? thTimeSlot.key : ''
-            const label = thLabel ? `${pickedTime} (${thLabel})` : ''
-
             // Call the checkout function to interact with the server
             const result = await checkout(
                 selectedItem.priceId,
                 email,
                 localTimezone,
                 orderDate,
-                label,
+                combinedCsrDate.split('T')[0] + pickedTime,
                 couponCode || '' // Default to empty string if coupon is undefined
             )
 
@@ -354,7 +382,7 @@ const OrderForm = () => {
                 window.location.href = result.url
                 setSelectedDate(null)
                 setPickedTime('')
-                setAvailableSlots(timeSlots)
+                // setAvailableSlots(timeSlots)
             } else {
                 // Handle case where result.url is not defined
                 alert('Failed to get the checkout URL. Please try again.')
