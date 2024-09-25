@@ -305,14 +305,14 @@ const OrderForm = () => {
         )
 
         try {
-            console.log(selectedDateObj.toDateString())
+            console.log(combinedCsrDate)
 
             // Call the checkout function to interact with the server
             const result = await checkout(
                 selectedItem.priceId,
                 email,
                 userTimeZone,
-                selectedDateObj.toDateString(),
+                combinedCsrDate,
                 pickedTime,
                 couponCode || '' // Default to empty string if coupon is undefined
             )

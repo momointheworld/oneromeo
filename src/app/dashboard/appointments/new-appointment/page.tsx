@@ -42,6 +42,7 @@ export default function CreateNewAppointment() {
 
     const handleDateChange = (date: DateValue | null) => {
         setSelectedDate(date) // Store the selected date
+        console.log(date)
     }
 
     const handleTimeChange = (e: {

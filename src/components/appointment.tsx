@@ -89,6 +89,7 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
     let { locale } = useLocale()
     const [isLoading, setIsLoading] = useState(false)
     const { selectedDate, setSelectedDate } = useDate()
+    const [isClient, setIsClient] = useState(false) // To check if rendering on client
     const { email, setEmail } = useEmail()
     // State to hold available slots based on selected date
     const [filteredSlots, setFilteredSlots] = useState<TimeSlot[]>([])
@@ -103,6 +104,11 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
 
     const [appointments, setAppointments] = useState<Appointment[]>([])
     const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([])
+
+    // Wait for the client-side rendering
+    useEffect(() => {
+        setIsClient(true)
+    }, [])
 
     useEffect(() => {
         const fetchAppointments = async () => {
@@ -160,6 +166,10 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
 
         // Return true if all slots are taken (no available slots for that date)
         return allSlotsTaken
+    }
+
+    if (!isClient) {
+        return null // Prevent rendering until client-side is active
     }
 
     return (
