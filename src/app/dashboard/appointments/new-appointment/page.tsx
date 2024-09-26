@@ -1,7 +1,13 @@
 'use client'
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { today, DateValue, getLocalTimeZone } from '@internationalized/date'
+import {
+    today,
+    DateValue,
+    getLocalTimeZone,
+    parseAbsoluteToLocal,
+    fromDate,
+} from '@internationalized/date'
 import { DateTime } from 'luxon'
 import { useLocale } from '@react-aria/i18n'
 import { addAppointment } from '@/actions'
@@ -50,30 +56,6 @@ export default function CreateNewAppointment() {
     }) => {
         setPickedTime(e.target.value)
     }
-
-    // const combineDateAndTimeInZone = (
-    //     date: Date,
-    //     time: string,
-    //     timeZone: string
-    // ): string => {
-    //     const [hours, minutes] = time.split(':').map(Number)
-
-    //     // Convert the JavaScript Date object to a Luxon DateTime object
-    //     const dateTime = DateTime.fromJSDate(date).setZone(timeZone, {
-    //         keepLocalTime: true,
-    //     })
-
-    //     // Set the time using hours and minutes
-    //     const combinedDateTime = dateTime.set({ hour: hours, minute: minutes })
-
-    //     // Return the ISO string with time zone information or throw an error if it fails
-    //     const isoString = combinedDateTime.toISO()
-    //     if (!isoString) {
-    //         throw new Error(`Invalid date/time conversion for ${timeZone}`)
-    //     }
-
-    //     return isoString
-    // }
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()

@@ -1,15 +1,4 @@
-import { combineDateAndTimeInZone } from '@/utils/combineDateAndTimeInZone'
-import { convertToThaiDateTime } from '@/utils/convertToThaiDateTime'
-import { convertToUTC } from '@/utils/convertToUTCDateTime'
-import {
-    parseAbsoluteToLocal,
-    parseDateTime,
-    parseDate,
-    parseAbsolute,
-    parseZonedDateTime,
-    fromDate,
-    DateValue,
-} from '@internationalized/date'
+import { parseAbsoluteToLocal, fromDate } from '@internationalized/date'
 import { generateSecureDownloadToken } from '@/utils/generateSecureDownloadToken'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
@@ -84,18 +73,29 @@ export async function POST(req: NextRequest, res: NextResponse) {
         )
     }
 
+    function formatDateTime(dateTimeString: string) {
+        // Extract date, time, and time zone parts using regex
+        const match = dateTimeString.match(
+            /(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2}).*\[(.+)]/
+        )
+        if (match) {
+            // Return the formatted string
+            return `${match[1]} | ${match[2]} [${match[3]}]`
+        } else {
+            // Handle the case where the input string is not in the expected format
+            throw new Error('Invalid date-time format')
+        }
+    }
+
     // Proceed with creating checkout session
     try {
         const { priceId, email, timeZone, date, timeSlot, couponCode } = body
+        // date format: '2024-09-30T19:30:00.000-07:00',
 
+        // parse to local zonedDateTime format
         const zonedDateTime = parseAbsoluteToLocal(date)
 
-        // const { thaiDate, thaiTime } = convertToThaiDateTime(
-        //     zonedDateTime,
-        //     timeSlot,
-        //     timeZone
-        // )
-
+        // convert to Thai and utc dateTime
         const thDateTime = fromDate(
             new Date(zonedDateTime.toAbsoluteString()),
             'Asia/Bangkok'
@@ -104,33 +104,6 @@ export async function POST(req: NextRequest, res: NextResponse) {
             new Date(zonedDateTime.toAbsoluteString()),
             'utc'
         )
-
-        // const { utcDate, utcTime } = convertToUTC(
-        //     zonedDateTime,
-        //     timeSlot,
-        //     timeZone
-        // )
-
-        // // 1. Thai Date (Asia/Bangkok)
-        // const combinedThaiDate = combineDateAndTimeInZone(
-        //     thaiDate,
-        //     thaiTime,
-        //     'Asia/Bangkok'
-        // )
-
-        // // 2. CSR Date (Local Timezone - user's timezone)
-        // const combinedCsrDate = combineDateAndTimeInZone(
-        //     zonedDateTime.toDate(),
-        //     timeSlot,
-        //     timeZone
-        // )
-
-        // // 3. UTC Date (UTC timezone)
-        // const combinedUtcDate = combineDateAndTimeInZone(
-        //     utcDate,
-        //     utcTime,
-        //     'UTC'
-        // )
 
         console.log('Request Body:', {
             priceId,
@@ -176,14 +149,24 @@ export async function POST(req: NextRequest, res: NextResponse) {
         }
 
         const customFields = []
-        // const csrDate = combinedCsrDate.split('T')[0]
-        // const thDate = combinedThaiDate.split('T')[0]
+
+        // zonedDateTime: 2024-09-30T21:30:00-05:00[America/Chicago]
+        // th: 2024-10-01T09:30:00+07:00[Asia/Bangkok]
+        // utc: 2024-10-01T02:30:00+00:00[utc]
+        const csrDate = zonedDateTime.toString()
+        const thDate = thDateTime.toString()
+        const utcDate = utcDateTime.toString()
+
+        // formatted # Outputs: 2024-09-30 | 21:30:00 [America/Chicago]
+        const formattedcsrDateTime = formatDateTime(csrDate)
+        const formattedThDateTime = formatDateTime(thDate)
+
         if (zonedDateTime) {
             customFields.push({
                 key: 'appointment_date_time',
-                label: { type: 'custom', custom: 'Appointment day' },
+                label: { type: 'custom', custom: 'Appointment date & Time' },
                 type: 'text',
-                text: { default_value: date },
+                text: { default_value: formattedcsrDateTime },
             })
         }
         if (thDateTime) {
@@ -194,22 +177,14 @@ export async function POST(req: NextRequest, res: NextResponse) {
                     custom: "Arnold's Date & Time",
                 },
                 type: 'text',
-                text: { default_value: thDateTime.toString() },
+                text: { default_value: formattedThDateTime },
             })
         }
-        // if (combinedUtcDate) {
-        //     customFields.push({
-        //         key: 'utc_date_time',
-        //         label: { type: 'custom', custom: 'UTC Date & Time' },
-        //         type: 'text',
-        //         text: { default_value: combinedUtcDate },
-        //     })
-        // }
 
         const metadata = {
-            appointment_date_time: date || '',
-            th_date_time: thDateTime.toString() || '',
-            utc_date_time: utcDateTime.toString() || '',
+            appointment_date_time: csrDate || '',
+            th_date_time: thDate || '',
+            utc_date_time: utcDate || '',
             csrTimeZone: timeZone || '',
         }
 
