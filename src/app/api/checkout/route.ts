@@ -220,7 +220,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
                 ? [{ promotion_code: promotionCode || promotionCodeId }] // Use the mapped promotion code ID
                 : []
 
-        let successUrl = `http://localhost:3000/confirmation?success=true&session_id={CHECKOUT_SESSION_ID}&date=${date}&timeSlot=${timeSlot}&timeZone=${timeZone}&email=${email}`
+        let successUrl = `http://localhost:3000/confirmation?success=true&session_id={CHECKOUT_SESSION_ID}&appointment_date_time=${csrDate}&th_date_time=${thDate}&utc_date_time=${utcDate}&csrTimeZone=${timeZone}&email=${email}`
         if (priceId === ebookPriceId) {
             // Generate a token for the ebook
             const token = await generateSecureDownloadToken(email) // Implement this function as needed
@@ -228,7 +228,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
         }
 
         const session = await stripeInstance.checkout.sessions.create({
-            payment_method_types: ['card', 'alipay'],
+            payment_method_types: ['card'],
             line_items: lineItems,
             custom_fields: customFields,
             custom_text: {
@@ -239,7 +239,6 @@ export async function POST(req: NextRequest, res: NextResponse) {
             mode: 'payment',
             customer_email: email,
             customer_creation: 'always', // Ensure a new customer object is created
-            // success_url: `http://localhost:3000/confirmation?success=true&session_id={CHECKOUT_SESSION_ID}&date=${date}&timeSlot=${timeSlot}&timeZone=${timeZone}&email=${email}`,
             success_url: successUrl,
             cancel_url: 'http://localhost:3000/',
         })

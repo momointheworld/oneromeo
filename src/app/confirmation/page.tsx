@@ -16,8 +16,9 @@ const ConfirmationPage: React.FC = () => {
     const success = searchParams.get('success') === 'true'
     const token = searchParams.get('token')
     const email = searchParams.get('email')
-    const timeSlot = searchParams.get('timeSlot')
-    const dateParam = searchParams.get('date')
+    const timeSlot = searchParams.get('appointment_date_time')
+    const utcSlot = searchParams.get('utc_date_time')
+    const dateParam = searchParams.get('createdAt')
     const [downloadUrl, setDownloadUrl] = useState<string | null>(null)
     const [loading, setLoading] = useState(true)
     const [formMessage, setFormMessage] = useState('')
@@ -61,13 +62,7 @@ const ConfirmationPage: React.FC = () => {
         return null // Render nothing while redirecting
     }
 
-    // Process timeSlot
-    const decodedTimeSlot = timeSlot ? decodeURIComponent(timeSlot) : ''
-    // Split the timeSlot into two parts using the '(' character
-    const [firstTimeSlot, lastTimeSlot] = decodedTimeSlot.split('(')
-    // Extract and trim the first part of the time slot
-    const displayTimeSlot = firstTimeSlot ? firstTimeSlot.trim() : ''
-    const hasAppointment = firstTimeSlot && lastTimeSlot && date
+    const hasAppointment = timeSlot && utcSlot
 
     const handleDownload = async () => {
         if (downloadUrl) {
@@ -105,13 +100,19 @@ const ConfirmationPage: React.FC = () => {
                                 <td>
                                     <strong>Your appointment is on:</strong>
                                 </td>
-                                <td>{formattedDate}</td>
+                                <td>{timeSlot}</td>
                             </tr>
                             <tr>
                                 <td>
                                     <strong>Time:</strong>
                                 </td>
-                                <td>{displayTimeSlot}</td>
+                                <td>
+                                    {timeSlot
+                                        .split('T')[1]
+                                        .split(':')
+                                        .slice(0, 2)
+                                        .join(':')}
+                                </td>
                             </tr>
                         </tbody>
                     </table>

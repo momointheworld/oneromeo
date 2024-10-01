@@ -17,23 +17,31 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
 
 interface CheckAppointmentProps {
     session: Stripe.Checkout.Session
-    date: Date
-    appointment_timeZone: string
-    thTimeSlot: string
-    csrTimeSlot: string
+    thDate: string
+    thTime: string
+    csrDate: string
+    csrTime: string
+    utcDate: string
+    utcTime: string
+    csrTimeZone: string
+    createdAt: Date
 }
 
 const handleAppointment = async ({
     session,
-    date,
-    appointment_timeZone,
-    thTimeSlot,
-    csrTimeSlot,
+    thDate,
+    thTime,
+    csrDate,
+    csrTime,
+    utcDate,
+    utcTime,
+    csrTimeZone,
+    createdAt,
 }: CheckAppointmentProps) => {
     if (session?.customer_email) {
         const existingAppointment = await findAppointmentByEmailAndDate(
             session.customer_email,
-            date
+            createdAt
         )
 
         if (existingAppointment) {
@@ -54,7 +62,7 @@ const handleAppointment = async ({
                 utcDate,
                 utcTime,
                 email: session.customer_email,
-                createdAt: new Date(),
+                createdAt,
             })
             console.log('Appointment created')
             return NextResponse.json(
@@ -82,16 +90,22 @@ async function handleCheckoutSessionCompleted(
 ) {
     if (
         session.metadata &&
-        session.metadata.appointment_date &&
-        session.metadata.appointment_timeSlot &&
-        session.metadata.appointment_timeZone
+        session.metadata.appointment_date_time &&
+        session.metadata.th_date_time &&
+        session.metadata.utc_date_time &&
+        session.metadata.csrTimeZone
     ) {
-        const { appointment_date, appointment_timeSlot, appointment_timeZone } =
-            session.metadata as {
-                appointment_date: string
-                appointment_timeSlot: string
-                appointment_timeZone: string
-            }
+        const {
+            appointment_date_time,
+            th_date_time,
+            utc_date_time,
+            csrTimeZone,
+        } = session.metadata as {
+            appointment_date_time: string
+            th_date_time: string
+            utc_date_time: string
+            csrTimeZone: string
+        }
         // Extract the customer ID from the session
         const customer = session.customer_details
         const customerId = session.customer ? session.customer.toString() : null
@@ -100,20 +114,37 @@ async function handleCheckoutSessionCompleted(
         console.log(`customer: ${customer}`)
         console.log(`customerID: ${customerId}`)
 
+        const thTime = th_date_time
+            .split('T')[1]
+            .split(':')
+            .slice(0, 2)
+            .join(':')
+        const csrTime = appointment_date_time
+            .split('T')[1]
+            .split(':')
+            .slice(0, 2)
+            .join(':')
+        const utcTime = utc_date_time
+            .split('T')[1]
+            .split(':')
+            .slice(0, 2)
+            .join(':')
+
         if (!customerId) {
             console.warn('No customer ID found in session')
             return
         }
-        let [csrTimeSlot, thTimeSlot] = appointment_timeSlot.split(' (')
-        thTimeSlot = thTimeSlot.replace(')', '')
 
-        const date = new Date(appointment_date)
         await handleAppointment({
             session,
-            date,
-            appointment_timeZone,
-            thTimeSlot,
-            csrTimeSlot,
+            thDate: th_date_time,
+            thTime,
+            csrDate: appointment_date_time,
+            csrTime,
+            utcDate: utc_date_time,
+            utcTime,
+            csrTimeZone,
+            createdAt: new Date(),
         })
     } else {
         console.warn('Required metadata not found in session')
