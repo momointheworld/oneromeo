@@ -64,7 +64,8 @@ const OrderItems: React.FC<OrderItemsProps> = ({ handleItemClick, items }) => {
                                     alt={product.imgAlt}
                                     src={product.imgSrc}
                                     width={150}
-                                    className="aspect-w-4 aspect-h-3 transform scale-125"
+                                    className="aspect-w-4 aspect-h-3 transform scale-125 h-auto w-auto"
+                                    priority={index === 0} // Add priority only to the first image
                                 />
                                 <div className="flex flex-col h-auto px-2">
                                     <div className="flex flex-col flex-wrap space-y-0">

@@ -153,7 +153,7 @@ const OrderForm = () => {
             )
             setIsLoading(false)
             return
-        } else if (!selectedDate) {
+        } else if (isAppointmentAvailable && !selectedDate) {
             setIsDateInvalid(true)
             setDateError('Please choose a date')
             setIsLoading(false)
@@ -163,28 +163,31 @@ const OrderForm = () => {
         // Get the user's timezone
         const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
         // // Convert selected date to the local time zone
-        const selectedDateObj = new Date(
-            selectedDate.year,
-            selectedDate.month - 1,
-            selectedDate.day
-        )
+        const selectedDateObj = selectedDate
+            ? new Date(
+                  selectedDate.year,
+                  selectedDate.month - 1,
+                  selectedDate.day
+              )
+            : null
 
         // CSR Date (Local Timezone - user's timezone)
-        const combinedCsrDate = combineDateAndTimeInZone(
-            selectedDateObj,
-            pickedTime,
-            userTimeZone
-        )
+
+        const combinedCsrDate = selectedDateObj
+            ? combineDateAndTimeInZone(
+                  selectedDateObj,
+                  pickedTime,
+                  userTimeZone
+              )
+            : null
 
         try {
-            console.log(combinedCsrDate)
-
             // Call the checkout function to interact with the server
             const result = await checkout(
                 selectedItem.priceId,
                 email,
                 userTimeZone,
-                combinedCsrDate,
+                combinedCsrDate || '',
                 pickedTime,
                 couponCode || '' // Default to empty string if coupon is undefined
             )

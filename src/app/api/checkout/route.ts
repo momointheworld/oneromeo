@@ -52,7 +52,6 @@ export async function POST(req: NextRequest, res: NextResponse) {
         // Flatten errors
         const flattenedErrors = parseResult.error.flatten()
         const emailError = flattenedErrors.fieldErrors.email || []
-        // const timezoneError = flattenedErrors.fieldErrors.timeZone || []
         const dateError = flattenedErrors.fieldErrors.date || []
         const timeSlotError = flattenedErrors.fieldErrors.timeSlot || []
         const couponCodeError = flattenedErrors.fieldErrors.couponCode || [] // Added couponCodeError
@@ -64,7 +63,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
                     emailError,
                     dateError,
                     timeSlotError,
-                    couponCodeError, // Added couponCodeError
+                    couponCodeError,
                 },
             }),
             {
@@ -74,111 +73,59 @@ export async function POST(req: NextRequest, res: NextResponse) {
     }
 
     function formatDateTime(dateTimeString: string) {
-        // Extract date, time, and time zone parts using regex
         const match = dateTimeString.match(
             /(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2}).*\[(.+)]/
         )
         if (match) {
-            // Return the formatted string
             return `${match[1]} | ${match[2]} [${match[3]}]`
         } else {
-            // Handle the case where the input string is not in the expected format
             throw new Error('Invalid date-time format')
         }
     }
 
-    // Proceed with creating checkout session
     try {
         const { priceId, email, timeZone, date, timeSlot, couponCode } = body
-        // date format: '2024-09-30T19:30:00.000-07:00',
 
-        // parse to local zonedDateTime format
-        const zonedDateTime = parseAbsoluteToLocal(date)
-
-        // convert to Thai and utc dateTime
-        const thDateTime = fromDate(
-            new Date(zonedDateTime.toAbsoluteString()),
-            'Asia/Bangkok'
-        )
-        const utcDateTime = fromDate(
-            new Date(zonedDateTime.toAbsoluteString()),
-            'utc'
-        )
-
-        console.log('Request Body:', {
-            priceId,
-            email,
-            timeZone,
-            date,
-            timeSlot,
-            couponCode,
-        })
-        console.log(`csr: ${date}, ${timeSlot}`)
-        console.log(`zonedDateTime: ${zonedDateTime}`)
-        console.log(`th: ${thDateTime}`)
-        console.log(`utc: ${utcDateTime}`)
-
-        // Define the promotionCodeId within a block scope
-        let promotionCodeId: string | null = null
-
-        if (body.couponCode) {
-            const promotionCodes = await stripeInstance.promotionCodes.list({
-                active: true,
-                code: body.couponCode,
-            })
-            console.log('Stripe Promotion Codes:', promotionCodes.data)
-
-            promotionCodeId =
-                promotionCodes.data.length > 0
-                    ? promotionCodes.data[0].id
-                    : null
-
-            if (!promotionCodeId) {
-                // Add an error to the couponCodeError array
-                const couponCodeError = ['Invalid coupon code']
-
-                return new Response(
-                    JSON.stringify({
-                        errors: {
-                            couponCodeError,
-                        },
-                    }),
-                    { status: 400 }
-                )
-            }
-        }
-
+        let csrDate = ''
+        let thDate = ''
+        let utcDate = ''
         const customFields = []
 
-        // zonedDateTime: 2024-09-30T21:30:00-05:00[America/Chicago]
-        // th: 2024-10-01T09:30:00+07:00[Asia/Bangkok]
-        // utc: 2024-10-01T02:30:00+00:00[utc]
-        const csrDate = zonedDateTime.toString()
-        const thDate = thDateTime.toString()
-        const utcDate = utcDateTime.toString()
+        // Process date-related logic only if a valid date is provided
+        if (date && date.trim() !== '') {
+            const zonedDateTime = parseAbsoluteToLocal(date)
 
-        // formatted # Outputs: 2024-09-30 | 21:30:00 [America/Chicago]
-        const formattedcsrDateTime = formatDateTime(csrDate)
-        const formattedThDateTime = formatDateTime(thDate)
+            const thDateTime = fromDate(
+                new Date(zonedDateTime.toAbsoluteString()),
+                'Asia/Bangkok'
+            )
+            const utcDateTime = fromDate(
+                new Date(zonedDateTime.toAbsoluteString()),
+                'utc'
+            )
 
-        if (zonedDateTime) {
+            csrDate = zonedDateTime.toString()
+            thDate = thDateTime.toString()
+            utcDate = utcDateTime.toString()
+
+            // formatted # Outputs: 2024-09-30 | 21:30:00 [America/Chicago]
+            const formattedcsrDateTime = formatDateTime(csrDate)
+            const formattedThDateTime = formatDateTime(thDate)
+
             customFields.push({
                 key: 'appointment_date_time',
                 label: { type: 'custom', custom: 'Appointment date & Time' },
                 type: 'text',
                 text: { default_value: formattedcsrDateTime },
             })
-        }
-        if (thDateTime) {
             customFields.push({
                 key: 'th_date_time',
-                label: {
-                    type: 'custom',
-                    custom: "Arnold's Date & Time",
-                },
+                label: { type: 'custom', custom: "Arnold's Date & Time" },
                 type: 'text',
                 text: { default_value: formattedThDateTime },
             })
+        } else {
+            console.log('No date provided, skipping date processing.')
         }
 
         const metadata = {
@@ -187,8 +134,6 @@ export async function POST(req: NextRequest, res: NextResponse) {
             utc_date_time: utcDate || '',
             csrTimeZone: timeZone || '',
         }
-
-        // const adjustableQuantityPriceId = singleSessionPriceId
 
         const lineItems = [
             {
@@ -201,29 +146,39 @@ export async function POST(req: NextRequest, res: NextResponse) {
             },
         ]
 
-        // Mapping of coupon codes to promotion code IDs from environment variables
-        const couponToPromotionCodeMap: { [key: string]: string } = {
-            QUIZ24: process.env.COUPON_CODE_QUIZ24 || '',
-            // Add more mappings as needed
+        let promotionCodeId: string | null = null
+
+        if (couponCode) {
+            const promotionCodes = await stripeInstance.promotionCodes.list({
+                active: true,
+                code: couponCode,
+            })
+            promotionCodeId =
+                promotionCodes.data.length > 0
+                    ? promotionCodes.data[0].id
+                    : null
+
+            if (!promotionCodeId) {
+                return new Response(
+                    JSON.stringify({
+                        errors: {
+                            couponCodeError: ['Invalid coupon code'],
+                        },
+                    }),
+                    { status: 400 }
+                )
+            }
         }
 
-        // Lookup the promotion code ID from the coupon code
-        const promotionCode = couponCode
-            ? couponToPromotionCodeMap[couponCode]
-            : null
-
-        console.log('Mapped Promotion Code:', promotionCode)
-
         const discounts =
-            priceId === singleSessionPriceId &&
-            (promotionCode || promotionCodeId)
-                ? [{ promotion_code: promotionCode || promotionCodeId }] // Use the mapped promotion code ID
+            priceId === singleSessionPriceId && promotionCodeId
+                ? [{ promotion_code: promotionCodeId }]
                 : []
 
         let successUrl = `http://localhost:3000/confirmation?success=true&session_id={CHECKOUT_SESSION_ID}&appointment_date_time=${csrDate}&th_date_time=${thDate}&utc_date_time=${utcDate}&csrTimeZone=${timeZone}&email=${email}`
+
         if (priceId === ebookPriceId) {
-            // Generate a token for the ebook
-            const token = await generateSecureDownloadToken(email) // Implement this function as needed
+            const token = await generateSecureDownloadToken(email)
             successUrl += `&token=${token}`
         }
 
@@ -231,14 +186,11 @@ export async function POST(req: NextRequest, res: NextResponse) {
             payment_method_types: ['card'],
             line_items: lineItems,
             custom_fields: customFields,
-            custom_text: {
-                submit: { message: '**$1 ≈ HK$ 7.80**' },
-            },
             discounts: discounts,
             metadata,
             mode: 'payment',
             customer_email: email,
-            customer_creation: 'always', // Ensure a new customer object is created
+            customer_creation: 'always',
             success_url: successUrl,
             cancel_url: 'http://localhost:3000/',
         })

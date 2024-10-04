@@ -97,8 +97,6 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
         const convertedSlots = convertToUserTimezone(slots)
         setAvailableSlots(convertedSlots)
 
-        console.log(convertedSlots)
-
         // Filter converted slots by selectedDate
         const filteredDateSlots = convertedSlots.filter((slot) => {
             // Create a Date object from selectedDate

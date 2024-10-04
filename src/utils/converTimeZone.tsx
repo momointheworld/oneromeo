@@ -39,8 +39,6 @@ const generateTimeSlots = (
         appointments.map((app) => `${app.utcDate.split('T')[0]}T${app.utcTime}`)
     )
 
-    console.log(takenSlotsSet)
-
     dates.forEach((date) => {
         predefinedTimes.forEach((time) => {
             // Create a unique identifier for the date and time (UTC)
