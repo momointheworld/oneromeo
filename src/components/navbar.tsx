@@ -330,13 +330,6 @@ const NavbarComp = () => {
                                             }}
                                         >
                                             <Link
-                                                // color={
-                                                //     activeMenuItems.includes(
-                                                //         child
-                                                //     )
-                                                //         ? 'danger'
-                                                //         : 'foreground'
-                                                // }
                                                 underline={
                                                     activeMenuItems.includes(
                                                         child
@@ -356,11 +349,6 @@ const NavbarComp = () => {
                         ) : (
                             <NavbarMenuItem key={`${item.title}-${index}`}>
                                 <Link
-                                    // color={
-                                    //     activeMenuItems.includes(item)
-                                    //         ? 'danger'
-                                    //         : 'foreground'
-                                    // }
                                     underline={
                                         activeMenuItems.includes(item)
                                             ? 'always'

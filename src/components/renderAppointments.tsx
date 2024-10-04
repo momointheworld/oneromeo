@@ -1,6 +1,5 @@
 import React from 'react'
 import { Button } from '@nextui-org/react'
-import { format as formatZonedTime, toZonedTime } from 'date-fns-tz'
 
 interface Appointment {
     id: string

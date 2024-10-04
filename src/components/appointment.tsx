@@ -1,20 +1,7 @@
 'use client'
-import React, { FormEvent, useEffect, useState } from 'react'
-import {
-    Button,
-    Chip,
-    DatePicker,
-    Input,
-    Select,
-    SelectItem,
-} from '@nextui-org/react'
-import {
-    today,
-    DateValue,
-    CalendarDate,
-    parseDate,
-    getLocalTimeZone,
-} from '@internationalized/date'
+import React, { useEffect, useState } from 'react'
+import { DatePicker, Input, Select, SelectItem } from '@nextui-org/react'
+import { today, DateValue, getLocalTimeZone } from '@internationalized/date'
 import { useLocale } from '@react-aria/i18n'
 import { I18nProvider } from '@react-aria/i18n'
 import DisplayMessage from '@/components/common/message'
@@ -22,7 +9,6 @@ import {
     convertToUserTimezone,
     generateTimeSlots,
 } from '@/utils/converTimeZone'
-import SelectTimezone from '@/components/timeZoneSelector'
 import { useDate } from '@/hooks/useDate'
 import { useEmail } from '@/hooks/useEmail'
 import { getAppointments } from '@/actions'
@@ -45,21 +31,14 @@ interface Appointment {
 }
 
 interface AddAppointmentProps {
-    // handleSubmit: HandleSubmitType
     handleDateChange: (date: DateValue | null) => void
     handleTimeChange: React.ChangeEventHandler<HTMLSelectElement>
-    // selectedDate: DateValue | null
-    // appointments: Appointment[]
-    // newDisabledRanges: CalendarDate[][]
-    // availableSlots: TimeSlot[]
     pickedTime: string
     formStateMessage: string
     isEmailInvalid: boolean
-    // isTimezoneInvalid: boolean
     isDateInvalid: boolean
     isTimeSlotInvalid: boolean
     isDisabled: boolean
-    // timezoneError: string
     emailError: string
     dateError: string
     timeSlotError: string
@@ -68,17 +47,12 @@ interface AddAppointmentProps {
 const AddAppointment: React.FC<AddAppointmentProps> = ({
     handleDateChange,
     handleTimeChange,
-    // newDisabledRanges,
-    // appointments,
-    // availableSlots,
     pickedTime,
     formStateMessage,
     isEmailInvalid,
-    // isTimezoneInvalid,
     isDateInvalid,
     isTimeSlotInvalid,
     isDisabled,
-    // timezoneError,
     emailError,
     dateError,
     timeSlotError,
@@ -87,7 +61,6 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
     let startDate = now.add({ days: 1 }) // Tomorrow
     let endDate = now.add({ days: 30 })
     let { locale } = useLocale()
-    const [isLoading, setIsLoading] = useState(false)
     const { selectedDate, setSelectedDate } = useDate()
     const [isClient, setIsClient] = useState(false) // To check if rendering on client
     const { email, setEmail } = useEmail()
@@ -115,7 +88,6 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
             const fetchedAppointments = await getAppointments()
             setAppointments(fetchedAppointments)
         }
-
         fetchAppointments()
     }, [])
 

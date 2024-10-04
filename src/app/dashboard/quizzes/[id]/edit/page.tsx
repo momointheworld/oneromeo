@@ -2,16 +2,10 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import * as actions from '@/actions'
-import Link from 'next/link'
 import DisplayMessage from '@/components/common/message'
 import paths from '@/components/paths'
 import PageBreadcrumbs from '@/components/common/breadcrumbs'
-import FormButton from '@/components/common/formbutton'
-import {
-    CardSkeleton,
-    FullSkeleton,
-} from '@/components/common/skeleton-loading'
-import router from 'next/router'
+import { CardSkeleton } from '@/components/common/skeleton-loading'
 import { Button, Input, Textarea } from '@nextui-org/react'
 
 interface AnswerDataProps {

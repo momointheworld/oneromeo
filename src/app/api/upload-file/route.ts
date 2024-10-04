@@ -7,16 +7,6 @@ import { db } from '@/db'
 
 const MONGODB_URI = process.env.DATABASE_URL as string
 
-// Remove the deprecated config object
-// export const runtime = 'nodejs'
-// export const preferredRegion = 'auto'
-
-// export const config = {
-//     api: {
-//         bodyParser: false,
-//     },
-// }
-
 export const runtime = 'nodejs'
 export const preferredRegion = 'auto'
 

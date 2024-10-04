@@ -3,7 +3,7 @@ import React, { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { downloadFile } from '@/actions'
 import DisplayMessage from '@/components/common/message'
-import { Button, Textarea } from '@nextui-org/react'
+import { Button } from '@nextui-org/react'
 
 interface DownloadResponse {
     error?: string

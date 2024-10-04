@@ -20,12 +20,6 @@ export default function DisplayMessage({ formStateMessage }: actionProps) {
         }
     }, [formStateMessage])
 
-    // Function to handle closing the message manually
-    // const closeMessage = () => {
-    //     setMessage('')
-    //     setMessageVisible(false)
-    // }
-
     return (
         messageVisible && (
             <div className="flex flex-wrap gap-4 justify-center my-3">

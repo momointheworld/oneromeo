@@ -222,17 +222,6 @@ export async function POST(req: NextRequest) {
 
     await logProcessedEvent(event.id)
 
-    // switch (event.type) {
-    //     case 'checkout.session.completed':
-    //         {
-    //             const session = event.data.object as Stripe.Checkout.Session
-    //             await handleCheckoutSessionCompleted(session)
-    //         }
-    //         break
-    //     default:
-    //         console.log(`Unhandled event type ${event.type}`)
-    //         break
-    // }
     switch (event.type) {
         case 'checkout.session.completed':
             {

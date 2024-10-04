@@ -117,12 +117,6 @@ const SingleQuizPage: React.FC = () => {
         fetchData()
     }, [slug])
 
-    // useEffect(() => {
-    //     if (totalScore !== null && resultsRef.current) {
-    //         resultsRef.current.scrollIntoView({ behavior: 'smooth' }) // Scroll to results section smoothly
-    //         // fetchQuizStats() // Fetch quiz stats after quiz is completed
-    //     }
-    // }, [totalScore])
     useEffect(() => {
         if (totalScore !== null && resultsRef.current) {
             resultsRef.current.scrollIntoView({ behavior: 'smooth' }) // Scroll to results section smoothly

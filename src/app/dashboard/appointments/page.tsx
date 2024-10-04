@@ -2,16 +2,13 @@
 import { getAppointments } from '@/actions'
 import { FullSkeleton } from '@/components/common/skeleton-loading'
 import RenderAppointments from '@/components/renderAppointments'
-import { Button, Link } from '@nextui-org/react'
+import { Link } from '@nextui-org/react'
 import { useEffect, useState } from 'react'
 import { Pagination } from '@nextui-org/react'
 import { deleteAppointment } from '@/actions/deleteAppointment'
-import { useFormState } from 'react-dom'
-import { log } from 'console'
 import DisplayMessage from '@/components/common/message'
 import paths from '@/components/paths'
 import PageBreadCrumbs from '@/components/common/breadcrumbs'
-import { format, toZonedTime } from 'date-fns-tz'
 
 interface Appointment {
     id: string
@@ -36,7 +33,6 @@ const AllAppointmentsPage = () => {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [page, setPage] = useState(1)
-    const [index, setIndex] = useState(1)
     const appointmentsPerPage = 30
     const [formMessage, setFormMessage] = useState('')
     const breadcrumbs: Breadcrumb[] = [
@@ -94,7 +90,11 @@ const AllAppointmentsPage = () => {
 
     const handleDelete = async (id: string) => {
         if (!handleDelete) return // No-op if handleDelete is not defined
-        console.log(id)
+        // Show confirmation alert before proceeding
+        const confirmed = window.confirm(
+            'Are you sure you want to delete this appointment?'
+        )
+        if (!confirmed) return // If the user cancels, do nothing
         try {
             await deleteAppointment(id)
             setFormMessage('Appointment deleted successfully')

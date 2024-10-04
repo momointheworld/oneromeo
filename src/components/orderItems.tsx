@@ -17,10 +17,6 @@ interface OrderItemsProps {
     items: Item[]
 }
 
-type PopoverContentProps = {
-    children: React.ReactNode
-}
-
 const OrderItems: React.FC<OrderItemsProps> = ({ handleItemClick, items }) => {
     const { selectedPriceId } = useSelectedItem()
 

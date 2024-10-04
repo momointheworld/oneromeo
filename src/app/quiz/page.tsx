@@ -1,12 +1,6 @@
 import Link from 'next/link'
 import { db } from '@/db'
 import { Card } from '@nextui-org/react'
-import { FullSkeleton } from '@/components/common/skeleton-loading'
-
-interface Breadcrumb {
-    href: string
-    text: string
-}
 
 const icons = {
     speech: (
