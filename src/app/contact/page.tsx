@@ -30,8 +30,9 @@ export default function ContactPage() {
                     'Content-Type': 'application/json',
                 },
             })
+            const data = await response.json()
+
             if (!response.ok) {
-                const data = await response.json()
                 if (data.errors) {
                     const newErrors: { [key: string]: string } = {}
                     for (const key in data.errors) {
@@ -40,16 +41,26 @@ export default function ContactPage() {
                         }
                     }
                     setErrors(newErrors)
-                    return
+                } else {
+                    setErrors({
+                        general:
+                            data.error ||
+                            'Failed to send the email. Please try again.',
+                    })
                 }
-                throw new Error('Failed to send the email. Please try again.')
+                return
             }
-            // Display success message
+
             setSuccessMessage(
                 'Thank you for reaching out. We will get back to you soon.'
             )
         } catch (error: any) {
-            console.error(error)
+            setErrors({
+                general:
+                    error.code === 'ECONNECTION'
+                        ? 'Failed to send the email: Connection error. Please try again later.'
+                        : error.message || 'An unexpected error occurred.',
+            })
         } finally {
             setIsLoading(false)
         }
@@ -81,6 +92,8 @@ export default function ContactPage() {
                     <h1>{`Say hello :)`} </h1>
                     {/* contact-bg class added for styling the background in global.css */}
                     <div className="grid grid-cols-1 sm:grid-cols-5 px-2 contact-bg">
+                        {/* Display general error message */}
+
                         <form
                             onSubmit={onSubmit}
                             className="flex flex-col gap-4 col-span-1 sm:col-start-2 sm:col-span-3 w-full"
@@ -117,6 +130,11 @@ export default function ContactPage() {
                             </Button>
                         </form>
                     </div>
+                    {errors.general && (
+                        <div className="text-red-500 text-sm mt-5">
+                            {errors.general}
+                        </div>
+                    )}
                 </div>
             )}
         </div>
