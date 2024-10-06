@@ -357,7 +357,7 @@ export default function ModifyQuizzes() {
 
         try {
             // Call the API action to delete the quiz
-            await actions.deleteQuiz(quiz.id)
+            await actions.deleteQuiz(id)
         } catch (error) {
             console.error('Error deleting the quiz:', error)
             setFormStateMessage(

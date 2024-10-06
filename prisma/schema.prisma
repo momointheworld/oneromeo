@@ -80,7 +80,6 @@ model Quiz {
   questions Question[]
   results   Result[]  
   submissions  QuizSubmission[]  // Add this to track submissions
-
 }
 
 // Define the Question model
@@ -114,7 +113,7 @@ model Result {
 // track submissions
 model QuizSubmission {
   id       String   @id @default(auto()) @map("_id") @db.ObjectId // MongoDB's default _id field
-  quiz     Quiz     @relation(fields: [quizId], references: [id])
+  quiz     Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade) // Move the onDelete behavior here
   quizId   String
   score    Int
   createdAt DateTime @default(now())
