@@ -1,6 +1,7 @@
 'use server'
+import paths from '@/components/paths'
 import { db } from '@/db'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { cache } from 'react'
 
 interface GetQuizProps {
@@ -54,7 +55,7 @@ export const getQuiz = cache(
         })
 
         if (!quiz) {
-            return notFound() // Return notFound if quiz is not found
+            redirect(paths.showAllQuizzes())
         }
 
         return quiz as FetchedQuiz // Cast quiz to FetchedQuiz type
@@ -85,7 +86,7 @@ export const getQuizBySlug = cache(
         })
 
         if (!quiz) {
-            return notFound() // Return notFound if quiz is not found
+            redirect(paths.showAllQuizzes())
         }
 
         return quiz as FetchedQuiz // Cast quiz to FetchedQuiz type
