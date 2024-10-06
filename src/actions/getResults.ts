@@ -17,7 +17,8 @@ export async function getResults(quizId: string): Promise<ResultDataProps[]> {
             orderBy: { minPoints: 'asc' }, // Optional: order results based on points
         })
         if (results.length === 0) {
-            throw new Error('No results found for the provided quiz ID.')
+            console.log('No results found for the provided quiz ID.')
+            // throw new Error('No results found for the provided quiz ID.')
         }
         return results
     } catch (error) {
