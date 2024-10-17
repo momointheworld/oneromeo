@@ -23,10 +23,10 @@ const OrderItems: React.FC<OrderItemsProps> = ({ handleItemClick, items }) => {
     return (
         <div className="bg-white">
             <div className="mx-auto flex flex-col gap-12 p-4">
-                <h1 className="text-center text-3xl font-bold text-primary">
+                <h1 className="text-center text-4xl font-bold text-primary custom-font">
                     We got this. I&apos;m here, to listen.
                 </h1>
-                <div className="flex justify-center items-center gap-5">
+                <div className="flex justify-center items-center gap-5 custom-font">
                     <Chip color="primary" size="lg" radius="full">
                         {' '}
                         1{' '}

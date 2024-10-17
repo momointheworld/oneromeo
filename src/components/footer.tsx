@@ -65,7 +65,6 @@ const Footer = () => {
                     </div>
                     <div className="flex flex-col text-sm text-zinc-400">
                         <p>No Catch, Just You and Me.</p>
-                        <p>Personal Listening, Without the Noise</p>
                     </div>
                 </div>
                 <div className="col-span-1 sm:col-span-4 text-center mt-4">

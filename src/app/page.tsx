@@ -34,7 +34,7 @@ const OrderForm = () => {
     const [singleSession, setSingleSession] = useState(false)
     const [isAppointmentAvailable, setIsAppointmentAvailable] = useState(true)
     const [secondStepTitle, setSecondStepTitle] = useState(
-        'Choose Time & Email'
+        'Pick a time (& email) to get the ball rolling!'
     )
 
     let now = today(getLocalTimeZone())
@@ -110,9 +110,9 @@ const OrderForm = () => {
         if (priceId === ebookPriceId) {
             setIsAppointmentAvailable(false)
             resetAppointment()
-            setSecondStepTitle('Enter Your Email')
+            setSecondStepTitle('Your email, please, to get you going!')
         } else {
-            setSecondStepTitle('Choose Time & Email')
+            setSecondStepTitle('Pick a time (& email) to get the ball rolling!')
             setIsAppointmentAvailable(true)
         }
 
@@ -255,12 +255,11 @@ const OrderForm = () => {
                         items={items}
                     />
                     <div ref={appointmentRef}>
-                        <div className="flex place-content-center mb-12">
+                        <div className="flex place-content-center mb-12 custom-font flex-wrap">
                             <Chip color="primary" size="lg" radius="full">
                                 2{' '}
                             </Chip>
                             <span className="mx-5 text-2xl font-bold tracking-tight text-gray-600">
-                                {/* Choose Your Time (& enter your email) */}
                                 {secondStepTitle}
                             </span>
                         </div>
@@ -303,7 +302,7 @@ const OrderForm = () => {
                             </div>
                         )}
                     </div>
-                    <div className=" flex justify-center">
+                    <div className=" flex justify-center custom-font">
                         <Button
                             isLoading={isLoading}
                             type="submit"
