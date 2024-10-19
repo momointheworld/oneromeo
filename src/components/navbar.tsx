@@ -17,7 +17,7 @@ import {
     Button,
 } from '@nextui-org/react'
 import Image from 'next/image'
-import Logo from '/public/logo-retangular.png'
+import Logo from '/public/logo-oneromeo.png'
 import Profile from '@/components/profile'
 import { useSession } from 'next-auth/react'
 import { CardSkeleton } from './common/skeleton-loading'
