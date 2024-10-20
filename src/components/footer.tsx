@@ -12,11 +12,14 @@ interface FooterSectionProps {
 const FooterSection: React.FC<FooterSectionProps> = ({ title, links }) => {
     return (
         <div className="md:col-start-2 md:col-span-1 text-center space-y-4 mb-5">
-            <h3 className="text-lg font-semibold uppercase ">{title}</h3>
+            <h3 className="text-xl font-semibold uppercase ">{title}</h3>
             <ul className="space-y-2">
                 {links.map((link, index) => (
                     <li key={index}>
-                        <Link href={link.href} className="text-zinc-200">
+                        <Link
+                            href={link.href}
+                            className="text-zinc-200 text-lg"
+                        >
                             {link.label}
                         </Link>
                     </li>
@@ -42,10 +45,10 @@ const footerLinks = {
 const Footer = () => {
     return (
         <div className="bg-primary text-white rounded pt-16 mt-12 px-5">
-            <footer className="grid grid-cols-1 sm:grid-cols-4 gap-4 p-4 max-w-6xl mx-auto text-left text-white  custom-font">
+            <footer className="grid grid-cols-1 sm:grid-cols-4 gap-4 p-4 max-w-6xl mx-auto text-left text-white custom-font">
                 <FooterSection title="Explore" links={footerLinks.explore} />
-                <div className="md:col-start-3 md:col-span-1 text-center space-y-4 mb-5 ">
-                    <h3 className="text-lg font-semibold uppercase">
+                <div className="md:col-start-3 md:col-span-1 text-center space-y-4 mb-5 text-lg">
+                    <h3 className="text-xl font-semibold uppercase">
                         elsewhere
                     </h3>
                     <div className="flex space-x-4 justify-center">
@@ -60,7 +63,7 @@ const Footer = () => {
                             className="w-6 h-6" // Adjust the size as needed
                         />
                     </div>
-                    <div className="flex flex-col text-sm text-zinc-400 gap-5">
+                    <div className="flex flex-col text-zinc-400 gap-5">
                         <p>No Catch, Just You and Me.</p>
                         <p>
                             What happens on One Romeo, stays on One Romeo. All

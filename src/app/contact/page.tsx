@@ -114,13 +114,15 @@ export default function ContactPage() {
                                 errorMessage={errors.name}
                                 required
                             />
-                            <Textarea
-                                name="description"
-                                label="What's on your mind?"
-                                isInvalid={!!errors.description}
-                                errorMessage={errors.description}
-                                required
-                            />
+                            <div className="base/inputWrapper">
+                                <Textarea
+                                    name="description"
+                                    label="What's on your mind?"
+                                    isInvalid={!!errors.description}
+                                    errorMessage={errors.description}
+                                    required
+                                />
+                            </div>
                             <Button
                                 type="submit"
                                 disabled={isLoading}
