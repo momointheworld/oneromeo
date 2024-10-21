@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { downloadFile } from '@/actions'
 import DisplayMessage from '@/components/common/message'
 import { Button } from '@nextui-org/react'
+import { Image } from '@nextui-org/react'
 
 interface DownloadResponse {
     error?: string
@@ -134,7 +135,7 @@ const ConfirmationPage: React.FC = () => {
                     </table>
                 </>
             ) : (
-                <div>
+                <div className="p-2">
                     <h1>Thanks, it&apos;s much appreciated. Enjoy the read!</h1>
                     <Button
                         onClick={handleDownload}
@@ -146,6 +147,15 @@ const ConfirmationPage: React.FC = () => {
                     <p className="text-slate-400">
                         This download link is valid for 1 hour.
                     </p>
+                    <div className="flex justify-center">
+                        <Image
+                            isBlurred
+                            alt="confirmation-image"
+                            src="/ebook-conf-img.png"
+                            width={150}
+                            className="aspect-w-4 aspect-h-3 transform scale-125 h-auto w-auto"
+                        />
+                    </div>
                 </div>
             )}
         </div>

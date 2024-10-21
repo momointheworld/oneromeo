@@ -22,10 +22,10 @@ export default function DisplayMessage({ formStateMessage }: actionProps) {
 
     return (
         messageVisible && (
-            <div className="flex flex-wrap gap-4 justify-center my-3">
-                <Button color="warning" variant="flat" className="capitalize">
+            <div className="flex flex-wrap justify-center">
+                <p className="rounded-lg capitalize text-wrap p-2 text-warning-600 bg-warning-100">
                     {message}
-                </Button>
+                </p>
             </div>
         )
     )
