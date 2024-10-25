@@ -96,6 +96,13 @@ footer {
   height: 100%;
 }
 
+/* images within the page articles */
+article img {
+  width: 100% !important; /* Override the inline width */
+  height: auto !important; /* Ensure height adjusts automatically */
+  max-width: 100%; /* Prevent image from exceeding original size */
+}
+
  
 /* contact page background */
 @media (min-width: 640px) { /* This is Tailwind's `sm` breakpoint */

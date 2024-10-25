@@ -358,13 +358,15 @@ const SingleQuizPage: React.FC = () => {
                                     </p>
                                 </div>
                             )}
-                            <div className="flex flex-col justify-center mt-5">
+                            <div className="flex flex-col place-items-center mt-5">
                                 <Button
-                                    variant="bordered"
-                                    color="primary"
+                                    variant="ghost"
+                                    color="warning"
                                     type="button"
                                 >
-                                    <Link href="/">Book Your Session NOW!</Link>
+                                    <Link href="/" className="text-blue-900">
+                                        Book Your Session NOW!
+                                    </Link>
                                 </Button>
                             </div>
                             {quizStats && (
@@ -373,8 +375,11 @@ const SingleQuizPage: React.FC = () => {
                                     isLoading={isLoading}
                                 />
                             )}
-                            <div className="flex flex-col items-center">
-                                <h3>Take a look at other quizzes</h3>
+                            <Divider className="my-4" />
+                            <div className="flex flex-col items-center bg-orange-50 rounded-md">
+                                <h2 className="">
+                                    Take a look at other quizzes
+                                </h2>
                                 <QuizList
                                     quizzes={filteredQuizzes}
                                     icons={[]}
