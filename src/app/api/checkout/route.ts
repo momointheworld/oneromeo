@@ -114,13 +114,13 @@ export async function POST(req: NextRequest, res: NextResponse) {
 
             customFields.push({
                 key: 'appointment_date_time',
-                label: { type: 'custom', custom: 'Appointment date & Time' },
+                label: { type: 'custom', custom: 'Appointment date & time' },
                 type: 'text',
                 text: { default_value: formattedcsrDateTime },
             })
             customFields.push({
                 key: 'th_date_time',
-                label: { type: 'custom', custom: "Arnold's Date & Time" },
+                label: { type: 'custom', custom: "Arnold's date & time" },
                 type: 'text',
                 text: { default_value: formattedThDateTime },
             })

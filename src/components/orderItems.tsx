@@ -2,6 +2,7 @@ import React, { MouseEventHandler } from 'react'
 import { Button, Chip } from '@nextui-org/react'
 import Image, { StaticImageData } from 'next/image'
 import { useSelectedItem } from '@/hooks/useSelectedItem'
+import EmbedVideo from './embedVideo'
 
 interface Item {
     imgSrc: StaticImageData
@@ -22,11 +23,14 @@ const OrderItems: React.FC<OrderItemsProps> = ({ handleItemClick, items }) => {
 
     return (
         <div className="bg-white">
-            <div className="mx-auto flex flex-col gap-12 p-4">
-                <h1 className="text-center text-3xl font-bold text-primary">
+            <div className="mx-auto flex flex-col gap-10 p-4">
+                <h1 className="text-center text-4xl font-bold text-primary custom-font">
                     We got this. I&apos;m here, to listen.
                 </h1>
-                <div className="flex justify-center items-center gap-5">
+                <div className="mx-auto w-full lg:w-1/2">
+                    <EmbedVideo videoId={'CGKtQ-5QlQY?si=3MIcYMYJjQfqDyRx'} />
+                </div>
+                <div className="flex justify-center items-center gap-5 custom-font mt-5">
                     <Chip color="primary" size="lg" radius="full">
                         {' '}
                         1{' '}
@@ -56,7 +60,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({ handleItemClick, items }) => {
                                         : 'default'
                                 }
                                 key={product.priceId}
-                                className={`group relative flex flex-col h-full px-4 ${bgColor}`}
+                                className={`group relative flex flex-col h-30 px-4 ${bgColor}`}
                                 data-price-id={product.priceId}
                                 onClick={handleItemClick}
                             >

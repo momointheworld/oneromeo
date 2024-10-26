@@ -2,6 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+/* convert to woff/woff2 version to reduce the font size from tiff */
+@font-face {
+  font-family: 'MyCustomFont'; 
+  src: url('/PatrickHand-Regular.woff2') format('woff2'),
+       url('/PatrickHand-Regular.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.custom-font,h1, h2, h3, h4 {
+  font-family: 'MyCustomFont', sans-serif;  
+}
+
+
 html, body {
     height: 100%;
     margin: 0;
@@ -51,6 +65,7 @@ footer {
   }
 
   /* Responsive Video Wrapper */
+ .embed-container,
 .responsive-video-wrapper {
   position: relative;
   padding-bottom: 56.25%; /* 16:9 aspect ratio */
@@ -60,6 +75,17 @@ footer {
   background: #000;
 }
 
+/* youtube videos */
+.embed-container {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+  max-width: 100%;
+  background: #000;
+}
+
+.embed-container iframe,
 .responsive-video-wrapper iframe,
 .responsive-video-wrapper object,
 .responsive-video-wrapper embed {
@@ -68,6 +94,13 @@ footer {
   left: 0;
   width: 100%;
   height: 100%;
+}
+
+/* images within the page articles */
+article img {
+  width: 100% !important; /* Override the inline width */
+  height: auto !important; /* Ensure height adjusts automatically */
+  max-width: 100%; /* Prevent image from exceeding original size */
 }
 
  

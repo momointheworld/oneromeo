@@ -7,7 +7,7 @@ import { Button, Card, Chip, Input } from '@nextui-org/react'
 import { useDate } from '@/hooks/useDate'
 import OrderItems from '@/components/orderItems'
 import singleSessionImg from '/public/single-session.png'
-import ebookImg from '/public/ebook-2.png'
+import ebookImg from '/public/ebook.png'
 import bundleImg from '/public/bundle-sessions.png'
 import { useEmail } from '@/hooks/useEmail'
 import { useSelectedItem } from '@/hooks/useSelectedItem'
@@ -34,7 +34,7 @@ const OrderForm = () => {
     const [singleSession, setSingleSession] = useState(false)
     const [isAppointmentAvailable, setIsAppointmentAvailable] = useState(true)
     const [secondStepTitle, setSecondStepTitle] = useState(
-        'Choose Time & Email'
+        'Pick a time (& email) to get the ball rolling!'
     )
 
     let now = today(getLocalTimeZone())
@@ -64,7 +64,7 @@ const OrderForm = () => {
             imgSrc: singleSessionImg,
             imgAlt: '',
             title: 'U Talk, I Listen',
-            price: 'USD 5.50',
+            price: 'HK$30',
             priceId: 'price_1PckCSHcOAKxyg1Z0WStpNJl',
             description:
                 "15-minute session / Buy me a coffee and I'll be the best listener you've ever had :-)",
@@ -73,7 +73,7 @@ const OrderForm = () => {
             imgSrc: bundleImg,
             imgAlt: '',
             title: 'U Talk, I Listen (5x)',
-            price: 'USD 24.50',
+            price: 'HK$125',
             priceId: 'price_1PckCyHcOAKxyg1ZPUkOd5XO',
             description:
                 'Bundle of 5 x 15-minute sessions / Buy me 5 coffees for a lower price :-)',
@@ -82,7 +82,7 @@ const OrderForm = () => {
             imgSrc: ebookImg,
             imgAlt: '',
             title: 'eBook',
-            price: 'USD 1.25',
+            price: 'HK$10',
             priceId: 'price_1PffWVHcOAKxyg1ZcYyxKX8U',
             description:
                 'I’ve been typing away for hours, days, and weeks, but it‘s finally here - Not in a Million Years!',
@@ -110,22 +110,23 @@ const OrderForm = () => {
         if (priceId === ebookPriceId) {
             setIsAppointmentAvailable(false)
             resetAppointment()
-            setSecondStepTitle('Enter Your Email')
+            setSecondStepTitle('Your email, please, to get you going!')
         } else {
-            setSecondStepTitle('Choose Time & Email')
+            setSecondStepTitle('Pick a time (& email) to get the ball rolling!')
             setIsAppointmentAvailable(true)
         }
 
         if (priceId === bundlePriceId) {
             setShowNote(true)
-            setNote(
-                'At this stage, you can only schedule your first appointment.'
-            )
+            setNote('For now, just schedule your first appointment.')
         }
 
         // Scroll to the Appointment component
         if (appointmentRef.current) {
-            appointmentRef.current.scrollIntoView({ behavior: 'smooth' })
+            appointmentRef.current.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start',
+            })
         }
     }
 
@@ -255,12 +256,11 @@ const OrderForm = () => {
                         items={items}
                     />
                     <div ref={appointmentRef}>
-                        <div className="flex place-content-center mb-12">
+                        <div className="flex place-content-center mb-12 custom-font flex-wrap">
                             <Chip color="primary" size="lg" radius="full">
                                 2{' '}
                             </Chip>
                             <span className="mx-5 text-2xl font-bold tracking-tight text-gray-600">
-                                {/* Choose Your Time (& enter your email) */}
                                 {secondStepTitle}
                             </span>
                         </div>
@@ -303,7 +303,7 @@ const OrderForm = () => {
                             </div>
                         )}
                     </div>
-                    <div className=" flex justify-center">
+                    <div className=" flex justify-center custom-font">
                         <Button
                             isLoading={isLoading}
                             type="submit"

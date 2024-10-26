@@ -17,19 +17,20 @@ import {
     Button,
 } from '@nextui-org/react'
 import Image from 'next/image'
-import Logo from '/public/logo-circle.png'
+import Logo from '/public/logo-oneromeo.png'
 import Profile from '@/components/profile'
 import { useSession } from 'next-auth/react'
 import { CardSkeleton } from './common/skeleton-loading'
 
 const MenuLogo = () => {
     return (
-        <div className="relative w-16 h-16 flex justify-start items-center p-2 mr-5">
+        <div className="relative flex justify-start items-center mr-5">
             <Image
                 className="object-contain" // Ensures the image maintains its aspect ratio
                 src={Logo}
                 alt="One Romeo Logo"
                 priority={true}
+                width={150}
             />
         </div>
     )
@@ -186,11 +187,11 @@ const NavbarComp = () => {
                     />
                     <NavbarBrand>
                         <MenuLogo />
-                        <p className="font-bold text-inherit">One Romeo</p>
+                        {/* <p className="font-bold text-inherit">One Romeo</p> */}
                     </NavbarBrand>
                 </NavbarContent>
                 <NavbarContent
-                    className="hidden sm:flex items-center space-x-4 py-3 px-6 rounded-lg mt-2 text-white"
+                    className="hidden sm:flex items-center space-x-4 py-3 px-6 rounded-lg mt-2 text-white custom-font"
                     justify="center"
                 >
                     {menuItems.map((item, index) =>
@@ -204,7 +205,7 @@ const NavbarComp = () => {
                                         {/* Button is the Parent Nav Item */}
                                         <Button
                                             disableRipple
-                                            className={`p-0 bg-transparent data-[hover=true]:bg-transparent self-start text-lg text-white ${
+                                            className={`p-0 bg-transparent data-[hover=true]:bg-transparent self-start text-lg text-white custom-font ${
                                                 activeMenuItems.includes(item)
                                                     ? 'font-bold underline'
                                                     : ''
@@ -242,7 +243,7 @@ const NavbarComp = () => {
                                             }}
                                         >
                                             <Link
-                                                className="text-lg"
+                                                className="text-lg custom-font"
                                                 underline={
                                                     activeMenuItems.includes(
                                                         child
@@ -261,7 +262,7 @@ const NavbarComp = () => {
                         ) : (
                             <NavbarItem key={index} isActive={isActive(item)}>
                                 <Link
-                                    className="text-lg text-white"
+                                    className="text-lg text-white custom-font"
                                     underline={
                                         activeMenuItems.includes(item)
                                             ? 'always'
@@ -293,7 +294,7 @@ const NavbarComp = () => {
                                         {/* Button is the Parent Nav Item */}
                                         <Button
                                             disableRipple
-                                            className={`p-0 bg-transparent data-[hover=true]:bg-transparent self-start text-lg text-primary ${
+                                            className={`p-0 bg-transparent data-[hover=true]:bg-transparent self-start text-lg text-primary custom-font ${
                                                 activeMenuItems.includes(item)
                                                     ? 'underline'
                                                     : ''
@@ -337,7 +338,7 @@ const NavbarComp = () => {
                                                         ? 'always'
                                                         : 'none'
                                                 }
-                                                className="flex items-center w-full text-lg"
+                                                className="flex items-center w-full text-lg custom-font"
                                                 href={child.href}
                                             >
                                                 {child.title}
@@ -354,7 +355,7 @@ const NavbarComp = () => {
                                             ? 'always'
                                             : 'none'
                                     }
-                                    className="w-full text-lg"
+                                    className="w-full text-lg custom-font"
                                     href={item.href}
                                     onPress={() => handleMenuItemClick(item)}
                                 >

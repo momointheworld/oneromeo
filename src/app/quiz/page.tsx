@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { db } from '@/db'
 import { Card } from '@nextui-org/react'
+import { getAllQuizzes } from '@/actions'
+import QuizList from '@/components/quizList'
 
 const icons = {
     speech: (
@@ -57,34 +59,14 @@ const icons = {
         </svg>
     ),
 }
+
 export default async function QuizPage() {
     const quizzes = await db.quiz.findMany({ orderBy: { date: 'desc' } })
-
-    const linksWithIcons = quizzes.map((quiz, index) => ({
-        href: `/quiz/${quiz.slug}`,
-        text: quiz.quizName,
-        icon: Object.values(icons)[index % Object.keys(icons).length],
-        //map through the icons
-    }))
-
-    const renderQuizzes = linksWithIcons.map((linkObj, index) => (
-        <Card
-            key={index}
-            className="flex flex-col justify-between items-center p-4 shadow-lg hover:shadow-2xl transition-shadow duration-300"
-            isHoverable
-            isFooterBlurred
-        >
-            {linkObj.icon}
-            <Link href={linkObj.href} className="no-underline">
-                <h4 className="text-primary">{linkObj.text}</h4>
-            </Link>
-        </Card>
-    ))
 
     return (
         <div className="flex flex-col items-center">
             <h1 className="text-2xl font-bold mb-4">Know Yourself - Quizzes</h1>
-            <div className="flex flex-wrap gap-4 p-4">{renderQuizzes}</div>
+            <QuizList quizzes={quizzes} icons={Object.values(icons)} />
         </div>
     )
 }

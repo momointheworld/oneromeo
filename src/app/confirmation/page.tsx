@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { downloadFile } from '@/actions'
 import DisplayMessage from '@/components/common/message'
 import { Button } from '@nextui-org/react'
+import { Image } from '@nextui-org/react'
 
 interface DownloadResponse {
     error?: string
@@ -64,6 +65,19 @@ const ConfirmationPage: React.FC = () => {
 
     const hasAppointment = timeSlot && utcSlot
 
+    function formatDateTime(dateTimeString: string) {
+        const match = dateTimeString.match(
+            /(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2}).*\[(.+)]/
+        )
+        if (match) {
+            return `${match[1]} | ${match[2]} [${match[3]}]`
+        } else {
+            throw new Error('Invalid date-time format')
+        }
+    }
+
+    const formattedTimeSlot = timeSlot ? formatDateTime(timeSlot) : ''
+
     const handleDownload = async () => {
         if (downloadUrl) {
             const a = document.createElement('a')
@@ -84,11 +98,26 @@ const ConfirmationPage: React.FC = () => {
             {hasAppointment ? (
                 <>
                     <div>
-                        <h1>Thanks for that!</h1>
-                        <br />
+                        <h1>
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke-width="1.5"
+                                stroke="currentColor"
+                                className="size-10 text-yellow-600 inline"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z"
+                                />
+                            </svg>{' '}
+                            Thanks for that!
+                        </h1>
                         We’ll send you a confirmation email soon 😊
                     </div>
-                    <table className="mt-14 flex justify-center">
+                    <table className="mt-14 flex justify-center p-4 text-lg">
                         <tbody>
                             <tr>
                                 <td>
@@ -100,25 +129,13 @@ const ConfirmationPage: React.FC = () => {
                                 <td>
                                     <strong>Your appointment is on:</strong>
                                 </td>
-                                <td>{timeSlot}</td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <strong>Time:</strong>
-                                </td>
-                                <td>
-                                    {timeSlot
-                                        .split('T')[1]
-                                        .split(':')
-                                        .slice(0, 2)
-                                        .join(':')}
-                                </td>
+                                <td>{formattedTimeSlot}</td>
                             </tr>
                         </tbody>
                     </table>
                 </>
             ) : (
-                <div>
+                <div className="p-2">
                     <h1>Thanks, it&apos;s much appreciated. Enjoy the read!</h1>
                     <Button
                         onClick={handleDownload}
@@ -130,6 +147,15 @@ const ConfirmationPage: React.FC = () => {
                     <p className="text-slate-400">
                         This download link is valid for 1 hour.
                     </p>
+                    <div className="flex justify-center">
+                        <Image
+                            isBlurred
+                            alt="confirmation-image"
+                            src="/ebook-conf-img.png"
+                            width={150}
+                            className="aspect-w-4 aspect-h-3 transform scale-125 h-auto w-auto"
+                        />
+                    </div>
                 </div>
             )}
         </div>

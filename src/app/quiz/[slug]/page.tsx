@@ -1,12 +1,13 @@
 'use client'
 import React, { useState, useEffect, useRef } from 'react'
-import { getQuizStats, recordQuizSubmission } from '@/actions'
+import { getAllQuizzes, getQuizStats, recordQuizSubmission } from '@/actions'
 import { FullSkeleton } from '@/components/common/skeleton-loading'
 import {
     Button,
     Card,
     Chip,
     Divider,
+    Link,
     Progress,
     Radio,
     RadioGroup,
@@ -16,6 +17,8 @@ import { useParams, usePathname } from 'next/navigation'
 import PageBreadCrumbs from '@/components/common/breadcrumbs'
 import { getQuizBySlug } from '@/actions/getQuiz'
 import dynamic from 'next/dynamic'
+import { db } from '@/db'
+import QuizList from '@/components/quizList'
 
 interface AnswerDataProps {
     id: string
@@ -55,9 +58,16 @@ interface QuizStats {
     maxPoints: number
     count: number
 }
+interface AllQuizzes {
+    id: string
+    date: Date
+    quizName: string
+    slug: string
+}
 
 const SingleQuizPage: React.FC = () => {
     const [quiz, setQuiz] = useState<FetchedQuiz | null>(null)
+    const [allQuizzes, setAllQuizzes] = useState<AllQuizzes[] | []>([])
     const [quizId, setQuizId] = useState<string | null>(null)
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0)
     const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null)
@@ -95,16 +105,19 @@ const SingleQuizPage: React.FC = () => {
             />
         </svg>
     )
+
     useEffect(() => {
         if (!slug) return // Make sure slug is present
         const fetchData = async () => {
             try {
+                const quizzes = await getAllQuizzes()
                 const result = await getQuizBySlug({ slug })
                 if (result === null) {
                     setError('Quiz not found or failed to fetch.')
                     return
                 }
                 const quizData = result as FetchedQuiz
+                setAllQuizzes(quizzes)
                 setQuiz(quizData)
                 setQuizId(quizData.id)
             } catch (error) {
@@ -140,6 +153,25 @@ const SingleQuizPage: React.FC = () => {
             }
         }
     }, [totalScore, quizId])
+
+    // Use useEffect to handle side effects after totalScore is updated
+    useEffect(() => {
+        if (isSubmitted && quizId && totalScore !== null) {
+            const submitQuiz = async () => {
+                try {
+                    setIsLoading(true)
+                    await recordQuizSubmission(quizId, totalScore)
+
+                    console.log('Quiz submission recorded successfully.')
+                } catch (error) {
+                    console.error('Failed to record quiz submission:', error)
+                }
+                setIsLoading(false)
+            }
+
+            submitQuiz()
+        }
+    }, [isSubmitted, quizId, totalScore])
 
     const handleAnswerChange = (
         questionId: string,
@@ -179,25 +211,9 @@ const SingleQuizPage: React.FC = () => {
         setTotalScore(score)
     }
 
-    // Use useEffect to handle side effects after totalScore is updated
-    useEffect(() => {
-        if (isSubmitted && quizId && totalScore !== null) {
-            const submitQuiz = async () => {
-                try {
-                    setIsLoading(true)
-                    await recordQuizSubmission(quizId, totalScore)
-
-                    console.log('Quiz submission recorded successfully.')
-                } catch (error) {
-                    console.error('Failed to record quiz submission:', error)
-                }
-                setIsLoading(false)
-            }
-
-            submitQuiz()
-        }
-    }, [isSubmitted, quizId, totalScore])
-
+    const filteredQuizzes = allQuizzes.filter(
+        (mapQuiz) => mapQuiz.id !== quizId
+    )
     const currentQuestion = quiz?.questions[currentQuestionIndex]
     const answerOptions = ['A', 'B', 'C', 'D']
 
@@ -262,7 +278,7 @@ const SingleQuizPage: React.FC = () => {
                                             className="flex items-center gap-2"
                                         >
                                             <RadioGroup
-                                                aria-label="Select your favorite city"
+                                                aria-label="Make a selection"
                                                 value={selectedAnswer}
                                                 onChange={() =>
                                                     handleAnswerChange(
@@ -326,14 +342,14 @@ const SingleQuizPage: React.FC = () => {
                                 ))}
                             <Divider className="my-4" />
                             {totalScore <= minFullScore && (
-                                <div className="">
+                                <div className="flex flex-col justify-center mt-5">
                                     <p>
                                         It seems like you need a little help.
                                         Use{' '}
                                         <span className="bg-warning-200 rounded-md p-2">
                                             QUIZ24
                                         </span>{' '}
-                                        at checkout to get 10% off a single
+                                        at the checkout to get 10% off a single
                                         listening session.
                                     </p>
                                     <p className="italic text-gray-400 text-sm">
@@ -342,12 +358,33 @@ const SingleQuizPage: React.FC = () => {
                                     </p>
                                 </div>
                             )}
+                            <div className="flex flex-col place-items-center mt-5">
+                                <Button
+                                    variant="ghost"
+                                    color="warning"
+                                    type="button"
+                                >
+                                    <Link href="/" className="text-blue-900">
+                                        Book Your Session NOW!
+                                    </Link>
+                                </Button>
+                            </div>
                             {quizStats && (
                                 <LazyBarChart
                                     stats={quizStats}
                                     isLoading={isLoading}
                                 />
                             )}
+                            <Divider className="my-4" />
+                            <div className="flex flex-col items-center bg-orange-50 rounded-md">
+                                <h2 className="">
+                                    Take a look at other quizzes
+                                </h2>
+                                <QuizList
+                                    quizzes={filteredQuizzes}
+                                    icons={[]}
+                                />
+                            </div>
                         </div>
                     )}
                 </>
