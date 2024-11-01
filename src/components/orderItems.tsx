@@ -25,7 +25,8 @@ const OrderItems: React.FC<OrderItemsProps> = ({ handleItemClick, items }) => {
         <div className="bg-white">
             <div className="mx-auto flex flex-col gap-10 p-4">
                 <h1 className="text-center text-4xl font-bold text-primary custom-font">
-                    We got this. I&apos;m here, to listen.
+                    We got this. I&apos;m here, to{' '}
+                    <span className="text-6xl text-orange-400">listen</span>.
                 </h1>
                 <div className="mx-auto w-full lg:w-1/2">
                     <EmbedVideo videoId={'CGKtQ-5QlQY?si=3MIcYMYJjQfqDyRx'} />

@@ -76,7 +76,7 @@ export default function NavbarPosts({ categoryName }: PostsByCategoryProps) {
                     <article>
                         {fetchedPosts.map((post) => (
                             <div key={post.id}>
-                                <h2 className="text-center">{post.title}</h2>{' '}
+                                <h1 className="text-center">{post.title}</h1>{' '}
                                 {/* {parse(post.body)} */}
                                 {parse(wrapIframe(post.body))}
                             </div>

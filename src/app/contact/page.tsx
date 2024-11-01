@@ -52,7 +52,7 @@ export default function ContactPage() {
             }
 
             setSuccessMessage(
-                'Thank you for reaching out. We will get back to you soon.'
+                "Thank you for reaching out. I'll be in touch soon."
             )
         } catch (error: any) {
             setErrors({
