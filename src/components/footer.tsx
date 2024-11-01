@@ -1,6 +1,13 @@
-import { Divider, Link } from '@nextui-org/react'
+import {
+    Button,
+    Card,
+    CardBody,
+    CardFooter,
+    Divider,
+    Link,
+} from '@nextui-org/react'
 import { SocialIcon } from 'react-social-icons'
-import EmbedVideo from './embedVideo'
+import Image, { StaticImageData } from 'next/image'
 
 // components/FooterSection.tsx
 
@@ -55,20 +62,20 @@ const Footer = () => {
         <div className="bg-primary text-white rounded pt-16 mt-12 px-5">
             <footer className="grid grid-cols-1 sm:grid-cols-4 gap-4 p-4 max-w-6xl mx-auto text-left text-white custom-font">
                 <FooterSection
-                    title="Fun"
+                    title="Fun."
                     links={footerLinks.fun}
                     fontSize="text-3xl"
                     color="text-orange-400"
                 />
                 <FooterSection
-                    title="Explore"
+                    title="Explore."
                     links={footerLinks.explore}
                     fontSize="text-lg"
                     color="text-zinc-200"
                 />
                 <div className="md:col-start-3 md:col-span-1 text-center space-y-4 mb-5 text-lg">
                     <h3 className="text-xl font-semibold uppercase">
-                        elsewhere
+                        elsewhere.
                     </h3>
                     <div className="flex space-x-4 justify-center">
                         <SocialIcon
@@ -82,15 +89,33 @@ const Footer = () => {
                             className="w-6 h-6" // Adjust the size as needed
                         />
                     </div>
-                    <div className="flex flex-col text-zinc-400 gap-5">
-                        <p>No Catch, Just You and Me.</p>
-                        <p>
-                            What happens on One Romeo, stays on One Romeo. All
-                            you share is confidential.
+                </div>
+                <div className="md:col-start-4 md:col-span-1 text-center space-y-4 mb-5 p-3 rounded-md shadow-xl bg-orange-100 origin-left rotate-12 shrink-1">
+                    <div className="flex flex-col items-center gap-5">
+                        <p className="text-2xl text-orange-600">
+                            No Catch, <br />
+                            Just You and Me.
                         </p>
+                        <p className="text-xl text-blue-900">
+                            What happens on One Romeo, stays on One Romeo.
+                            <br /> All you share is confidential.
+                        </p>
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth="1.5"
+                            stroke="currentColor"
+                            className="size-12 text-green-700"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z"
+                            />
+                        </svg>
                     </div>
                 </div>
-
                 <div className="col-span-1 sm:col-span-4 text-center mt-4">
                     <Divider className="my-4" />
                     <p>© 2024 OneRomeo.com. All Rights Reserved.</p>

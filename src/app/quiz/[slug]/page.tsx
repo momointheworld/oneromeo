@@ -358,14 +358,33 @@ const SingleQuizPage: React.FC = () => {
                                     </p>
                                 </div>
                             )}
-                            <div className="flex flex-col place-items-center mt-5">
+                            <div className="flex flex-row justify-center items-center mt-5">
                                 <Button
-                                    variant="ghost"
+                                    variant="solid"
                                     color="warning"
                                     type="button"
+                                    size="lg"
+                                    className="shadow-md border"
                                 >
-                                    <Link href="/" className="text-blue-900">
-                                        Book Your Session NOW!
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        strokeWidth="1.5"
+                                        stroke="currentColor"
+                                        className="size-12 text-stone-100"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15M12 9l3 3m0 0-3 3m3-3H2.25"
+                                        />
+                                    </svg>
+                                    <Link
+                                        href="/"
+                                        className="text-2xl text-stone-50 custom-font"
+                                    >
+                                        Want to talk? Hit me up.
                                     </Link>
                                 </Button>
                             </div>
@@ -378,7 +397,7 @@ const SingleQuizPage: React.FC = () => {
                             <Divider className="my-4" />
                             <div className="flex flex-col items-center bg-orange-50 rounded-md">
                                 <h2 className="">
-                                    Take a look at other quizzes
+                                    Take a Look at More Quizzes
                                 </h2>
                                 <QuizList
                                     quizzes={filteredQuizzes}

@@ -64,8 +64,8 @@ const OrderForm = () => {
             imgSrc: singleSessionImg,
             imgAlt: '',
             title: 'U Talk, I Listen',
-            price: 'HK$30',
-            priceId: 'price_1PckCSHcOAKxyg1Z0WStpNJl',
+            price: 'HK$45',
+            priceId: singleSessionPriceId || '',
             description:
                 "15-minute session / Buy me a coffee and I'll be the best listener you've ever had :-)",
         },
@@ -73,8 +73,8 @@ const OrderForm = () => {
             imgSrc: bundleImg,
             imgAlt: '',
             title: 'U Talk, I Listen (5x)',
-            price: 'HK$125',
-            priceId: 'price_1PckCyHcOAKxyg1ZPUkOd5XO',
+            price: 'HK$200',
+            priceId: bundlePriceId || '',
             description:
                 'Bundle of 5 x 15-minute sessions / Buy me 5 coffees for a lower price :-)',
         },
@@ -83,7 +83,7 @@ const OrderForm = () => {
             imgAlt: '',
             title: 'eBook',
             price: 'HK$10',
-            priceId: 'price_1PffWVHcOAKxyg1ZcYyxKX8U',
+            priceId: ebookPriceId || '',
             description:
                 'I’ve been typing away for hours, days, and weeks, but it‘s finally here - Not in a Million Years!',
         },
