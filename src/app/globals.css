@@ -98,7 +98,7 @@ footer {
 
 /* images within the page articles */
 article img {
-  width: 100% !important; /* Override the inline width */
+  /* width: 100% !important; Override the inline width */
   height: auto !important; /* Ensure height adjusts automatically */
   max-width: 100%; /* Prevent image from exceeding original size */
 }

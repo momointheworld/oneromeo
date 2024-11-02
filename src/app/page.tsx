@@ -230,7 +230,7 @@ const OrderForm = () => {
             } else {
                 // Handle case where result.url is not defined
                 alert('Failed to get the checkout URL. Please try again.')
-                setFormStateMessage('Failed to proceed with the checkout.')
+                setFormStateMessage('Unable to proceed with the checkout')
             }
         } catch (error) {
             setFormStateMessage('Something went wrong, contact support please.')

@@ -23,7 +23,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({ handleItemClick, items }) => {
 
     return (
         <div className="bg-white">
-            <div className="mx-auto flex flex-col gap-10 p-4">
+            <div className="mx-auto flex flex-col gap-8 p-4">
                 <h1 className="text-center text-4xl font-bold text-primary custom-font">
                     We got this. I&apos;m here, to{' '}
                     <span className="text-6xl text-orange-400">listen</span>.
@@ -31,7 +31,10 @@ const OrderItems: React.FC<OrderItemsProps> = ({ handleItemClick, items }) => {
                 <div className="mx-auto w-full lg:w-1/2">
                     <EmbedVideo videoId={'CGKtQ-5QlQY?si=3MIcYMYJjQfqDyRx'} />
                 </div>
-                <div className="flex justify-center items-center gap-5 custom-font mt-5">
+                <div
+                    className="flex justify-center items-center gap-8 custom-font my-8"
+                    id="items-section"
+                >
                     <Chip color="primary" size="lg" radius="full">
                         {' '}
                         1{' '}
@@ -79,6 +82,10 @@ const OrderItems: React.FC<OrderItemsProps> = ({ handleItemClick, items }) => {
                                         </p>
                                         <p className="text-lg font-medium text-gray-600 px-2">
                                             {product.price}
+                                            <br />
+                                            <span className="text-sm text-gray-400">
+                                                ( 1 US$ is about 7.77 HK$ )
+                                            </span>
                                         </p>
                                     </div>
 
