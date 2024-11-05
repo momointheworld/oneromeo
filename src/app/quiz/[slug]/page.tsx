@@ -381,7 +381,7 @@ const SingleQuizPage: React.FC = () => {
                                         />
                                     </svg>
                                     <Link
-                                        href="/"
+                                        href="/#items-section"
                                         className="text-2xl text-stone-50 custom-font"
                                     >
                                         Want to talk? Hit me up.
