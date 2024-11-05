@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
         // Create a customer portal session
         const session = await stripe.billingPortal.sessions.create({
             customer: customerId,
-            return_url: 'http://localhost:3000/confirmation', // URL to return to after exiting the portal
+            return_url: 'https://www.oneromeo.com/confirmation', // URL to return to after exiting the portal
         })
 
         console.log(`sessionurl: ${session.url}`)

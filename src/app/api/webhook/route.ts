@@ -160,7 +160,7 @@ async function handleCheckoutSessionCompleted(
         // Store the token and associated email in your database
         await saveTokenToDatabase(email, token)
         // Generate the download URL
-        const downloadUrl = `http://localhost:3000/confirmation?success=true&session_id=${session.id}&token=${token}`
+        const downloadUrl = `https://www.oneromeo.com/confirmation?success=true&session_id=${session.id}&token=${token}`
         console.log('Download URL:', downloadUrl)
     }
 }

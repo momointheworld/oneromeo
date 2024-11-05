@@ -175,7 +175,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
                 ? [{ promotion_code: promotionCodeId }]
                 : []
 
-        let successUrl = `http://localhost:3000/confirmation?success=true&session_id={CHECKOUT_SESSION_ID}&appointment_date_time=${csrDate}&th_date_time=${thDate}&utc_date_time=${utcDate}&csrTimeZone=${timeZone}&email=${email}`
+        let successUrl = `https://www.oneromeo.com/confirmation?success=true&session_id={CHECKOUT_SESSION_ID}&appointment_date_time=${csrDate}&th_date_time=${thDate}&utc_date_time=${utcDate}&csrTimeZone=${timeZone}&email=${email}`
 
         if (priceId === ebookPriceId) {
             const token = await generateSecureDownloadToken(email)
@@ -192,7 +192,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
             customer_email: email,
             customer_creation: 'always',
             success_url: successUrl,
-            cancel_url: 'http://localhost:3000/',
+            cancel_url: 'https://www.oneromeo.com/',
         })
 
         return NextResponse.json({ url: session.url })
