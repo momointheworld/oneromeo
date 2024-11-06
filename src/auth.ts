@@ -29,6 +29,7 @@ export const {
             clientSecret: GITHUB_CLIENT_SECRET,
         }),
     ],
+    trustHost: true,
     callbacks: {
         async signIn({ user, account, profile, email, credentials }) {
             // Verify if the user is allowed access
