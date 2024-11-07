@@ -2,6 +2,7 @@ import { parseAbsoluteToLocal, fromDate } from '@internationalized/date'
 import { generateSecureDownloadToken } from '@/utils/generateSecureDownloadToken'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
+import { DateTime } from 'luxon'
 
 const schema = z
     .object({
@@ -83,6 +84,60 @@ export async function POST(req: NextRequest, res: NextResponse) {
         }
     }
 
+    // try {
+    //     const { priceId, email, timeZone, date, timeSlot, couponCode } = body
+
+    //     let csrDate = ''
+    //     let thDate = ''
+    //     let utcDate = ''
+    //     const customFields = []
+
+    //     // Process date-related logic only if a valid date is provided
+    //     if (date && date.trim() !== '') {
+    //         const zonedDateTime = parseAbsoluteToLocal(date)
+
+    //         const thDateTime = fromDate(
+    //             new Date(zonedDateTime.toAbsoluteString()),
+    //             'Asia/Bangkok'
+    //         )
+    //         const utcDateTime = fromDate(
+    //             new Date(zonedDateTime.toAbsoluteString()),
+    //             'utc'
+    //         )
+
+    //         csrDate = zonedDateTime.toString()
+    //         thDate = thDateTime.toString()
+    //         utcDate = utcDateTime.toString()
+
+    //         // formatted # Outputs: 2024-09-30 | 21:30:00 [America/Chicago]
+    //         const formattedcsrDateTime = formatDateTime(csrDate)
+    //         const formattedThDateTime = formatDateTime(thDate)
+
+    //         customFields.push({
+    //             key: 'appointment_date_time',
+    //             label: { type: 'custom', custom: 'Appointment date & time' },
+    //             type: 'text',
+    //             text: { default_value: formattedcsrDateTime },
+    //         })
+    //         customFields.push({
+    //             key: 'th_date_time',
+    //             label: { type: 'custom', custom: "Arnold's date & time" },
+    //             type: 'text',
+    //             text: { default_value: formattedThDateTime },
+    //         })
+    //     } else {
+    //         console.log('No date provided, skipping date processing.')
+    //     }
+
+    //     const metadata = {
+    //         appointment_date_time: csrDate || '',
+    //         th_date_time: thDate || '',
+    //         utc_date_time: utcDate || '',
+    //         csrTimeZone: timeZone || '',
+    //     }
+
+    //     let successUrl = `https://oneromeo.com/confirmation?success=true&session_id={CHECKOUT_SESSION_ID}&appointment_date_time=${csrDate}&th_date_time=${thDate}&utc_date_time=${utcDate}&csrTimeZone=${timeZone}&email=${email}`
+
     try {
         const { priceId, email, timeZone, date, timeSlot, couponCode } = body
 
@@ -93,30 +148,47 @@ export async function POST(req: NextRequest, res: NextResponse) {
 
         // Process date-related logic only if a valid date is provided
         if (date && date.trim() !== '') {
-            const zonedDateTime = parseAbsoluteToLocal(date)
+            // Use Luxon to handle the date conversions
+            // First, parse the incoming date string which includes timezone info
+            const customerDateTime = DateTime.fromISO(date)
 
-            const thDateTime = fromDate(
-                new Date(zonedDateTime.toAbsoluteString()),
-                'Asia/Bangkok'
+            if (!customerDateTime.isValid) {
+                throw new Error('Invalid date format received')
+            }
+
+            // Convert to different timezones while preserving the exact moment in time
+            const thDateTime = customerDateTime.setZone('Asia/Bangkok')
+            const utcDateTime = customerDateTime.setZone('UTC')
+            const csrDateTime = customerDateTime.setZone(timeZone)
+
+            // Store the formatted dates
+            csrDate = csrDateTime.toISO() || ''
+            thDate = thDateTime.toISO() || ''
+            utcDate = utcDateTime.toISO() || ''
+
+            // Format for display (customize the format as needed)
+            const formattedCsrDateTime = csrDateTime.toFormat(
+                'yyyy-MM-dd | HH:mm:ss [ZZZZ]'
             )
-            const utcDateTime = fromDate(
-                new Date(zonedDateTime.toAbsoluteString()),
-                'utc'
+            const formattedThDateTime = thDateTime.toFormat(
+                'yyyy-MM-dd | HH:mm:ss [ZZZZ]'
             )
 
-            csrDate = zonedDateTime.toString()
-            thDate = thDateTime.toString()
-            utcDate = utcDateTime.toString()
-
-            // formatted # Outputs: 2024-09-30 | 21:30:00 [America/Chicago]
-            const formattedcsrDateTime = formatDateTime(csrDate)
-            const formattedThDateTime = formatDateTime(thDate)
+            console.log('Date Debug:', {
+                receivedDate: date,
+                customerTimeZone: timeZone,
+                csrFormatted: formattedCsrDateTime,
+                thFormatted: formattedThDateTime,
+                csrISO: csrDate,
+                thISO: thDate,
+                utcISO: utcDate,
+            })
 
             customFields.push({
                 key: 'appointment_date_time',
                 label: { type: 'custom', custom: 'Appointment date & time' },
                 type: 'text',
-                text: { default_value: formattedcsrDateTime },
+                text: { default_value: formattedCsrDateTime },
             })
             customFields.push({
                 key: 'th_date_time',
@@ -129,10 +201,10 @@ export async function POST(req: NextRequest, res: NextResponse) {
         }
 
         const metadata = {
-            appointment_date_time: csrDate || '',
-            th_date_time: thDate || '',
-            utc_date_time: utcDate || '',
-            csrTimeZone: timeZone || '',
+            appointment_date_time: csrDate,
+            th_date_time: thDate,
+            utc_date_time: utcDate,
+            csrTimeZone: timeZone,
         }
 
         const lineItems = [
@@ -175,7 +247,14 @@ export async function POST(req: NextRequest, res: NextResponse) {
                 ? [{ promotion_code: promotionCodeId }]
                 : []
 
-        let successUrl = `https://oneromeo.com/confirmation?success=true&session_id={CHECKOUT_SESSION_ID}&appointment_date_time=${csrDate}&th_date_time=${thDate}&utc_date_time=${utcDate}&csrTimeZone=${timeZone}&email=${email}`
+        // URL encode the dates for the success URL
+        const encodedCsrDate = encodeURIComponent(csrDate)
+        const encodedThDate = encodeURIComponent(thDate)
+        const encodedUtcDate = encodeURIComponent(utcDate)
+        const encodedTimeZone = encodeURIComponent(timeZone)
+        const encodedEmail = encodeURIComponent(email)
+
+        let successUrl = `https://oneromeo.com/confirmation?success=true&session_id={CHECKOUT_SESSION_ID}&appointment_date_time=${encodedCsrDate}&th_date_time=${encodedThDate}&utc_date_time=${encodedUtcDate}&csrTimeZone=${encodedTimeZone}&email=${encodedEmail}`
 
         if (priceId === ebookPriceId) {
             const token = await generateSecureDownloadToken(email)
