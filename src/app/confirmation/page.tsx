@@ -91,14 +91,26 @@ const ConfirmationPage: React.FC = () => {
     const hasAppointment = timeSlot && utcSlot
 
     function formatDateTime(dateTimeString: string) {
-        const match = dateTimeString.match(
-            /(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2}).*\[(.+)]/
-        )
-        if (match) {
-            return `${match[1]} | ${match[2]} [${match[3]}]`
-        } else {
+        const date = new Date(dateTimeString)
+        if (isNaN(date.getTime())) {
             throw new Error('Invalid date-time format')
         }
+
+        // Format the date and time
+        const formattedDate = date.toLocaleDateString('en-US', {
+            month: 'long', // "November"
+            day: 'numeric', // "12"
+            year: 'numeric', // "2024"
+        })
+
+        const formattedTime = date.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true, // Use 12-hour format (AM/PM)
+        })
+
+        // Return formatted date and time
+        return `${formattedDate} | ${formattedTime}`
     }
 
     const formattedTimeSlot = timeSlot ? formatDateTime(timeSlot) : ''
