@@ -13,7 +13,6 @@ import { useEmail } from '@/hooks/useEmail'
 import { useSelectedItem } from '@/hooks/useSelectedItem'
 import checkout from '@/actions/checkout'
 import { StaticImageData } from 'next/image'
-import { combineDateAndTimeInZone } from '@/utils/combineDateAndTimeInZone'
 import { DateTime } from 'luxon'
 
 const OrderForm = () => {
@@ -161,27 +160,6 @@ const OrderForm = () => {
             setIsLoading(false)
             return
         }
-
-        // // Get the user's timezone
-        // const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
-        // // // Convert selected date to the local time zone
-        // const selectedDateObj = selectedDate
-        //     ? new Date(
-        //           selectedDate.year,
-        //           selectedDate.month - 1,
-        //           selectedDate.day
-        //       )
-        //     : null
-
-        // // CSR Date (Local Timezone - user's timezone)
-
-        // const combinedCsrDate = selectedDateObj
-        //     ? combineDateAndTimeInZone(
-        //           selectedDateObj,
-        //           pickedTime,
-        //           userTimeZone
-        //       )
-        //     : null
 
         const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
         let combinedCsrDate: string | null = null

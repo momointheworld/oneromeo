@@ -166,19 +166,14 @@ async function handleCheckoutSessionCompleted(
     }
 }
 
-async function streamToBuffer(
-    stream: ReadableStream<Uint8Array>
-): Promise<Buffer> {
-    const reader = stream.getReader()
+async function streamToBuffer(readableStream: ReadableStream<Uint8Array>) {
+    const reader = readableStream.getReader()
     const chunks: Uint8Array[] = []
-    let done = false
+    let result = await reader.read()
 
-    while (!done) {
-        const { value, done: doneReading } = await reader.read()
-        done = doneReading
-        if (value) {
-            chunks.push(value)
-        }
+    while (!result.done) {
+        chunks.push(result.value)
+        result = await reader.read()
     }
 
     return Buffer.concat(chunks)
