@@ -184,8 +184,6 @@ async function streamToBuffer(
     return Buffer.concat(chunks)
 }
 
-export const config = { api: { bodyParser: false } }
-
 export async function POST(req: NextRequest) {
     const sig = req.headers.get('stripe-signature') as string
     let event
