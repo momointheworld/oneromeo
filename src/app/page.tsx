@@ -182,6 +182,21 @@ const OrderForm = () => {
               )
             : null
 
+        // Add this right before the checkout call
+        console.log('Checkout payload:', {
+            priceId: selectedItem.priceId,
+            email,
+            userTimeZone,
+            combinedCsrDate,
+            pickedTime,
+            originalDate: selectedDate
+                ? new Date(
+                      selectedDate.year,
+                      selectedDate.month - 1,
+                      selectedDate.day
+                  ).toISOString()
+                : null,
+        })
         try {
             // Call the checkout function to interact with the server
             const result = await checkout(
