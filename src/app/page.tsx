@@ -14,6 +14,7 @@ import { useSelectedItem } from '@/hooks/useSelectedItem'
 import checkout from '@/actions/checkout'
 import { StaticImageData } from 'next/image'
 import { combineDateAndTimeInZone } from '@/utils/combineDateAndTimeInZone'
+import { DateTime } from 'luxon'
 
 const OrderForm = () => {
     interface Item {
@@ -161,42 +162,65 @@ const OrderForm = () => {
             return
         }
 
-        // Get the user's timezone
+        // // Get the user's timezone
+        // const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
+        // // // Convert selected date to the local time zone
+        // const selectedDateObj = selectedDate
+        //     ? new Date(
+        //           selectedDate.year,
+        //           selectedDate.month - 1,
+        //           selectedDate.day
+        //       )
+        //     : null
+
+        // // CSR Date (Local Timezone - user's timezone)
+
+        // const combinedCsrDate = selectedDateObj
+        //     ? combineDateAndTimeInZone(
+        //           selectedDateObj,
+        //           pickedTime,
+        //           userTimeZone
+        //       )
+        //     : null
+
         const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
-        // // Convert selected date to the local time zone
-        const selectedDateObj = selectedDate
-            ? new Date(
-                  selectedDate.year,
-                  selectedDate.month - 1,
-                  selectedDate.day
-              )
-            : null
+        let combinedCsrDate: string | null = null
 
-        // CSR Date (Local Timezone - user's timezone)
+        if (selectedDate && pickedTime) {
+            // Create the date in local time first
+            const dt = DateTime.local(
+                selectedDate.year,
+                selectedDate.month,
+                selectedDate.day,
+                parseInt(pickedTime.split(':')[0]),
+                parseInt(pickedTime.split(':')[1]),
+                0,
+                { zone: userTimeZone } // Explicitly set the zone
+            )
 
-        const combinedCsrDate = selectedDateObj
-            ? combineDateAndTimeInZone(
-                  selectedDateObj,
-                  pickedTime,
-                  userTimeZone
-              )
-            : null
+            if (!dt.isValid) {
+                throw new Error('Invalid datetime conversion')
+            }
 
-        // Add this right before the checkout call
-        console.log('Checkout payload:', {
-            priceId: selectedItem.priceId,
-            email,
-            userTimeZone,
-            combinedCsrDate,
-            pickedTime,
-            originalDate: selectedDate
-                ? new Date(
-                      selectedDate.year,
-                      selectedDate.month - 1,
-                      selectedDate.day
-                  ).toISOString()
-                : null,
-        })
+            combinedCsrDate = dt.toISO()
+
+            // Debug logging
+            console.log('Date debugging:', {
+                selectedDate: {
+                    year: selectedDate.year,
+                    month: selectedDate.month,
+                    day: selectedDate.day,
+                },
+                pickedTime,
+                userTimeZone,
+                luxonDate: dt.toString(),
+                isoString: combinedCsrDate,
+                zoneName: dt.zoneName,
+                offset: dt.offset,
+                isValid: dt.isValid,
+            })
+        }
+
         try {
             // Call the checkout function to interact with the server
             const result = await checkout(
