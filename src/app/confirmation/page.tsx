@@ -11,30 +11,55 @@ interface DownloadResponse {
     downloadUrl?: string
 }
 
+// const ConfirmationPage: React.FC = () => {
+//     const searchParams = useSearchParams()
+//     const router = useRouter()
+//     const success = searchParams.get('success') === 'true'
+//     const token = searchParams.get('token')
+//     const email = searchParams.get('email')
+//     const timeSlot = searchParams.get('appointment_date_time')
+//     const utcSlot = searchParams.get('utc_date_time')
+//     const dateParam = searchParams.get('createdAt')
+//     const [downloadUrl, setDownloadUrl] = useState<string | null>(null)
+//     const [loading, setLoading] = useState(true)
+//     const [formMessage, setFormMessage] = useState('')
+
+//     // Convert the date string to a Date object
+//     const date = dateParam ? new Date(dateParam) : null
+
+//     // Format the date as "Month Day, Year"
+//     const formattedDate = date
+//         ? date.toLocaleDateString('en-US', {
+//               month: 'long', // "September"
+//               day: 'numeric', // "10"
+//               year: 'numeric', // "2024"
+//           })
+//         : ''
+
 const ConfirmationPage: React.FC = () => {
     const searchParams = useSearchParams()
     const router = useRouter()
+
+    // Get query params from the URL
     const success = searchParams.get('success') === 'true'
+    const sessionId = searchParams.get('session_id')
     const token = searchParams.get('token')
-    const email = searchParams.get('email')
-    const timeSlot = searchParams.get('appointment_date_time')
-    const utcSlot = searchParams.get('utc_date_time')
-    const dateParam = searchParams.get('createdAt')
+    const encodedTimeSlot = searchParams.get('appointment_date_time')
+    const encodedThDate = searchParams.get('th_date_time')
+    const encodedUtcDate = searchParams.get('utc_date_time')
+    const encodedTimeZone = searchParams.get('csrTimeZone')
+    const encodedEmail = searchParams.get('email')
+
+    // Decode the parameters
+    const timeSlot = encodedTimeSlot ? decodeURIComponent(encodedTimeSlot) : ''
+    const thDate = encodedThDate ? decodeURIComponent(encodedThDate) : ''
+    const utcSlot = encodedUtcDate ? decodeURIComponent(encodedUtcDate) : ''
+    const timeZone = encodedTimeZone ? decodeURIComponent(encodedTimeZone) : ''
+    const email = encodedEmail ? decodeURIComponent(encodedEmail) : ''
+
     const [downloadUrl, setDownloadUrl] = useState<string | null>(null)
     const [loading, setLoading] = useState(true)
     const [formMessage, setFormMessage] = useState('')
-
-    // Convert the date string to a Date object
-    const date = dateParam ? new Date(dateParam) : null
-
-    // Format the date as "Month Day, Year"
-    const formattedDate = date
-        ? date.toLocaleDateString('en-US', {
-              month: 'long', // "September"
-              day: 'numeric', // "10"
-              year: 'numeric', // "2024"
-          })
-        : ''
 
     useEffect(() => {
         const fetchDownloadUrl = async () => {
