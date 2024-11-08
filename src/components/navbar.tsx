@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, Suspense } from 'react'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import {
     Navbar,
     NavbarBrand,
@@ -127,6 +127,7 @@ interface ItemProps {
 
 const NavbarComp = () => {
     const pathName = usePathname()
+    const router = useRouter()
     // const [activeMenuItem, setActiveMenuItem] = useState<ItemProps | null>(null)
     const [activeMenuItems, setActiveMenuItems] = useState<ItemProps[]>([])
     const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -164,6 +165,19 @@ const NavbarComp = () => {
     const handleMenuItemClick = (item: ItemProps) => {
         setActiveMenuItems([item])
         setIsMenuOpen(false)
+    }
+
+    const handleNavigation = (href: string, item: ItemProps) => {
+        handleMenuItemClick(item)
+        router.push(href)
+    }
+
+    // Helper function to determine active state styling
+    const getActiveLinkStyle = (item: ItemProps) => {
+        if (activeMenuItems.includes(item)) {
+            return 'underline font-medium'
+        }
+        return ''
     }
 
     const isActive = (item: ItemProps) => {
@@ -281,20 +295,16 @@ const NavbarComp = () => {
                     {session.data?.user && <Profile />}
                 </NavbarContent>
 
-                {/* Navbar for small screen */}
-                <NavbarMenu className="sm:justify-start">
+                {/* Mobile menu with fixed spacing */}
+                <NavbarMenu className="pt-6 sm:justify-start">
                     {menuItems.map((item, index) =>
                         item.children ? (
                             <Dropdown key={`${item.title}-${index}`}>
-                                <NavbarMenuItem
-                                    key={index}
-                                    isActive={isActive(item)}
-                                >
+                                <NavbarMenuItem key={index} className="my-2">
                                     <DropdownTrigger>
-                                        {/* Button is the Parent Nav Item */}
                                         <Button
                                             disableRipple
-                                            className={`p-0 bg-transparent data-[hover=true]:bg-transparent self-start text-lg text-primary custom-font ${
+                                            className={`sm: justify-start p-0 bg-transparent data-[hover=true]:bg-transparent text-lg text-primary custom-font ${
                                                 activeMenuItems.includes(item)
                                                     ? 'underline'
                                                     : ''
@@ -324,43 +334,45 @@ const NavbarComp = () => {
                                             }
                                             textValue={child.title}
                                             onClick={() => {
-                                                // Navigate directly on DropdownItem click
-                                                handleMenuItemClick(child)
-                                                window.location.href =
-                                                    child.href // Navigate to the link
+                                                handleNavigation(
+                                                    child.href,
+                                                    child
+                                                )
                                             }}
+                                            className="py-2 text-primary"
                                         >
-                                            <Link
-                                                underline={
+                                            <span
+                                                className={`text-lg custom-font ${
                                                     activeMenuItems.includes(
                                                         child
                                                     )
-                                                        ? 'always'
-                                                        : 'none'
-                                                }
-                                                className="flex items-center w-full text-lg custom-font"
-                                                href={child.href}
+                                                        ? 'underline'
+                                                        : ''
+                                                }`}
                                             >
                                                 {child.title}
-                                            </Link>
+                                            </span>
                                         </DropdownItem>
                                     ))}
                                 </DropdownMenu>
                             </Dropdown>
                         ) : (
-                            <NavbarMenuItem key={`${item.title}-${index}`}>
-                                <Link
-                                    underline={
+                            <NavbarMenuItem
+                                key={`${item.title}-${index}`}
+                                className="my-2"
+                            >
+                                <button
+                                    className={`w-full text-left text-lg custom-font text-primary transition-colors ${
                                         activeMenuItems.includes(item)
-                                            ? 'always'
-                                            : 'none'
+                                            ? 'underline'
+                                            : ''
+                                    }`}
+                                    onClick={() =>
+                                        handleNavigation(item.href, item)
                                     }
-                                    className="w-full text-lg custom-font"
-                                    href={item.href}
-                                    onPress={() => handleMenuItemClick(item)}
                                 >
                                     {item.title}
-                                </Link>
+                                </button>
                             </NavbarMenuItem>
                         )
                     )}
