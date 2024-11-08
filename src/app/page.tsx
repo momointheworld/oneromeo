@@ -273,7 +273,7 @@ const OrderForm = () => {
                         items={items}
                     />
                     <div ref={appointmentRef}>
-                        <div className="flex place-content-center mb-12 custom-font flex-wrap">
+                        <div className="flex justify-center items-center gap-5 md:gap-0 mb-12 custom-font flex-wrap">
                             <Chip color="primary" size="lg" radius="full">
                                 2{' '}
                             </Chip>
