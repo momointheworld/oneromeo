@@ -32,7 +32,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({ handleItemClick, items }) => {
                     <EmbedVideo videoId={'CGKtQ-5QlQY?si=3MIcYMYJjQfqDyRx'} />
                 </div>
                 <div
-                    className="flex justify-center items-center gap-5 custom-font my-8 flex-wrap"
+                    className="flex flex-col md:flex-row justify-center items-center gap-5 custom-font my-8 "
                     id="items-section"
                 >
                     <Chip color="primary" size="lg" radius="full">
