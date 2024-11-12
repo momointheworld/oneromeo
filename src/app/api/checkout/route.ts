@@ -73,71 +73,6 @@ export async function POST(req: NextRequest, res: NextResponse) {
         )
     }
 
-    function formatDateTime(dateTimeString: string) {
-        const match = dateTimeString.match(
-            /(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2}).*\[(.+)]/
-        )
-        if (match) {
-            return `${match[1]} | ${match[2]} [${match[3]}]`
-        } else {
-            throw new Error('Invalid date-time format')
-        }
-    }
-
-    // try {
-    //     const { priceId, email, timeZone, date, timeSlot, couponCode } = body
-
-    //     let csrDate = ''
-    //     let thDate = ''
-    //     let utcDate = ''
-    //     const customFields = []
-
-    //     // Process date-related logic only if a valid date is provided
-    //     if (date && date.trim() !== '') {
-    //         const zonedDateTime = parseAbsoluteToLocal(date)
-
-    //         const thDateTime = fromDate(
-    //             new Date(zonedDateTime.toAbsoluteString()),
-    //             'Asia/Bangkok'
-    //         )
-    //         const utcDateTime = fromDate(
-    //             new Date(zonedDateTime.toAbsoluteString()),
-    //             'utc'
-    //         )
-
-    //         csrDate = zonedDateTime.toString()
-    //         thDate = thDateTime.toString()
-    //         utcDate = utcDateTime.toString()
-
-    //         // formatted # Outputs: 2024-09-30 | 21:30:00 [America/Chicago]
-    //         const formattedcsrDateTime = formatDateTime(csrDate)
-    //         const formattedThDateTime = formatDateTime(thDate)
-
-    //         customFields.push({
-    //             key: 'appointment_date_time',
-    //             label: { type: 'custom', custom: 'Appointment date & time' },
-    //             type: 'text',
-    //             text: { default_value: formattedcsrDateTime },
-    //         })
-    //         customFields.push({
-    //             key: 'th_date_time',
-    //             label: { type: 'custom', custom: "Arnold's date & time" },
-    //             type: 'text',
-    //             text: { default_value: formattedThDateTime },
-    //         })
-    //     } else {
-    //         console.log('No date provided, skipping date processing.')
-    //     }
-
-    //     const metadata = {
-    //         appointment_date_time: csrDate || '',
-    //         th_date_time: thDate || '',
-    //         utc_date_time: utcDate || '',
-    //         csrTimeZone: timeZone || '',
-    //     }
-
-    //     let successUrl = `https://oneromeo.com/confirmation?success=true&session_id={CHECKOUT_SESSION_ID}&appointment_date_time=${csrDate}&th_date_time=${thDate}&utc_date_time=${utcDate}&csrTimeZone=${timeZone}&email=${email}`
-
     try {
         const { priceId, email, timeZone, date, timeSlot, couponCode } = body
 
@@ -262,7 +197,12 @@ export async function POST(req: NextRequest, res: NextResponse) {
         }
 
         const session = await stripeInstance.checkout.sessions.create({
-            payment_method_types: ['card'],
+            payment_method_types: ['card', 'alipay', 'wechat_pay'],
+            payment_method_options: {
+                wechat_pay: {
+                    client: 'web',
+                },
+            },
             line_items: lineItems,
             custom_fields: customFields,
             discounts: discounts,
