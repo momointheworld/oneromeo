@@ -112,7 +112,7 @@ const OrderForm = () => {
             resetAppointment()
             setSecondStepTitle('Your email, please, to get you going!')
         } else {
-            setSecondStepTitle('Pick a time (& email) to get the ball rolling!')
+            setSecondStepTitle('Select a time (& email) to get going!')
             setIsAppointmentAvailable(true)
         }
 
