@@ -138,6 +138,12 @@ async function handleCheckoutSessionCompleted(
             return
         }
 
+        const localDate = new Date()
+        const userTimezoneOffset = localDate.getTimezoneOffset() // Gets the user's local timezone offset in minutes
+        const utcCreatedAt = new Date(
+            localDate.getTime() + userTimezoneOffset * 60 * 1000
+        )
+
         await handleAppointment({
             session,
             thDate: th_date_time,
@@ -148,10 +154,7 @@ async function handleCheckoutSessionCompleted(
             utcTime,
             csrTimeZone,
             // Convert the current local time to UTC before saving
-            createdAt: dateUtils.localToUTC({
-                date: new Date(),
-                timezone: csrTimeZone,
-            }),
+            createdAt: utcCreatedAt,
         })
     } else {
         console.warn('Required metadata not found in session')
