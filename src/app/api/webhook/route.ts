@@ -11,6 +11,7 @@ import { findAppointmentByEmailAndDate } from '@/actions/findAppointmentByEmailA
 import createCustomerPortalSession from '@/actions/createCustomerPortalSession'
 import { generateSecureDownloadToken } from '@/utils/generateSecureDownloadToken'
 import { fromZonedTime } from 'date-fns-tz'
+import { dateUtils } from '@/utils/dateUtils'
 
 export const runtime = 'nodejs'
 export const preferredRegion = 'auto'
@@ -137,8 +138,6 @@ async function handleCheckoutSessionCompleted(
             return
         }
 
-        const thaiDate = fromZonedTime(new Date(), 'Asia/Bangkok')
-
         await handleAppointment({
             session,
             thDate: th_date_time,
@@ -148,7 +147,11 @@ async function handleCheckoutSessionCompleted(
             utcDate: utc_date_time,
             utcTime,
             csrTimeZone,
-            createdAt: thaiDate,
+            // Convert the current local time to UTC before saving
+            createdAt: dateUtils.localToUTC({
+                date: new Date(),
+                timezone: csrTimeZone,
+            }),
         })
     } else {
         console.warn('Required metadata not found in session')

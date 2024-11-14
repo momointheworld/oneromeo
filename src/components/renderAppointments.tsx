@@ -78,6 +78,8 @@ const RenderAppointments: React.FC<RenderAppointmentsProps> = ({
                         <td className="p-2 md:border md:border-gray-300 text-left block md:table-cell">
                             {app.createdAt.toLocaleString('en-US', {
                                 timeZone: 'Asia/Bangkok',
+                                dateStyle: 'medium', // 'full' | 'long' | 'medium' | 'short'
+                                timeStyle: 'short', // 'full' | 'long' | 'medium' | 'short'
                             })}
                         </td>
                         <td className="p-2 md:border md:border-gray-300 text-left block md:table-cell">
