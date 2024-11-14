@@ -76,7 +76,9 @@ const RenderAppointments: React.FC<RenderAppointmentsProps> = ({
                             {startIndex + index}
                         </td>
                         <td className="p-2 md:border md:border-gray-300 text-left block md:table-cell">
-                            {app.createdAt.toDateString()}
+                            {app.createdAt.toLocaleString('en-US', {
+                                timeZone: 'Asia/Bangkok',
+                            })}
                         </td>
                         <td className="p-2 md:border md:border-gray-300 text-left block md:table-cell">
                             {app.thDate.split('T')[0]}

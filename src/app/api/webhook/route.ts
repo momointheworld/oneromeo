@@ -10,6 +10,7 @@ import { isEventProcessed, logProcessedEvent } from '@/actions/eventHelper'
 import { findAppointmentByEmailAndDate } from '@/actions/findAppointmentByEmailAndDate'
 import createCustomerPortalSession from '@/actions/createCustomerPortalSession'
 import { generateSecureDownloadToken } from '@/utils/generateSecureDownloadToken'
+import { fromZonedTime } from 'date-fns-tz'
 
 export const runtime = 'nodejs'
 export const preferredRegion = 'auto'
@@ -136,6 +137,8 @@ async function handleCheckoutSessionCompleted(
             return
         }
 
+        const thaiDate = fromZonedTime(new Date(), 'Asia/Bangkok')
+
         await handleAppointment({
             session,
             thDate: th_date_time,
@@ -145,7 +148,7 @@ async function handleCheckoutSessionCompleted(
             utcDate: utc_date_time,
             utcTime,
             csrTimeZone,
-            createdAt: new Date(),
+            createdAt: thaiDate,
         })
     } else {
         console.warn('Required metadata not found in session')
