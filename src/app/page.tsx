@@ -34,7 +34,7 @@ const OrderForm = () => {
     const [singleSession, setSingleSession] = useState(false)
     const [isAppointmentAvailable, setIsAppointmentAvailable] = useState(true)
     const [secondStepTitle, setSecondStepTitle] = useState(
-        'Pick a time (& email) to get the ball rolling!'
+        'Select a time (& email) to get going!'
     )
 
     let now = today(getLocalTimeZone())
