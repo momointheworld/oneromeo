@@ -1,4 +1,3 @@
-import { Readable } from 'stream'
 import Stripe from 'stripe'
 import { NextRequest, NextResponse } from 'next/server'
 import {
@@ -10,8 +9,6 @@ import { isEventProcessed, logProcessedEvent } from '@/actions/eventHelper'
 import { findAppointmentByEmailAndDate } from '@/actions/findAppointmentByEmailAndDate'
 import createCustomerPortalSession from '@/actions/createCustomerPortalSession'
 import { generateSecureDownloadToken } from '@/utils/generateSecureDownloadToken'
-import { fromZonedTime } from 'date-fns-tz'
-import { dateUtils } from '@/utils/dateUtils'
 
 export const runtime = 'nodejs'
 export const preferredRegion = 'auto'

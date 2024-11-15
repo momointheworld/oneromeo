@@ -29,7 +29,10 @@ const OrderItems: React.FC<OrderItemsProps> = ({ handleItemClick, items }) => {
                     <span className="text-6xl text-orange-400">listen</span>.
                 </h1>
                 <div className="mx-auto w-full lg:w-1/2">
-                    <EmbedVideo videoId={'CGKtQ-5QlQY?si=3MIcYMYJjQfqDyRx'} />
+                    <EmbedVideo
+                        videoId={'CGKtQ-5QlQY?si=3MIcYMYJjQfqDyRx'}
+                        bvid={'BV1hmmdYNEGD'}
+                    />
                 </div>
                 <div
                     className="flex flex-col md:flex-row justify-center items-center gap-5 custom-font my-8 "
