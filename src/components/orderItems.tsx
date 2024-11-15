@@ -43,7 +43,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({ handleItemClick, items }) => {
                         1{' '}
                     </Chip>
                     <span className="text-2xl font-bold tracking-tight text-gray-600">
-                        What&apos;s it going to be? Coffee or eBook?
+                        Make a selection. Coffee or eBook?
                     </span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-3">
