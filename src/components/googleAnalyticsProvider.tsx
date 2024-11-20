@@ -7,5 +7,5 @@ export function GoogleAnalyticsProvider() {
 
     if (cookieConsent !== 'accepted') return null
 
-    return <GoogleAnalytics trackPageViews gaMeasurementId="G-337279624" />
+    return <GoogleAnalytics trackPageViews gaMeasurementId="G-L1JXZXGE60" />
 }
