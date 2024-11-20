@@ -20,7 +20,7 @@ export default function RootLayout({
 }) {
     return (
         <html lang="en">
-            <body className={`${inter.className}`}>
+            <body className={inter.className}>
                 <Providers>
                     <Header />
                     <main className="prose md:container mx-auto mt-10 rounded-md mx-5 min-h-screen">

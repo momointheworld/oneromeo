@@ -7,6 +7,9 @@ import { TimezoneProvider } from '@/hooks/useTimezone'
 import { DateProvider } from '@/hooks/useDate'
 import { EmailProvider } from '@/hooks/useEmail'
 import { SelectedItemProvider } from '@/hooks/useSelectedItem'
+import { CookieConsentProvider } from '@/hooks/useCookieConsent'
+import { GoogleAnalyticsProvider } from '@/components/googleAnalyticsProvider'
+import CookieConsent from '@/components/cookieConsent'
 
 interface ProviderProps {
     children: React.ReactNode
@@ -16,15 +19,21 @@ const Providers = ({ children }: ProviderProps) => {
     return (
         <SessionProvider>
             <NextUIProvider>
-                <AuthWrapper>
-                    <SelectedItemProvider>
-                        <TimezoneProvider>
-                            <DateProvider>
-                                <EmailProvider> {children} </EmailProvider>
-                            </DateProvider>
-                        </TimezoneProvider>
-                    </SelectedItemProvider>
-                </AuthWrapper>
+                <CookieConsentProvider>
+                    <AuthWrapper>
+                        <SelectedItemProvider>
+                            <TimezoneProvider>
+                                <DateProvider>
+                                    <EmailProvider>
+                                        {children}
+                                        <GoogleAnalyticsProvider />
+                                        <CookieConsent />
+                                    </EmailProvider>
+                                </DateProvider>
+                            </TimezoneProvider>
+                        </SelectedItemProvider>
+                    </AuthWrapper>
+                </CookieConsentProvider>
             </NextUIProvider>
         </SessionProvider>
     )
