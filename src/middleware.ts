@@ -1,32 +1,21 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextApiResponse } from 'next'
+import { NextResponse, NextRequest } from 'next/server'
 
-export function middleware(req: NextRequest) {
-    // Define your expected host (domain)
-    const allowedHost = 'oneromeo.com'
+type NextApiHandler = (req: NextRequest, res: NextApiResponse) => Promise<void>
 
-    // Get `x-forwarded-host` and `origin` headers
-    const forwardedHost = req.headers.get('x-forwarded-host') || ''
-    const originHost =
-        req.headers
-            .get('origin')
-            ?.replace(/(http|https):\/\//, '')
-            .replace(/\/$/, '') || '' // Normalize origin host
+const actionHeaderCheckOverride = async (
+    req: NextRequest,
+    res: NextApiResponse,
+    next: NextApiHandler
+): Promise<any> => {
+    console.debug('REQUEST HEADERS:::: ', req.headers)
 
-    // Validate the headers
-    if (
-        forwardedHost.includes(allowedHost) ||
-        originHost.includes(allowedHost)
-    ) {
-        // Headers are valid, proceed with the request
-        const response = NextResponse.next()
-        return response
-    }
-
-    // Invalid headers, reject the request
-    return new NextResponse(
-        'Header mismatch: Invalid forwarded host or origin',
-        {
-            status: 400,
-        }
+    const response = NextResponse.next()
+    response.headers.set(
+        'x-forwarded-host',
+        req.headers.get('origin')?.replace(/(http|https):\/\//, '') || '*'
     )
+    return response
 }
+
+export default actionHeaderCheckOverride
