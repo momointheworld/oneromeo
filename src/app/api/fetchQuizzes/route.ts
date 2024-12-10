@@ -1,12 +1,8 @@
-import { NextApiRequest, NextApiResponse } from 'next'
+// src/app/api/fetchQuizzes/route.ts
 import { db } from '@/db'
 import { Quiz } from '@prisma/client'
 
-// API handler function
-export default async function handler(
-    req: NextApiRequest, // Type the request
-    res: NextApiResponse // Type the response
-) {
+export async function POST(req: Request) {
     try {
         // Fetch quizzes from the database
         const quizzes: Quiz[] = await db.quiz.findMany({
@@ -14,9 +10,12 @@ export default async function handler(
         })
 
         // Return quizzes as JSON
-        res.status(200).json({ quizzes })
+        return new Response(JSON.stringify({ quizzes }), { status: 200 })
     } catch (error) {
         // Handle errors and return a 500 status code
-        res.status(500).json({ error: 'Error fetching quizzes' })
+        return new Response(
+            JSON.stringify({ error: 'Error fetching quizzes' }),
+            { status: 500 }
+        )
     }
 }
