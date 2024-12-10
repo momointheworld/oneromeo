@@ -1,5 +1,5 @@
 module.exports = {
-  siteUrl: 'http://localhost:3000',
+  siteUrl: 'https://oneromeo.com',
   generateRobotsTxt: true,
   exclude: ['/login', '/dashboard', '/dashboard/*'],  // Exclude both /dashboard and any sub-pages
   additionalPaths: async (config) => {
@@ -19,7 +19,7 @@ module.exports = {
 };
 
 async function fetchQuizSlugs() {
-  const response = await fetch('http://localhost:3000/api/fetchQuizzes', {
+  const response = await fetch('https://oneromeo.com/api/fetchQuizzes', {
     method: 'POST', // Ensure you're using the correct method
     headers: {
       'Content-Type': 'application/json',
