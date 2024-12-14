@@ -25,13 +25,15 @@ import { CardSkeleton } from './common/skeleton-loading'
 const MenuLogo = () => {
     return (
         <div className="relative flex justify-start items-center mr-5">
-            <Image
-                className="object-contain" // Ensures the image maintains its aspect ratio
-                src={Logo}
-                alt="One Romeo Logo"
-                priority={true}
-                width={150}
-            />
+            <Link href="/">
+                <Image
+                    className="object-contain" // Ensures the image maintains its aspect ratio
+                    src={Logo}
+                    alt="One Romeo Logo"
+                    priority={true}
+                    width={150}
+                />
+            </Link>
         </div>
     )
 }
@@ -201,7 +203,6 @@ const NavbarComp = () => {
                     />
                     <NavbarBrand>
                         <MenuLogo />
-                        {/* <p className="font-bold text-inherit">One Romeo</p> */}
                     </NavbarBrand>
                 </NavbarContent>
                 <NavbarContent
