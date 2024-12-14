@@ -68,6 +68,7 @@ const OrderForm = () => {
             priceId: singleSessionPriceId || '',
             description:
                 "15-minute session / Buy me a coffee and I'll be the best listener you've ever had :-)",
+            buttonText: 'Book Now!',
         },
         {
             imgSrc: bundleImg,
@@ -77,6 +78,7 @@ const OrderForm = () => {
             priceId: bundlePriceId || '',
             description:
                 'Bundle of 5 x 15-minute sessions / Buy me 5 coffees for a lower price :-)',
+            buttonText: 'Bundle Up!',
         },
         {
             imgSrc: ebookImg,
@@ -86,6 +88,7 @@ const OrderForm = () => {
             priceId: ebookPriceId || '',
             description:
                 'I’ve been typing away for hours, days, and weeks, but it‘s finally here - Not in a Million Years!',
+            buttonText: 'Get It Now!',
         },
     ]
 

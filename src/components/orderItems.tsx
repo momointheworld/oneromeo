@@ -11,6 +11,7 @@ interface Item {
     price: string
     priceId: string
     description: string
+    buttonText: string
 }
 
 interface OrderItemsProps {
@@ -104,7 +105,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({ handleItemClick, items }) => {
                                     </div>
                                     <div className="my-2 text-xl">
                                         <p className="text-slate-200 bg-primary flex-1 border border-current rounded-lg p-2">
-                                            Proceed
+                                            {product.buttonText}
                                         </p>
                                     </div>
                                 </div>
