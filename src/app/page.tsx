@@ -274,8 +274,13 @@ const OrderForm = () => {
                     />
                     <div ref={appointmentRef}>
                         <div className="flex flex-col md:flex-row justify-center items-center gap-5 md:gap-0 mb-12 custom-font flex-wrap">
-                            <Chip color="primary" size="lg" radius="full">
-                                2{' '}
+                            <Chip
+                                color="primary"
+                                size="lg"
+                                radius="full"
+                                className="text-2xl"
+                            >
+                                STEP 2{' '}
                             </Chip>
                             <span className="mx-5 text-2xl font-bold tracking-tight text-gray-600">
                                 {secondStepTitle}
@@ -324,9 +329,12 @@ const OrderForm = () => {
                         <Button
                             isLoading={isLoading}
                             type="submit"
-                            color="primary"
+                            color="warning"
+                            variant="solid"
+                            size="lg"
+                            className="text-2xl text-white"
                         >
-                            PROCEED &gt;&gt;
+                            Confirm & Pay
                         </Button>
                         {/* Can not use FormButton on client component */}
                     </div>

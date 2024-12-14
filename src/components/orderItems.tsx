@@ -38,9 +38,14 @@ const OrderItems: React.FC<OrderItemsProps> = ({ handleItemClick, items }) => {
                     className="flex flex-col md:flex-row justify-center items-center gap-5 custom-font my-8 "
                     id="items-section"
                 >
-                    <Chip color="primary" size="lg" radius="full">
+                    <Chip
+                        color="primary"
+                        size="lg"
+                        radius="full"
+                        className="text-2xl"
+                    >
                         {' '}
-                        1{' '}
+                        STEP 1{' '}
                     </Chip>
                     <span className="text-2xl font-bold tracking-tight text-gray-600">
                         Make a selection. Coffee or eBook?
@@ -95,6 +100,11 @@ const OrderItems: React.FC<OrderItemsProps> = ({ handleItemClick, items }) => {
                                     <div className="mt-2 text-sm text-gray-500 flex-1 px-2">
                                         <p className="overflow-hidden overflow-ellipsis whitespace-normal">
                                             {product.description}
+                                        </p>
+                                    </div>
+                                    <div className="my-2 text-xl">
+                                        <p className="text-slate-200 bg-primary flex-1 border border-current rounded-lg p-2">
+                                            Proceed
                                         </p>
                                     </div>
                                 </div>
