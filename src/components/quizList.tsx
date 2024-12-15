@@ -12,24 +12,39 @@ interface QuizListProps {
 }
 
 const QuizList: React.FC<QuizListProps> = ({ quizzes, icons }) => {
+    const bgColors = [
+        'bg-primary-50',
+        'bg-secondary-50',
+        'bg-warning-50',
+        'bg-danger-50',
+        'bg-neutral-50',
+        'bg-red-50',
+        'bg-orange-50',
+        'bg-lime-50',
+        'bg-sky-50',
+    ] // List of background colors
+
     const linksWithIcons = quizzes.map((quiz, index) => ({
         href: `/quiz/${quiz.slug}`,
         text: quiz.quizName,
         icon: icons[index % icons.length], // Cycle through icons
+        bgColor: bgColors[index % bgColors.length], // Cycle through background colors
     }))
 
     return (
-        <div className="flex flex-wrap gap-4 p-4">
+        <div className="flex flex-wrap gap-4 p-4 justify-center text-center">
             {linksWithIcons.map((linkObj, index) => (
                 <Card
                     key={index}
-                    className="flex flex-col justify-between items-center p-4 shadow-lg hover:shadow-2xl transition-shadow duration-300"
+                    className={`flex flex-col justify-evenly items-center p-4 shadow-lg hover:shadow-2xl transition-shadow duration-300 ${linkObj.bgColor}`}
                     isHoverable
                     isFooterBlurred
                 >
                     {linkObj.icon}
                     <Link href={linkObj.href} className="no-underline">
-                        <h4 className="text-primary">{linkObj.text}</h4>
+                        <p className="text-primary text-wrap sm:max-w-full md:max-w-48">
+                            {linkObj.text}
+                        </p>
                     </Link>
                 </Card>
             ))}

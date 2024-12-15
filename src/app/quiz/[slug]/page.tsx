@@ -261,11 +261,11 @@ const SingleQuizPage: React.FC = () => {
                         className="mb-6"
                     />
                     {currentQuestion && (
-                        <Card isHoverable className="p-6 shadow-md">
-                            <h3 className="text-xl font-semibold mb-4">
+                        <Card isHoverable className="px-6 pb-6 shadow-md">
+                            <p className="text-2xl font-semibold mb-4">
                                 {currentQuestionIndex + 1}:{' '}
                                 {currentQuestion.text}
-                            </h3>
+                            </p>
                             <Spacer y={2} />
                             <div className="flex flex-col gap-4">
                                 {currentQuestion.answers

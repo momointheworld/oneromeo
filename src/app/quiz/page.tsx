@@ -1,7 +1,4 @@
-import Link from 'next/link'
 import { db } from '@/db'
-import { Card } from '@nextui-org/react'
-import { getAllQuizzes } from '@/actions'
 import QuizList from '@/components/quizList'
 
 const icons = {
