@@ -5,7 +5,6 @@ import { FullSkeleton } from '@/components/common/skeleton-loading'
 import {
     Button,
     Card,
-    Chip,
     Divider,
     Link,
     Progress,
@@ -17,8 +16,9 @@ import { useParams, usePathname } from 'next/navigation'
 import PageBreadCrumbs from '@/components/common/breadcrumbs'
 import { getQuizBySlug } from '@/actions/getQuiz'
 import dynamic from 'next/dynamic'
-import { db } from '@/db'
 import QuizList from '@/components/quizList'
+
+import { generateQuizMetadata } from '@/utils/generateQuizMetadata'
 
 interface AnswerDataProps {
     id: string
@@ -65,7 +65,9 @@ interface AllQuizzes {
     slug: string
 }
 
-const SingleQuizPage: React.FC = () => {
+export { generateQuizMetadata as generateMetadata }
+
+const SingleQuizPage = () => {
     const [quiz, setQuiz] = useState<FetchedQuiz | null>(null)
     const [allQuizzes, setAllQuizzes] = useState<AllQuizzes[] | []>([])
     const [quizId, setQuizId] = useState<string | null>(null)
@@ -112,6 +114,9 @@ const SingleQuizPage: React.FC = () => {
             try {
                 const quizzes = await getAllQuizzes()
                 const result = await getQuizBySlug({ slug })
+                const metadata = await generateQuizMetadata({
+                    params: { slug },
+                })
                 if (result === null) {
                     setError('Quiz not found or failed to fetch.')
                     return
@@ -120,6 +125,10 @@ const SingleQuizPage: React.FC = () => {
                 setAllQuizzes(quizzes)
                 setQuiz(quizData)
                 setQuizId(quizData.id)
+                // Dynamically set the document title
+                if (metadata?.title) {
+                    document.title = String(metadata.title)
+                }
             } catch (error) {
                 setError('Error fetching quiz data.')
                 console.error('Error fetching quiz data:', error)
@@ -244,171 +253,178 @@ const SingleQuizPage: React.FC = () => {
     })
 
     return (
-        <div className="p-6 max-w-4xl mx-auto">
-            {loading ? (
-                <FullSkeleton /> // Display loading skeleton while data is being fetched
-            ) : error ? (
-                <p className="text-red-500">{error}</p> // Display error message if there was an error fetching data
-            ) : (
-                <>
-                    <PageBreadCrumbs items={breadcrumbs} />
-                    <h1 className="text-center text-3xl font-bold mb-6">
-                        {quiz?.quizName}
-                    </h1>
-                    <Progress
-                        aria-label="Quiz progress"
-                        value={progress}
-                        className="mb-6"
-                    />
-                    {currentQuestion && (
-                        <Card isHoverable className="px-6 pb-6 shadow-md">
-                            <p className="text-2xl font-semibold mb-4">
-                                {currentQuestionIndex + 1}:{' '}
-                                {currentQuestion.text}
-                            </p>
-                            <Spacer y={2} />
-                            <div className="flex flex-col gap-4">
-                                {currentQuestion.answers
-                                    .filter(
-                                        (answer) => answer.text.trim() !== ''
-                                    ) // Filter out answers with no text
-                                    .map((answer, ansIndex) => (
-                                        <div
-                                            key={answer.id}
-                                            className="flex items-center gap-2"
-                                        >
-                                            <RadioGroup
-                                                aria-label="Make a selection"
-                                                value={selectedAnswer}
-                                                onChange={() =>
-                                                    handleAnswerChange(
-                                                        currentQuestion.id,
-                                                        answer.id,
-                                                        answer.points
-                                                    )
-                                                }
+        <>
+            <div className="p-6 max-w-4xl mx-auto">
+                {loading ? (
+                    <FullSkeleton /> // Display loading skeleton while data is being fetched
+                ) : error ? (
+                    <p className="text-red-500">{error}</p> // Display error message if there was an error fetching data
+                ) : (
+                    <>
+                        <PageBreadCrumbs items={breadcrumbs} />
+                        <h1 className="text-center text-3xl font-bold mb-6">
+                            {quiz?.quizName}
+                        </h1>
+                        <Progress
+                            aria-label="Quiz progress"
+                            value={progress}
+                            className="mb-6"
+                        />
+                        {currentQuestion && (
+                            <Card isHoverable className="px-6 pb-6 shadow-md">
+                                <p className="text-2xl font-semibold mb-4">
+                                    {currentQuestionIndex + 1}:{' '}
+                                    {currentQuestion.text}
+                                </p>
+                                <Spacer y={2} />
+                                <div className="flex flex-col gap-4">
+                                    {currentQuestion.answers
+                                        .filter(
+                                            (answer) =>
+                                                answer.text.trim() !== ''
+                                        ) // Filter out answers with no text
+                                        .map((answer, ansIndex) => (
+                                            <div
+                                                key={answer.id}
+                                                className="flex items-center gap-2"
                                             >
-                                                <label
-                                                    htmlFor={answer.id}
-                                                    className="ml-2"
+                                                <RadioGroup
+                                                    aria-label="Make a selection"
+                                                    value={selectedAnswer}
+                                                    onChange={() =>
+                                                        handleAnswerChange(
+                                                            currentQuestion.id,
+                                                            answer.id,
+                                                            answer.points
+                                                        )
+                                                    }
                                                 >
-                                                    <Radio
-                                                        id={answer.id}
-                                                        name={`question-${currentQuestion.id}`}
-                                                        value={answer.id}
-                                                    />
-                                                    {answerOptions[ansIndex]}:{' '}
-                                                    {answer.text}
-                                                </label>
-                                            </RadioGroup>
+                                                    <label
+                                                        htmlFor={answer.id}
+                                                        className="ml-2"
+                                                    >
+                                                        <Radio
+                                                            id={answer.id}
+                                                            name={`question-${currentQuestion.id}`}
+                                                            value={answer.id}
+                                                        />
+                                                        {
+                                                            answerOptions[
+                                                                ansIndex
+                                                            ]
+                                                        }
+                                                        : {answer.text}
+                                                    </label>
+                                                </RadioGroup>
+                                            </div>
+                                        ))}
+                                </div>
+                                <Spacer y={2} />
+                                <Button
+                                    onClick={handleNextClick}
+                                    size="lg"
+                                    color="primary"
+                                    className="w-full mt-5"
+                                    isDisabled={isSubmitted} // Disable button if already submitted
+                                >
+                                    {currentQuestionIndex ===
+                                    (quiz?.questions.length || 0) - 1
+                                        ? 'Submit'
+                                        : 'Next'}
+                                </Button>
+                            </Card>
+                        )}
+                        {totalScore !== null && (
+                            <div ref={resultsRef} className="mt-12">
+                                <h2 className="text-2xl font-bold flex gap-2">
+                                    {resultIcon}
+                                    You scored {totalScore} out of a possible{' '}
+                                    {fullScore}!
+                                </h2>
+                                {quiz?.results
+                                    .filter(
+                                        (result) =>
+                                            totalScore >= result.minPoints &&
+                                            totalScore <= result.maxPoints
+                                    )
+                                    .map((result) => (
+                                        <div
+                                            key={result.id}
+                                            className="mt-2 text-lg"
+                                        >
+                                            {result.resultText}
                                         </div>
                                     ))}
-                            </div>
-                            <Spacer y={2} />
-                            <Button
-                                onClick={handleNextClick}
-                                size="lg"
-                                color="primary"
-                                className="w-full mt-5"
-                                isDisabled={isSubmitted} // Disable button if already submitted
-                            >
-                                {currentQuestionIndex ===
-                                (quiz?.questions.length || 0) - 1
-                                    ? 'Submit'
-                                    : 'Next'}
-                            </Button>
-                        </Card>
-                    )}
-                    {totalScore !== null && (
-                        <div ref={resultsRef} className="mt-12">
-                            <h2 className="text-2xl font-bold flex gap-2">
-                                {resultIcon}
-                                You scored {totalScore} out of a possible{' '}
-                                {fullScore}!
-                            </h2>
-                            {quiz?.results
-                                .filter(
-                                    (result) =>
-                                        totalScore >= result.minPoints &&
-                                        totalScore <= result.maxPoints
-                                )
-                                .map((result) => (
-                                    <div
-                                        key={result.id}
-                                        className="mt-2 text-lg"
-                                    >
-                                        {result.resultText}
+                                <Divider className="my-4" />
+                                {totalScore <= minFullScore && (
+                                    <div className="flex flex-col justify-center mt-5">
+                                        <p>
+                                            It seems like you need a little
+                                            help. Use{' '}
+                                            <span className="bg-warning-200 rounded-md p-2">
+                                                QUIZ24
+                                            </span>{' '}
+                                            at the checkout to get 10% off a
+                                            single listening session.
+                                        </p>
+                                        <p className="italic text-gray-400 text-sm">
+                                            Please note: This offer does not
+                                            apply to bundle purchases.
+                                        </p>
                                     </div>
-                                ))}
-                            <Divider className="my-4" />
-                            {totalScore <= minFullScore && (
-                                <div className="flex flex-col justify-center mt-5">
-                                    <p>
-                                        It seems like you need a little help.
-                                        Use{' '}
-                                        <span className="bg-warning-200 rounded-md p-2">
-                                            QUIZ24
-                                        </span>{' '}
-                                        at the checkout to get 10% off a single
-                                        listening session.
-                                    </p>
-                                    <p className="italic text-gray-400 text-sm">
-                                        Please note: This offer does not apply
-                                        to bundle purchases.
-                                    </p>
+                                )}
+                                <div className="flex flex-row justify-center items-center mt-5">
+                                    <Button
+                                        variant="solid"
+                                        color="warning"
+                                        type="button"
+                                        size="lg"
+                                        className="shadow-md border"
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            strokeWidth="1.5"
+                                            stroke="currentColor"
+                                            className="size-12 text-stone-100"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15M12 9l3 3m0 0-3 3m3-3H2.25"
+                                            />
+                                        </svg>
+                                        <Link
+                                            href="/#items-section"
+                                            className="text-2xl text-stone-50 custom-font"
+                                        >
+                                            Want to talk? Hit me up.
+                                        </Link>
+                                    </Button>
                                 </div>
-                            )}
-                            <div className="flex flex-row justify-center items-center mt-5">
-                                <Button
-                                    variant="solid"
-                                    color="warning"
-                                    type="button"
-                                    size="lg"
-                                    className="shadow-md border"
-                                >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        strokeWidth="1.5"
-                                        stroke="currentColor"
-                                        className="size-12 text-stone-100"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15M12 9l3 3m0 0-3 3m3-3H2.25"
-                                        />
-                                    </svg>
-                                    <Link
-                                        href="/#items-section"
-                                        className="text-2xl text-stone-50 custom-font"
-                                    >
-                                        Want to talk? Hit me up.
-                                    </Link>
-                                </Button>
+                                {quizStats && (
+                                    <LazyBarChart
+                                        stats={quizStats}
+                                        isLoading={isLoading}
+                                    />
+                                )}
+                                <Divider className="my-4" />
+                                <div className="flex flex-col items-center bg-orange-50 rounded-md">
+                                    <h2 className="">
+                                        Take a Look at More Quizzes
+                                    </h2>
+                                    <QuizList
+                                        quizzes={filteredQuizzes}
+                                        icons={[]}
+                                    />
+                                </div>
                             </div>
-                            {quizStats && (
-                                <LazyBarChart
-                                    stats={quizStats}
-                                    isLoading={isLoading}
-                                />
-                            )}
-                            <Divider className="my-4" />
-                            <div className="flex flex-col items-center bg-orange-50 rounded-md">
-                                <h2 className="">
-                                    Take a Look at More Quizzes
-                                </h2>
-                                <QuizList
-                                    quizzes={filteredQuizzes}
-                                    icons={[]}
-                                />
-                            </div>
-                        </div>
-                    )}
-                </>
-            )}
-        </div>
+                        )}
+                    </>
+                )}
+            </div>
+        </>
     )
 }
 

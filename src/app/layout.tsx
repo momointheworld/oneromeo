@@ -8,7 +8,10 @@ import Providers from '@/app/providers'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-    title: 'One Romeo',
+    title: {
+        default: 'One Romeo',
+        template: '%s | One Romeo',
+    },
     description:
         'I just want to do my part. To leave my footprints in the sand.',
 }
