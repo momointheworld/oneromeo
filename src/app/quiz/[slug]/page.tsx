@@ -18,8 +18,6 @@ import { getQuizBySlug } from '@/actions/getQuiz'
 import dynamic from 'next/dynamic'
 import QuizList from '@/components/quizList'
 
-import { generateQuizMetadata } from '@/utils/generateQuizMetadata'
-
 interface AnswerDataProps {
     id: string
     text: string
@@ -64,8 +62,6 @@ interface AllQuizzes {
     quizName: string
     slug: string
 }
-
-export { generateQuizMetadata as generateMetadata }
 
 const SingleQuizPage = () => {
     const [quiz, setQuiz] = useState<FetchedQuiz | null>(null)
@@ -114,9 +110,6 @@ const SingleQuizPage = () => {
             try {
                 const quizzes = await getAllQuizzes()
                 const result = await getQuizBySlug({ slug })
-                const metadata = await generateQuizMetadata({
-                    params: { slug },
-                })
                 if (result === null) {
                     setError('Quiz not found or failed to fetch.')
                     return
@@ -125,10 +118,6 @@ const SingleQuizPage = () => {
                 setAllQuizzes(quizzes)
                 setQuiz(quizData)
                 setQuizId(quizData.id)
-                // Dynamically set the document title
-                if (metadata?.title) {
-                    document.title = String(metadata.title)
-                }
             } catch (error) {
                 setError('Error fetching quiz data.')
                 console.error('Error fetching quiz data:', error)

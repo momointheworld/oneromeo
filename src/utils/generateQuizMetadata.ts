@@ -30,7 +30,5 @@ export async function generateQuizMetadata({
         description:
             quizData.questions?.[0]?.text || 'Default Quiz Description',
     }
-
-    console.log('Generated Metadata:', metadata) // Log the returned metadata
     return metadata
 }
