@@ -1,5 +1,5 @@
 // dynamically generate the metadata for Quiz Page
-import { generateQuizMetadata } from '@/utils/generateQuizMetadata' // The function that generates metadata based on the quiz data
+import { generateQuizMetadata } from '@/utils/generateQuizMetadata'
 
 export const generateMetadata = async ({
     params,

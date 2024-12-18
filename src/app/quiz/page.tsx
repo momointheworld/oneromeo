@@ -1,5 +1,6 @@
 import { db } from '@/db'
 import QuizList from '@/components/quizList'
+import { Metadata } from 'next'
 
 const icons = {
     speech: (
@@ -55,6 +56,12 @@ const icons = {
             />
         </svg>
     ),
+}
+
+export const metadata: Metadata = {
+    title: 'Know Yourself Better – Take a Quiz Today!',
+    description:
+        'Discover more about yourself by taking one (or all) of the quizzes, and – if needed – book a listening session. Ready to get started?',
 }
 
 export default async function QuizPage() {

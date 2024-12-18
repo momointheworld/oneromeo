@@ -9,11 +9,11 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
     title: {
-        default: 'One Romeo',
+        default: 'I’m Here to Listen – Personal Listening, 100% Confidential',
         template: '%s | One Romeo',
     },
     description:
-        'I just want to do my part. To leave my footprints in the sand.',
+        'A 100% confidential space for you to share your thoughts freely. No catch, just you and me. I’m here to listen and help you feel better.',
 }
 
 export default function RootLayout({
