@@ -392,46 +392,47 @@ export default function ModifyQuizzes() {
         <>
             <PageBreadcrumbs items={breadcrumbs} />
 
-            <div className="flex justify-center">
-                <div className="flex flex-col justify-center lg:w-2/3 md:w-full content-evenly">
-                    {/* Quiz title */}
+            <div className="flex justify-center py-6 px-4">
+                <div className="flex flex-col w-full lg:w-2/3 md:w-full">
+                    {/* Quiz Title */}
                     {quiz && (
-                        <div className="flex flex-col justify-between my-5 gap-5 rounded">
-                            <label className="text-nowrap self-center text-xl">
-                                Quiz Name:
-                            </label>
-                            <input
-                                type="text"
-                                value={quiz.quizName}
-                                className="border rounded p-2 mx-5 w-full"
-                                onChange={handleQuizNameChange}
-                            />
-
-                            <label className="text-nowrap self-center text-xl">
-                                Quiz Description:
-                            </label>
-                            <input
-                                type="text"
-                                value={quiz.quizDescription}
-                                className="border rounded p-2 mx-5 w-full"
-                                onChange={handleQuizDescriptionChange}
-                            />
+                        <div className="space-y-3 mb-5">
+                            <div className="grid grid-cols-3 gap-2">
+                                <label className="text-lg font-medium bg-gray-200 border-2">
+                                    Quiz Name
+                                </label>
+                                <input
+                                    type="text"
+                                    value={quiz.quizName}
+                                    className="col-span-2 focus:outline-none focus:ring-1 focus:ring-indigo-500  border-b border-b-gray-500"
+                                    onChange={handleQuizNameChange}
+                                />
+                            </div>
+                            <div className="grid grid-cols-3 gap-2">
+                                <label className="text-lg font-medium bg-gray-200 border-2 ">
+                                    Quiz Description
+                                </label>
+                                <input
+                                    type="text"
+                                    value={quiz.quizDescription}
+                                    className="col-span-3 focus:outline-none focus:ring-1 focus:ring-indigo-500  border-b border-b-gray-500"
+                                    onChange={handleQuizDescriptionChange}
+                                />
+                            </div>
                         </div>
                     )}
-                    {/* Questions */}
+
+                    {/* Questions Section */}
                     {questions.map((question, questionIndex) => (
-                        <div
-                            key={question.id}
-                            className="flex flex-col justify-between my-5 p-5 border-slate-300 bg-slate-200 rounded"
-                        >
-                            <div className="flex font-bold">
-                                <label className="text-nowrap px-2 self-center">
-                                    Question {questionIndex + 1}:
+                        <div key={question.id} className="space-y-3 p-5 mt-5">
+                            <div className="grid grid-cols-3 gap-2">
+                                <label className="text-lg font-medium bg-orange-200 ">
+                                    Question {questionIndex + 1}
                                 </label>
                                 <input
                                     type="text"
                                     value={question.text}
-                                    className="border rounded p-2 mx-5 w-full"
+                                    className="col-span-2 focus:outline-none focus:ring-1 focus:ring-indigo-500  border-b border-b-gray-500"
                                     onChange={(e) =>
                                         handleQuestionTextChange(
                                             questionIndex,
@@ -440,38 +441,36 @@ export default function ModifyQuizzes() {
                                     }
                                 />
                             </div>
+
                             {/* Answers */}
                             {answers[questionIndex]?.map(
                                 (answer, answerIndex) => (
                                     <div
                                         key={answer.id}
-                                        className="flex flex-row my-2 p-3 rounded"
+                                        className="grid grid-cols-6"
                                     >
-                                        <label className="text-nowrap px-2 content-evenly">
+                                        <div className="text-xs text-orange-700 text-start">
                                             {String.fromCharCode(
                                                 65 + answerIndex
                                             )}
                                             :
-                                        </label>
-                                        <Textarea
-                                            type="text"
-                                            value={answer.text}
-                                            className="border rounded p-2 mx-5"
-                                            classNames={{
-                                                base: 'max-w-full',
-                                                input: 'resize-y min-h-[40px]',
-                                            }}
-                                            onChange={(e) =>
-                                                handleAnswerTextChange(
-                                                    questionIndex,
-                                                    answerIndex,
-                                                    e
-                                                )
-                                            }
-                                        />
+                                        </div>
+                                        <div className="col-start-1 col-span-5">
+                                            <Input
+                                                value={answer.text}
+                                                className="focus:outline-none focus:ring-1 focus:ring-indigo-500 "
+                                                onChange={(e) =>
+                                                    handleAnswerTextChange(
+                                                        questionIndex,
+                                                        answerIndex,
+                                                        e
+                                                    )
+                                                }
+                                            />
+                                        </div>
                                         <select
                                             value={answer.points}
-                                            className="border rounded p-2"
+                                            className="focus:outline-none focus:ring-1 focus:ring-indigo-500 border-b border-b-gray-500"
                                             onChange={(e) =>
                                                 handleAnswerPointsChange(
                                                     questionIndex,
@@ -486,9 +485,9 @@ export default function ModifyQuizzes() {
                                                     (option) =>
                                                         option !== answer.points
                                                 ),
-                                            ].map((option, index) => (
+                                            ].map((option) => (
                                                 <option
-                                                    key={index}
+                                                    key={option}
                                                     value={option}
                                                 >
                                                     {option}
@@ -498,34 +497,36 @@ export default function ModifyQuizzes() {
                                     </div>
                                 )
                             )}
-                            {/* Delete question button */}
+
+                            {/* Delete Question Button */}
                             <Button
                                 onClick={() =>
                                     handleDeleteQuestion(question.id)
                                 }
                                 color="danger"
-                                variant="ghost"
+                                variant="flat"
+                                className="text-xs font-medium float-right"
                             >
                                 Delete Question
                             </Button>
                         </div>
                     ))}
-                    {/* Results */}
-                    <div className="my-5 p-5 border-slate-300 bg-slate-200 rounded">
-                        <h3 className="font-bold">Results</h3>
+
+                    {/* Results Section */}
+                    <div className="flex flex-col space-y-3 ">
+                        <p className="text-lg font-medium text-gray-700">
+                            Results
+                        </p>
                         {results.map((result, resultIndex) => (
-                            <div
-                                key={result.id}
-                                className="flex flex-col my-3 p-3 rounded"
-                            >
-                                <div className="flex flex-row">
-                                    <label className="text-nowrap px-2 self-center">
-                                        Min Points:
+                            <div key={result.id} className="space-y-3">
+                                <div className="flex justify-between items-center">
+                                    <label className="text-xs font-medium text-gray-600">
+                                        Min Points
                                     </label>
                                     <Input
                                         type="number"
                                         defaultValue={result.minPoints.toString()}
-                                        className="border rounded p-2 mx-5 w-full"
+                                        className="p-2 w-full focus:outline-none focus:ring-1 focus:ring-indigo-500"
                                         onChange={(e) =>
                                             handleResultMinPointsChange(
                                                 resultIndex,
@@ -534,14 +535,14 @@ export default function ModifyQuizzes() {
                                         }
                                     />
                                 </div>
-                                <div className="flex flex-row">
-                                    <label className="text-nowrap px-2 self-center">
-                                        Max Points:
+                                <div className="flex justify-between items-center">
+                                    <label className="text-xs font-medium text-gray-600">
+                                        Max Points
                                     </label>
                                     <Input
                                         type="number"
                                         defaultValue={result.maxPoints.toString()}
-                                        className="border rounded p-2 mx-5 w-full"
+                                        className="p-2 w-full focus:outline-none focus:ring-1 focus:ring-indigo-500"
                                         onChange={(e) =>
                                             handleResultMaxPointsChange(
                                                 resultIndex,
@@ -550,18 +551,13 @@ export default function ModifyQuizzes() {
                                         }
                                     />
                                 </div>
-                                <div className="flex flex-row">
-                                    <label className="text-nowrap px-2 self-center">
-                                        Result Text:
+                                <div className="flex justify-between items-center">
+                                    <label className="text-xs font-medium text-gray-600">
+                                        Result Text
                                     </label>
                                     <Textarea
-                                        type="textarea"
                                         value={result.resultText}
-                                        className="border rounded p-2 mx-5 w-full"
-                                        classNames={{
-                                            base: 'max-w-full',
-                                            input: 'resize-y min-h-[40px]',
-                                        }}
+                                        className="p-2 w-full resize-y min-h-[40px] focus:outline-none focus:ring-1 focus:ring-indigo-500"
                                         onChange={(e) =>
                                             handleResultTextChange(
                                                 resultIndex,
@@ -570,13 +566,15 @@ export default function ModifyQuizzes() {
                                         }
                                     />
                                 </div>
-                                {/* Delete result button */}
+
+                                {/* Delete Result Button */}
                                 <Button
                                     onClick={() =>
                                         handleDeleteResult(result.id)
                                     }
                                     color="danger"
-                                    variant="ghost"
+                                    variant="flat"
+                                    className="text-xs font-medium float-right"
                                 >
                                     Delete Result
                                 </Button>
@@ -584,12 +582,14 @@ export default function ModifyQuizzes() {
                         ))}
                     </div>
 
-                    <div className="flex gap-4 justify-center">
+                    {/* Action Buttons */}
+                    <div className="flex flex-col mt-20 gap-2">
                         <Button
                             color="primary"
                             variant="ghost"
                             onClick={handleAddQuestion}
                             isLoading={isAddQLoading}
+                            className="w-1/3 text-sm font-medium"
                         >
                             Add Question
                         </Button>
@@ -598,27 +598,32 @@ export default function ModifyQuizzes() {
                             variant="ghost"
                             onClick={handleAddResult}
                             isLoading={isAddResultLoading}
+                            className="w-1/3 text-sm font-medium"
                         >
                             Add Result
                         </Button>
                         <Button
-                            color="primary"
-                            variant="ghost"
+                            color="warning"
+                            variant="solid"
                             onClick={handleSubmit}
                             isLoading={isSubmitLoading}
+                            className="w-1/3 mt-5 text-sm font-medium"
                         >
                             Save Changes
                         </Button>
                     </div>
 
+                    {/* Delete Quiz */}
                     <Button
                         color="danger"
-                        variant="ghost"
-                        className="mt-5"
+                        variant="solid"
                         onClick={handleQuizDelete}
+                        className="mt-8 w-full"
                     >
                         Delete Quiz
                     </Button>
+
+                    {/* Form State Message */}
                     <DisplayMessage formStateMessage={formStateMessage} />
                 </div>
             </div>

@@ -27,8 +27,7 @@ export async function generateQuizMetadata({
 
     const metadata = {
         title: quizData.quizName || 'OneRomeo Quiz',
-        description:
-            quizData.questions?.[0]?.text || 'Default Quiz Description',
+        description: quizData.quizDescription || 'Default Quiz Description',
     }
     return metadata
 }
