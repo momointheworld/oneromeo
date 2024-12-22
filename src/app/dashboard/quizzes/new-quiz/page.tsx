@@ -27,6 +27,7 @@ interface ResultDataProps {
 interface QuizDataProps {
     date: Date
     quizName: string
+    quizDescription: string
     questions: QuestionDataProps[]
     results: ResultDataProps[] // Include results in the quiz data
 }
@@ -39,6 +40,7 @@ interface Breadcrumb {
 export default function NewQuiz() {
     const [selectedDate, setSelectedDate] = useState<Date | null>(new Date())
     const [quizName, setQuizName] = useState('')
+    const [quizDescription, setQuizDescription] = useState('')
     const [formStateMessage, setFormStateMessage] = useState('')
     const [questions, setQuestions] = useState<QuestionDataProps[]>([
         {
@@ -116,6 +118,7 @@ export default function NewQuiz() {
             const formDataForQuiz: QuizDataProps = {
                 date: selectedDate || new Date(),
                 quizName,
+                quizDescription,
                 questions,
                 results,
             }
@@ -219,6 +222,25 @@ export default function NewQuiz() {
                                 value={quizName}
                                 className="border rounded p-2 mx-5 w-full"
                                 onChange={(e) => setQuizName(e.target.value)}
+                                required
+                            />
+                        </div>
+                        <div className="flex flex-row">
+                            <label
+                                className="text-nowrap self-center"
+                                htmlFor="quizDescription"
+                            >
+                                Quiz Description:
+                            </label>
+                            <input
+                                type="text"
+                                id="quizDescription"
+                                name="quizDescription"
+                                value={quizDescription}
+                                className="border rounded p-2 mx-5 w-full"
+                                onChange={(e) =>
+                                    setQuizDescription(e.target.value)
+                                }
                                 required
                             />
                         </div>
