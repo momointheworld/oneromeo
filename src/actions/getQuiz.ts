@@ -32,6 +32,7 @@ interface ResultDataProps {
 interface FetchedQuiz {
     id: string
     quizName: string
+    quizDescription: string
     questions: QuestionDataProps[]
     results: ResultDataProps[] // Include results
 }

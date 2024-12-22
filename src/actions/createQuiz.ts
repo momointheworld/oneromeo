@@ -31,12 +31,13 @@ interface ResultDataProps {
 interface QuizDataProps {
     date: Date
     quizName: string
+    quizDescription: string
     questions: QuestionDataProps[]
     results: ResultDataProps[] // Include results in the quiz data
 }
 
 export async function createQuiz(formData: QuizDataProps) {
-    const { date, quizName, questions, results } = formData
+    const { date, quizName, quizDescription, questions, results } = formData
 
     // Generate a slug based on the quiz name
     const slug = generateSlug(quizName)
@@ -47,6 +48,7 @@ export async function createQuiz(formData: QuizDataProps) {
                 date,
                 quizName,
                 slug,
+                quizDescription,
                 questions: {
                     create: questions.map((question) => ({
                         text: question.text,

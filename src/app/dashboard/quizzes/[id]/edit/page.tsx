@@ -31,6 +31,7 @@ interface ResultDataProps {
 interface FetchedQuiz {
     id: string
     quizName: string
+    quizDescription: string
     questions: QuestionDataProps[]
     results: ResultDataProps[] // Add results to quiz data
 }
@@ -105,6 +106,15 @@ export default function ModifyQuizzes() {
     ) => {
         if (quiz) {
             setQuiz({ ...quiz, quizName: event.target.value })
+        }
+    }
+
+    // Update quiz name
+    const handleQuizDescriptionChange = (
+        event: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        if (quiz) {
+            setQuiz({ ...quiz, quizDescription: event.target.value })
         }
     }
 
@@ -319,7 +329,10 @@ export default function ModifyQuizzes() {
             setIsSubmitLoading(false)
             setFormStateMessage('Quiz data updated successfully...reloading')
             // Update quiz
-            await actions.updateQuiz(id, { quizName: quiz.quizName })
+            await actions.updateQuiz(id, {
+                quizName: quiz.quizName,
+                quizDescription: quiz.quizDescription,
+            })
         } catch (error) {
             console.error('Error updating data:', error)
             setIsSubmitLoading(false)
@@ -383,8 +396,8 @@ export default function ModifyQuizzes() {
                 <div className="flex flex-col justify-center lg:w-2/3 md:w-full content-evenly">
                     {/* Quiz title */}
                     {quiz && (
-                        <div className="flex flex-row">
-                            <label className="text-nowrap self-center">
+                        <div className="flex flex-col justify-between my-5 gap-5 rounded">
+                            <label className="text-nowrap self-center text-xl">
                                 Quiz Name:
                             </label>
                             <input
@@ -392,6 +405,16 @@ export default function ModifyQuizzes() {
                                 value={quiz.quizName}
                                 className="border rounded p-2 mx-5 w-full"
                                 onChange={handleQuizNameChange}
+                            />
+
+                            <label className="text-nowrap self-center text-xl">
+                                Quiz Description:
+                            </label>
+                            <input
+                                type="text"
+                                value={quiz.quizDescription}
+                                className="border rounded p-2 mx-5 w-full"
+                                onChange={handleQuizDescriptionChange}
                             />
                         </div>
                     )}

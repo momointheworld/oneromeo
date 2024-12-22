@@ -64,6 +64,7 @@ export default async function SingleQuizPage({ params }: ShowQuizProps) {
                     </div>
                 </div>
                 <div className="p-2 mt-4">
+                    <h2>Description: {quiz.quizDescription}</h2>
                     <h2>Questions:</h2>
                     <div>
                         {quiz.questions.map((questionWithAnswers, index) => (
