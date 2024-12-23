@@ -42,6 +42,7 @@ interface FetchedQuiz {
     id: string
     quizName: string
     slug: string
+    quizDescription: string
     questions: QuestionDataProps[]
     results: ResultDataProps[]
 }
