@@ -32,6 +32,7 @@ interface FetchedQuiz {
     id: string
     quizName: string
     quizDescription: string
+    quizIcon: string
     questions: QuestionDataProps[]
     results: ResultDataProps[] // Add results to quiz data
 }
@@ -109,12 +110,19 @@ export default function ModifyQuizzes() {
         }
     }
 
-    // Update quiz name
     const handleQuizDescriptionChange = (
         event: React.ChangeEvent<HTMLInputElement>
     ) => {
         if (quiz) {
             setQuiz({ ...quiz, quizDescription: event.target.value })
+        }
+    }
+
+    const handleQuizIconChange = (
+        event: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        if (quiz) {
+            setQuiz({ ...quiz, quizIcon: event.target.value })
         }
     }
 
@@ -331,6 +339,7 @@ export default function ModifyQuizzes() {
             // Update quiz
             await actions.updateQuiz(id, {
                 quizName: quiz.quizName,
+                quizIcon: quiz.quizIcon,
                 quizDescription: quiz.quizDescription,
             })
         } catch (error) {
@@ -417,6 +426,17 @@ export default function ModifyQuizzes() {
                                     value={quiz.quizDescription}
                                     className="col-span-3 focus:outline-none focus:ring-1 focus:ring-indigo-500  border-b border-b-gray-500"
                                     onChange={handleQuizDescriptionChange}
+                                />
+                            </div>
+                            <div className="grid grid-cols-3 gap-2">
+                                <label className="text-lg font-medium bg-gray-200 border-2 ">
+                                    Quiz Icon
+                                </label>
+                                <input
+                                    type="text"
+                                    value={quiz.quizIcon}
+                                    className="col-span-3 focus:outline-none focus:ring-1 focus:ring-indigo-500  border-b border-b-gray-500"
+                                    onChange={handleQuizIconChange}
                                 />
                             </div>
                         </div>

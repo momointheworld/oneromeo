@@ -6,16 +6,18 @@ import paths from '@/components/paths'
 
 interface UpdateQuizProps {
     quizName: string
+    quizIcon: string
     quizDescription: string
 }
 
 export async function updateQuiz(id: string, data: UpdateQuizProps) {
-    const { quizName, quizDescription } = data
+    const { quizName, quizIcon, quizDescription } = data
     try {
         const updatedQuiz = await db.quiz.update({
             where: { id },
             data: {
                 quizName,
+                quizIcon,
                 quizDescription,
             },
         })

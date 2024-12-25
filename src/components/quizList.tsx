@@ -1,17 +1,18 @@
 import Link from 'next/link'
 import { Card } from '@nextui-org/react'
+import parse from 'html-react-parser'
 
 interface Quiz {
     slug: string
     quizName: string
+    quizIcon: string
 }
 
 interface QuizListProps {
     quizzes: Quiz[]
-    icons: React.ReactNode[]
 }
 
-const QuizList: React.FC<QuizListProps> = ({ quizzes, icons }) => {
+const QuizList: React.FC<QuizListProps> = ({ quizzes }) => {
     const bgColors = [
         'bg-primary-50',
         'bg-secondary-50',
@@ -27,7 +28,7 @@ const QuizList: React.FC<QuizListProps> = ({ quizzes, icons }) => {
     const linksWithIcons = quizzes.map((quiz, index) => ({
         href: `/quiz/${quiz.slug}`,
         text: quiz.quizName,
-        icon: icons[index % icons.length], // Cycle through icons
+        icon: quiz.quizIcon,
         bgColor: bgColors[index % bgColors.length], // Cycle through background colors
     }))
 
@@ -40,7 +41,7 @@ const QuizList: React.FC<QuizListProps> = ({ quizzes, icons }) => {
                     isHoverable
                     isFooterBlurred
                 >
-                    {linkObj.icon}
+                    {parse(linkObj.icon)}
                     <Link href={linkObj.href} className="no-underline">
                         <p className="text-primary text-wrap sm:max-w-full md:max-w-48">
                             {linkObj.text}

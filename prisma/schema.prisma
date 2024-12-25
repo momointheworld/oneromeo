@@ -79,6 +79,7 @@ model Quiz {
   slug      String   @unique 
   quizDescription String  @default("No description provided")  // Set default value
   questions Question[]
+  quizIcon       String    // Store the icon code
   results   Result[]  
   submissions  QuizSubmission[]  // Add this to track submissions
 }

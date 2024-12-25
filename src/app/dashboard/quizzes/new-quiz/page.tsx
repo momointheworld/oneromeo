@@ -28,6 +28,7 @@ interface QuizDataProps {
     date: Date
     quizName: string
     quizDescription: string
+    quizIcon: string
     questions: QuestionDataProps[]
     results: ResultDataProps[] // Include results in the quiz data
 }
@@ -40,6 +41,7 @@ interface Breadcrumb {
 export default function NewQuiz() {
     const [selectedDate, setSelectedDate] = useState<Date | null>(new Date())
     const [quizName, setQuizName] = useState('')
+    const [quizIcon, setQuizIcon] = useState('')
     const [quizDescription, setQuizDescription] = useState('')
     const [formStateMessage, setFormStateMessage] = useState('')
     const [questions, setQuestions] = useState<QuestionDataProps[]>([
@@ -118,6 +120,7 @@ export default function NewQuiz() {
             const formDataForQuiz: QuizDataProps = {
                 date: selectedDate || new Date(),
                 quizName,
+                quizIcon,
                 quizDescription,
                 questions,
                 results,
@@ -241,6 +244,23 @@ export default function NewQuiz() {
                                 onChange={(e) =>
                                     setQuizDescription(e.target.value)
                                 }
+                                required
+                            />
+                        </div>
+                        <div className="flex flex-row">
+                            <label
+                                className="text-nowrap self-center"
+                                htmlFor="quizIcon"
+                            >
+                                Quiz Icon:
+                            </label>
+                            <input
+                                type="text"
+                                id="quizIcon"
+                                name="quizIcon"
+                                value={quizIcon}
+                                className="border rounded p-2 mx-5 w-full"
+                                onChange={(e) => setQuizIcon(e.target.value)}
                                 required
                             />
                         </div>

@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { db } from '@/db'
 import paths from '@/components/paths'
 import PageBreadcrumbs from '@/components/common/breadcrumbs'
+import parse from 'html-react-parser'
 
 interface ShowQuizProps {
     params: {
@@ -65,6 +66,12 @@ export default async function SingleQuizPage({ params }: ShowQuizProps) {
                 </div>
                 <div className="p-2 mt-4">
                     <h2>Description: {quiz.quizDescription}</h2>
+                    <h2>Icon: {parse(quiz.quizIcon)}</h2>
+                    <span
+                        className="iconify"
+                        data-icon="noto-v1--department-store"
+                    ></span>
+
                     <h2>Questions:</h2>
                     <div>
                         {quiz.questions.map((questionWithAnswers, index) => (
