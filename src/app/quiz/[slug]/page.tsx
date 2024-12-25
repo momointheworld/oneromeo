@@ -62,6 +62,7 @@ interface AllQuizzes {
     id: string
     date: Date
     quizName: string
+    quizIcon: string
     slug: string
 }
 
@@ -405,10 +406,7 @@ const SingleQuizPage = () => {
                                     <h2 className="">
                                         Take a Look at More Quizzes
                                     </h2>
-                                    <QuizList
-                                        quizzes={filteredQuizzes}
-                                        icons={[]}
-                                    />
+                                    <QuizList quizzes={filteredQuizzes} />
                                 </div>
                             </div>
                         )}
