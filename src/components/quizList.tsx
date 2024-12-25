@@ -35,19 +35,20 @@ const QuizList: React.FC<QuizListProps> = ({ quizzes }) => {
     return (
         <div className="flex flex-wrap gap-4 p-4 justify-center text-center">
             {linksWithIcons.map((linkObj, index) => (
-                <Card
-                    key={index}
-                    className={`flex flex-col justify-evenly items-center p-4 shadow-lg hover:shadow-2xl transition-shadow duration-300 ${linkObj.bgColor}`}
-                    isHoverable
-                    isFooterBlurred
-                >
-                    {parse(linkObj.icon)}
-                    <Link href={linkObj.href} className="no-underline">
+                <Link href={linkObj.href} className="no-underline" key={index}>
+                    <Card
+                        key={index}
+                        className={`flex flex-col justify-evenly items-center p-4 shadow-lg hover:shadow-2xl transition-shadow duration-300 ${linkObj.bgColor}`}
+                        isHoverable
+                        isFooterBlurred
+                    >
+                        {parse(linkObj.icon)}
+
                         <p className="text-primary text-wrap sm:max-w-full md:max-w-48">
                             {linkObj.text}
                         </p>
-                    </Link>
-                </Card>
+                    </Card>
+                </Link>
             ))}
         </div>
     )
