@@ -132,6 +132,16 @@ export default function ContactPage() {
                             </Button>
                         </form>
                     </div>
+                    <h2 className="mt-10">
+                        And/or join the conversation on{' '}
+                        <a
+                            href="https://discord.gg/FTMDwjSj"
+                            target="_blank"
+                            className="text-warning"
+                        >
+                            Discord
+                        </a>{' '}
+                    </h2>
                     {errors.general && (
                         <div className="text-red-500 text-sm mt-5">
                             {errors.general}

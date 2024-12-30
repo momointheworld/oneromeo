@@ -77,16 +77,26 @@ const Footer = () => {
                     <h3 className="text-xl font-semibold uppercase">
                         elsewhere.
                     </h3>
-                    <div className="flex space-x-4 justify-center">
+                    <div className="grid md:grid-cols-4 md:grid-rows-3 gap-2 items-center justify-items-center justify-center">
                         <SocialIcon
                             url="www.youtube.com"
                             href="https://www.youtube.com/@oneromeo2409"
-                            className="w-6 h-6" // Adjust the size as needed
+                            className="w-6 h-6 col-start-2" // Adjust the size as needed
                         />
                         <SocialIcon
                             url="www.xiaohongshu.com"
                             href="https://www.xiaohongshu.com/user/profile/61dbea62000000001000598f"
-                            className="w-6 h-6" // Adjust the size as needed
+                            className="w-6 h-6 col-start-3" // Adjust the size as needed
+                        />
+                        <SocialIcon
+                            url="www.facebook.com"
+                            href="https://www.facebook.com/oneromeomedia"
+                            className="w-6 h-6 drop-shadow-xl row-start-2 col-start-2" // Adjust the size as needed
+                        />
+                        <SocialIcon
+                            url="www.discord.com"
+                            href="https://discord.gg/FTMDwjSj"
+                            className="w-6 h-6 row-start-2 col-start-3" // Adjust the size as needed
                         />
                     </div>
                 </div>
