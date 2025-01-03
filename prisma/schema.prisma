@@ -157,3 +157,54 @@ model DownloadToken {
   createdAt      DateTime @default(now())
 }
 
+model ReviewLink {
+  id            String   @id @default(cuid()) @map("_id") @db.ObjectId
+  email         String   // Customer's email
+  productId     String   // ID of the product purchased from Stripe
+  productName   String   // Name of the product purchased
+  token         String   @unique  // One-time token for the review link
+  expiryDate    DateTime // Date when the review link expires (7 days)
+  status        String   @default("pending") // Can be 'pending', 'sent', 'done'
+  createdAt     DateTime @default(now()) // When the link was generated
+  updatedAt     DateTime @updatedAt // When the link was last updated (if applicable)
+
+  // Relation to Review: A ReviewLink is associated with a Review
+  review        Review?  @relation("ReviewLinkToReview")
+
+  // Relation to Customer: A ReviewLink is associated with a Customer
+  customer      Customer @relation(fields: [email], references: [email])
+}
+
+model Product {
+  id        String    @id @default(cuid()) @map("_id") @db.ObjectId
+  name      String
+  reviews   Review[]  @relation("ProductReviews") // Relation to Review model
+}
+
+model Review {
+  id            String    @id @default(cuid()) @map("_id") @db.ObjectId
+  email         String    // Email of the customer
+  productId     String    // Reference to the product
+  product       Product   @relation("ProductReviews", fields: [productId], references: [id]) // Product review relationship
+  rating        Int       // Rating given by the customer
+  comment       String    // Review comment
+  submittedAt   DateTime  // Date when the review was first submitted
+  updatedAt     DateTime  @updatedAt // Date when the review was last updated
+  reviewLinkId  String    @unique  // Foreign key to ReviewLink
+  editLinkToken String    @unique   // Unique token for the review link
+  editLinkExpiry DateTime // Expiry date of the link
+  isFinalized   Boolean   @default(false) // Flag to check if review is finalized
+  status        String    @default("pending") // Review status: 'pending', 'approved', 'rejected'
+
+  // Relation to ReviewLink: A Review is linked to a specific review link
+  reviewLink    ReviewLink @relation("ReviewLinkToReview", fields: [reviewLinkId], references: [id])
+}
+
+model Customer {
+  id            String   @id @default(cuid()) @map("_id") @db.ObjectId
+  email         String   @unique
+  name          String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  reviewLinks   ReviewLink[]
+}
