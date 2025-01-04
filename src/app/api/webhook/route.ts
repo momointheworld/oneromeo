@@ -9,6 +9,7 @@ import { isEventProcessed, logProcessedEvent } from '@/actions/eventHelper'
 import { findAppointmentByEmailAndDate } from '@/actions/findAppointmentByEmailAndDate'
 import createCustomerPortalSession from '@/actions/createCustomerPortalSession'
 import { generateSecureDownloadToken } from '@/utils/generateSecureDownloadToken'
+import { storeCustomerDetailsForLaterReview } from '@/utils/storeCustomerDetailsForLaterReview'
 
 export const runtime = 'nodejs'
 export const preferredRegion = 'auto'
@@ -133,6 +134,30 @@ async function handleCheckoutSessionCompleted(
         if (!customerId) {
             console.warn('No customer ID found in session')
             return
+        }
+
+        // Extract product details from line items
+        const lineItems = session.line_items?.data || []
+        if (lineItems.length > 0) {
+            const firstLineItem = lineItems[0]
+            const productId =
+                firstLineItem.price &&
+                typeof firstLineItem.price.product === 'string'
+                    ? firstLineItem.price.product
+                    : 'Unknown Product'
+            const productName = firstLineItem.description || 'Unknown Product'
+            // const quantity = firstLineItem.quantity
+            // const amountTotal = firstLineItem.amount_total
+
+            console.log(`Product ID: ${productId}`)
+            console.log(`Product Name: ${productName}`)
+            // console.log(`Quantity: ${quantity}`)
+            // console.log(`Total Amount: ${amountTotal / 100} USD`)
+
+            // Store customer details for later review
+            await storeCustomerDetailsForLaterReview(customerId, productId)
+
+            console.log('Customer and product details stored successfully!')
         }
 
         const localDate = new Date()

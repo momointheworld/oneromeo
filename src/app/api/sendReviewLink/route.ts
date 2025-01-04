@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { email, productName } = parsedBody.data
-    const token = generateReviewToken()
+    const token = generateReviewToken(email, productName)
 
     const reviewLink = `${process.env.NEXT_PUBLIC_SITE_URL}/review/${token}`
 
