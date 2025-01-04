@@ -60,6 +60,7 @@ export default function CreatePost() {
         'FAQ',
         'Quiz',
         'Ebook',
+        'Animation',
     ]
     const [selectedCategories, setSelectedCategories] = useState<string[]>([
         'Blog',

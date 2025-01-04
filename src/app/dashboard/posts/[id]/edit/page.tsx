@@ -66,6 +66,7 @@ export default function UpdatePostPage() {
         'FAQ',
         'Quiz',
         'Ebook',
+        'Animation',
     ]
     const [selectedCategories, setSelectedCategories] = useState<any[]>([])
     const [editorContent, setEditorContent] = useState('')
