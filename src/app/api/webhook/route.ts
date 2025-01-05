@@ -3,14 +3,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import {
     addAppointment,
     findTokenByEmail,
+    saveCustomerDetailsToDatabase,
     saveTokenToDatabase,
 } from '@/actions'
 import { isEventProcessed, logProcessedEvent } from '@/actions/eventHelper'
 import { findAppointmentByEmailAndDate } from '@/actions/findAppointmentByEmailAndDate'
-import createCustomerPortalSession from '@/actions/createCustomerPortalSession'
-import { generateSecureDownloadToken } from '@/utils/generateSecureDownloadToken'
-import { storeCustomerDetailsForLaterReview } from '@/utils/storeCustomerDetailsForLaterReview'
-import { log } from 'console'
+import { generateAndSaveSecureToken } from '@/utils/generateAndSaveSecureToken'
 
 export const runtime = 'nodejs'
 export const preferredRegion = 'auto'
@@ -158,47 +156,53 @@ async function handleCheckoutSessionCompleted(
     } else {
         console.warn('Required metadata not found in session')
         // Generate a secure download token for the ebook
-        const email = session.customer_email || 'guest@example.com'
-        const token = await generateSecureDownloadToken(email)
-        // Check if a token already exists for this email
-        const existingToken = await findTokenByEmail(email)
-        if (existingToken) {
-            console.log('Token already exists:', existingToken.token)
-            return
-        }
-        // Store the token and associated email in your database
-        await saveTokenToDatabase(email, token)
+        const email = session.customer_details?.email || 'unknown email'
+        const token = await generateAndSaveSecureToken(email)
+
+        // await saveTokenToDatabase(email, token)
         // Generate the download URL
         // const downloadUrl = `https://oneromeo.com/confirmation?success=true&session_id=${session.id}&token=${token}`
         const downloadUrl = `${process.env.NEXT_PUBLIC_SITE_URL}?success=true&session_id=${session.id}&token=${token}`
         console.log('Download URL:', downloadUrl)
     }
-    // Extract product details from line items
-    // const lineItems = session.line_items?.data || []
-    // if (lineItems.length > 0) {
-    //     const firstLineItem = lineItems[0]
-    //     const productId =
-    //         firstLineItem.price && typeof firstLineItem.price === 'string'
-    //             ? firstLineItem.price
-    //             : 'Unknown Product'
-    //     const productName = firstLineItem.description || 'Unknown Product'
-    //     // const quantity = firstLineItem.quantity
-    //     // const amountTotal = firstLineItem.amount_total
 
-    //     console.log(`Product ID: ${productId}`)
-    //     console.log(`Product Name: ${productName}`)
-    // console.log(`Quantity: ${quantity}`)
-    // console.log(`Total Amount: ${amountTotal / 100} USD`)
+    const email = session.customer_details?.email
+    if (!email) {
+        console.error('No email found in the session')
+        return NextResponse.json(
+            { error: 'No email found in session' },
+            { status: 400 }
+        )
+    }
 
-    // // Extract the customer ID from the session
-    // const customerId = session.customer ? session.customer.toString() : null
-    // if (!customerId) {
-    //     console.warn('No customer ID found in session')
-    //     return
-    // }
+    // Retrieve line items for the session
+    const lineItems = await stripe.checkout.sessions.listLineItems(session.id)
+
+    if (lineItems.data.length === 0) {
+        console.error('No line items found for session')
+        return NextResponse.json(
+            { error: 'No line items found' },
+            { status: 400 }
+        )
+    }
+
+    const customerId = session.customer ? session.customer.toString() : null
+    const customerName = session.customer_details?.name
+    // Use the first line item for product details (adjust if needed)
+    const productId = lineItems.data[0].price?.product || 'Unknown Product'
+    const productName = lineItems.data[0].description || 'Unknown Product Name'
 
     // Store customer details for later review
-    // await storeCustomerDetailsForLaterReview(customerId, productId)
+    if (customerId && customerName) {
+        await saveCustomerDetailsToDatabase(
+            email,
+            customerId,
+            productName,
+            productId,
+            customerName
+        )
+        console.log('Customer details stored successfully.')
+    }
 }
 
 async function streamToBuffer(readableStream: ReadableStream<Uint8Array>) {
@@ -258,35 +262,13 @@ export async function POST(req: NextRequest) {
             {
                 const session = event.data.object as Stripe.Checkout.Session
                 await handleCheckoutSessionCompleted(session)
-                // Ensure line_items is expanded
-                const lineItems = session.line_items?.data || []
-                console.log('Line Items:', lineItems)
-                // // Check if line_items array has items
-                if (lineItems.length > 0) {
-                    const firstLineItem = lineItems[0]
-                    // // Add checks to ensure firstLineItem and its properties are defined
-                    const productId =
-                        firstLineItem.price?.id || 'Unknown Product'
-                    const productName =
-                        firstLineItem.description || 'Unknown Product'
-                    console.log(`Product ID: ${productId}`)
-                    console.log(`Product Name: ${productName}`)
-
-                    // Create a customer portal session after handling checkout
-                    const customerId = session.customer
-                        ? session.customer.toString()
-                        : null
-                    if (customerId) {
-                        await createCustomerPortalSession(customerId)
-                        await storeCustomerDetailsForLaterReview(
-                            customerId,
-                            productId
-                        )
-                        console.log(
-                            'Customer and product details stored successfully!'
-                        )
-                    }
-                }
+                // Store customer details for later review
+                // const customerId = session.customer
+                //     ? session.customer.toString()
+                //     : null
+                // if (customerId) {
+                //     await createCustomerPortalSession(customerId)
+                // }
             }
             break
         // Add other cases as needed

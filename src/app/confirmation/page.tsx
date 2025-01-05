@@ -15,10 +15,8 @@ const ConfirmationPage: React.FC = () => {
     const searchParams = useSearchParams()
     const router = useRouter()
 
-    // Get query params from the URL
     const success = searchParams.get('success') === 'true'
     const sessionId = searchParams.get('session_id')
-    const token = searchParams.get('token')
     const encodedTimeSlot = searchParams.get('appointment_date_time')
     const encodedThDate = searchParams.get('th_date_time')
     const encodedUtcDate = searchParams.get('utc_date_time')
@@ -37,6 +35,8 @@ const ConfirmationPage: React.FC = () => {
     const [formMessage, setFormMessage] = useState('')
 
     useEffect(() => {
+        // Use sessionStorage for secure token handling
+        const token = sessionStorage.getItem('downloadToken')
         const fetchDownloadUrl = async () => {
             if (token) {
                 const { error, downloadUrl }: DownloadResponse =
@@ -51,7 +51,7 @@ const ConfirmationPage: React.FC = () => {
         }
 
         fetchDownloadUrl()
-    }, [token])
+    }, [])
 
     useEffect(() => {
         if (!success) {

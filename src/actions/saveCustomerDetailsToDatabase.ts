@@ -1,9 +1,12 @@
 import { db } from '@/db'
-import { generateReviewToken } from './generateReviewToken'
+import { generateReviewToken } from '@/utils/generateReviewToken'
 
-export async function storeCustomerDetailsForLaterReview(
+export async function saveCustomerDetailsToDatabase(
     email: string,
-    productId: string
+    productId: string,
+    productName: string,
+    stripeCustomerId: string,
+    name: string
 ) {
     try {
         // Check if the customer already exists
@@ -16,7 +19,8 @@ export async function storeCustomerDetailsForLaterReview(
             await db.customer.create({
                 data: {
                     email,
-                    name: 'Customer Name', // Replace with actual customer name if available
+                    stripeCustomerId, // Store Stripe customer ID
+                    name,
                 },
             })
         }
@@ -47,7 +51,7 @@ export async function storeCustomerDetailsForLaterReview(
             data: {
                 email,
                 productId,
-                productName: 'Product Name Here', // Use the actual product name if available
+                productName,
                 token: reviewToken,
                 expiryDate,
                 status: 'pending', // Initial status
