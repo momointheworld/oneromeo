@@ -10,6 +10,7 @@ import { findAppointmentByEmailAndDate } from '@/actions/findAppointmentByEmailA
 import createCustomerPortalSession from '@/actions/createCustomerPortalSession'
 import { generateSecureDownloadToken } from '@/utils/generateSecureDownloadToken'
 import { storeCustomerDetailsForLaterReview } from '@/utils/storeCustomerDetailsForLaterReview'
+import { log } from 'console'
 
 export const runtime = 'nodejs'
 export const preferredRegion = 'auto'
@@ -136,30 +137,6 @@ async function handleCheckoutSessionCompleted(
             return
         }
 
-        // Extract product details from line items
-        const lineItems = session.line_items?.data || []
-        if (lineItems.length > 0) {
-            const firstLineItem = lineItems[0]
-            const productId =
-                firstLineItem.price &&
-                typeof firstLineItem.price.product === 'string'
-                    ? firstLineItem.price.product
-                    : 'Unknown Product'
-            const productName = firstLineItem.description || 'Unknown Product'
-            // const quantity = firstLineItem.quantity
-            // const amountTotal = firstLineItem.amount_total
-
-            console.log(`Product ID: ${productId}`)
-            console.log(`Product Name: ${productName}`)
-            // console.log(`Quantity: ${quantity}`)
-            // console.log(`Total Amount: ${amountTotal / 100} USD`)
-
-            // Store customer details for later review
-            await storeCustomerDetailsForLaterReview(customerId, productId)
-
-            console.log('Customer and product details stored successfully!')
-        }
-
         const localDate = new Date()
         const userTimezoneOffset = localDate.getTimezoneOffset() // Gets the user's local timezone offset in minutes
         const utcCreatedAt = new Date(
@@ -192,9 +169,36 @@ async function handleCheckoutSessionCompleted(
         // Store the token and associated email in your database
         await saveTokenToDatabase(email, token)
         // Generate the download URL
-        const downloadUrl = `https://oneromeo.com/confirmation?success=true&session_id=${session.id}&token=${token}`
+        // const downloadUrl = `https://oneromeo.com/confirmation?success=true&session_id=${session.id}&token=${token}`
+        const downloadUrl = `${process.env.NEXT_PUBLIC_SITE_URL}?success=true&session_id=${session.id}&token=${token}`
         console.log('Download URL:', downloadUrl)
     }
+    // Extract product details from line items
+    // const lineItems = session.line_items?.data || []
+    // if (lineItems.length > 0) {
+    //     const firstLineItem = lineItems[0]
+    //     const productId =
+    //         firstLineItem.price && typeof firstLineItem.price === 'string'
+    //             ? firstLineItem.price
+    //             : 'Unknown Product'
+    //     const productName = firstLineItem.description || 'Unknown Product'
+    //     // const quantity = firstLineItem.quantity
+    //     // const amountTotal = firstLineItem.amount_total
+
+    //     console.log(`Product ID: ${productId}`)
+    //     console.log(`Product Name: ${productName}`)
+    // console.log(`Quantity: ${quantity}`)
+    // console.log(`Total Amount: ${amountTotal / 100} USD`)
+
+    // // Extract the customer ID from the session
+    // const customerId = session.customer ? session.customer.toString() : null
+    // if (!customerId) {
+    //     console.warn('No customer ID found in session')
+    //     return
+    // }
+
+    // Store customer details for later review
+    // await storeCustomerDetailsForLaterReview(customerId, productId)
 }
 
 async function streamToBuffer(readableStream: ReadableStream<Uint8Array>) {
@@ -254,12 +258,34 @@ export async function POST(req: NextRequest) {
             {
                 const session = event.data.object as Stripe.Checkout.Session
                 await handleCheckoutSessionCompleted(session)
-                // Create a customer portal session after handling checkout
-                const customerId = session.customer
-                    ? session.customer.toString()
-                    : null
-                if (customerId) {
-                    await createCustomerPortalSession(customerId)
+                // Ensure line_items is expanded
+                const lineItems = session.line_items?.data || []
+                console.log('Line Items:', lineItems)
+                // // Check if line_items array has items
+                if (lineItems.length > 0) {
+                    const firstLineItem = lineItems[0]
+                    // // Add checks to ensure firstLineItem and its properties are defined
+                    const productId =
+                        firstLineItem.price?.id || 'Unknown Product'
+                    const productName =
+                        firstLineItem.description || 'Unknown Product'
+                    console.log(`Product ID: ${productId}`)
+                    console.log(`Product Name: ${productName}`)
+
+                    // Create a customer portal session after handling checkout
+                    const customerId = session.customer
+                        ? session.customer.toString()
+                        : null
+                    if (customerId) {
+                        await createCustomerPortalSession(customerId)
+                        await storeCustomerDetailsForLaterReview(
+                            customerId,
+                            productId
+                        )
+                        console.log(
+                            'Customer and product details stored successfully!'
+                        )
+                    }
                 }
             }
             break
