@@ -1,3 +1,4 @@
+//this is for the review link token
 import crypto from 'crypto'
 
 export function generateReviewToken(email: string, productId: string): string {

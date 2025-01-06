@@ -2,9 +2,8 @@ import Stripe from 'stripe'
 import { NextRequest, NextResponse } from 'next/server'
 import {
     addAppointment,
-    findTokenByEmail,
     saveCustomerDetailsToDatabase,
-    saveTokenToDatabase,
+    setDownloadToken,
 } from '@/actions'
 import { isEventProcessed, logProcessedEvent } from '@/actions/eventHelper'
 import { findAppointmentByEmailAndDate } from '@/actions/findAppointmentByEmailAndDate'
@@ -158,12 +157,13 @@ async function handleCheckoutSessionCompleted(
         // Generate a secure download token for the ebook
         const email = session.customer_details?.email || 'unknown email'
         const token = await generateAndSaveSecureToken(email)
+        await setDownloadToken(token)
+        console.log('Secure token generated:', token)
 
-        // await saveTokenToDatabase(email, token)
-        // Generate the download URL
-        // const downloadUrl = `https://oneromeo.com/confirmation?success=true&session_id=${session.id}&token=${token}`
-        const downloadUrl = `${process.env.NEXT_PUBLIC_SITE_URL}?success=true&session_id=${session.id}&token=${token}`
+        // Generate the download URL to send it to the frontend as a response
+        const downloadUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/confirmation?success=true&session_id=${session.id}`
         console.log('Download URL:', downloadUrl)
+        return NextResponse.redirect(downloadUrl) // Redirect the client to the confirmation page
     }
 
     const email = session.customer_details?.email
@@ -262,13 +262,6 @@ export async function POST(req: NextRequest) {
             {
                 const session = event.data.object as Stripe.Checkout.Session
                 await handleCheckoutSessionCompleted(session)
-                // Store customer details for later review
-                // const customerId = session.customer
-                //     ? session.customer.toString()
-                //     : null
-                // if (customerId) {
-                //     await createCustomerPortalSession(customerId)
-                // }
             }
             break
         // Add other cases as needed

@@ -1,6 +1,7 @@
 export { createPost } from './createPost'
 export { createQuestion } from './createQuestion'
 export { createQuiz } from './createQuiz'
+export { setCookie, setDownloadToken } from './cookiesActions'
 export { deletePost } from './deletePost'
 export { deleteQuestion } from './deleteQuestion'
 export { fetchAndGroupPostsByCategory } from './fetchCategoryPosts'

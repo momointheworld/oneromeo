@@ -36,6 +36,8 @@
 //     }
 // }
 
+// this is to validate the token and generate the download url for ebook
+
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/db'
 
@@ -45,44 +47,39 @@ export async function POST(request: NextRequest) {
     if (!authorizationHeader || !authorizationHeader.startsWith('Bearer ')) {
         return NextResponse.json(
             { error: 'Invalid or missing Authorization header' },
-            { status: 400 }
+            { status: 401 }
         )
     }
 
     const token = authorizationHeader.split(' ')[1] // Extract token from 'Bearer <token>'
 
     if (!token || typeof token !== 'string') {
-        return NextResponse.json({ error: 'Invalid token' }, { status: 400 })
+        return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
     }
 
     try {
         // Validate the token
         const tokenRecord = await db.downloadToken.findUnique({
-            where: { token: token },
+            where: { token },
         })
-
-        console.log('Token record found:', tokenRecord)
 
         if (!tokenRecord) {
             return NextResponse.json(
                 { error: 'Token not found' },
-                { status: 400 }
+                { status: 401 }
             )
         }
 
         // Check if the token has expired
         const currentDate = new Date()
-        console.log('Current date/time:', currentDate)
-        console.log('Token expiration date:', tokenRecord.expirationDate)
-
-        if (tokenRecord.expirationDate < currentDate) {
+        if (new Date(tokenRecord.expirationDate) < currentDate) {
             return NextResponse.json(
                 { error: 'Token is expired' },
-                { status: 400 }
+                { status: 401 }
             )
         }
 
-        // Generate the download URL
+        // Generate the download URL securely (could point to a separate API route or signed URL logic)
         const downloadUrl = `/api/download-file?token=${encodeURIComponent(
             token
         )}`
@@ -91,7 +88,7 @@ export async function POST(request: NextRequest) {
     } catch (err) {
         console.error('Error generating download URL:', err)
         return NextResponse.json(
-            { error: 'Error generating download URL' },
+            { error: 'Internal server error' },
             { status: 500 }
         )
     }

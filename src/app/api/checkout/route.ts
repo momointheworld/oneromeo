@@ -191,11 +191,6 @@ export async function POST(req: NextRequest, res: NextResponse) {
         // let successUrl = `https://oneromeo.com/confirmation?success=true&session_id={CHECKOUT_SESSION_ID}&appointment_date_time=${encodedCsrDate}&th_date_time=${encodedThDate}&utc_date_time=${encodedUtcDate}&csrTimeZone=${encodedTimeZone}&email=${encodedEmail}`
         let successUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/confirmation?success=true&session_id={CHECKOUT_SESSION_ID}&appointment_date_time=${encodedCsrDate}&th_date_time=${encodedThDate}&utc_date_time=${encodedUtcDate}&csrTimeZone=${encodedTimeZone}&email=${encodedEmail}`
 
-        // if (priceId === ebookPriceId) {
-        //     const token = await generateAndSaveSecureToken(email)
-        //     successUrl += `&token=${token}`
-        // }
-
         const session = await stripeInstance.checkout.sessions.create({
             payment_method_types: ['card', 'alipay', 'wechat_pay'],
             payment_method_options: {
@@ -214,7 +209,6 @@ export async function POST(req: NextRequest, res: NextResponse) {
             // cancel_url: 'https://oneromeo.com/',
             cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}`,
         })
-
         return NextResponse.json({ url: session.url })
     } catch (err: any) {
         console.error('Error creating checkout session:', err)

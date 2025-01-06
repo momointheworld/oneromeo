@@ -1,10 +1,11 @@
 'use client'
 import React, { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { downloadFile } from '@/actions'
+import { downloadFile, getCookie } from '@/actions'
 import DisplayMessage from '@/components/common/message'
 import { Button } from '@nextui-org/react'
 import { Image } from '@nextui-org/react'
+import Cookies from 'js-cookie'
 
 interface DownloadResponse {
     error?: string
@@ -33,25 +34,42 @@ const ConfirmationPage: React.FC = () => {
     const [downloadUrl, setDownloadUrl] = useState<string | null>(null)
     const [loading, setLoading] = useState(true)
     const [formMessage, setFormMessage] = useState('')
+    const [token, setToken] = useState<string | null>(null)
 
     useEffect(() => {
-        // Use sessionStorage for secure token handling
-        const token = sessionStorage.getItem('downloadToken')
+        const tokenFromCookie = Cookies.get('downloadToken')
+        console.log('Token from cookie:', tokenFromCookie)
+        if (tokenFromCookie) {
+            setToken(tokenFromCookie)
+        } else {
+            setFormMessage('No valid token found')
+            setLoading(false)
+        }
+    }, [])
+
+    useEffect(() => {
+        // Only fetch the download URL if the token is available
         const fetchDownloadUrl = async () => {
             if (token) {
-                const { error, downloadUrl }: DownloadResponse =
-                    await downloadFile(token)
-                if (error) {
-                    setFormMessage(error)
-                } else {
-                    setDownloadUrl(downloadUrl || null)
+                try {
+                    const { error, downloadUrl }: DownloadResponse =
+                        await downloadFile(token)
+                    if (error) {
+                        setFormMessage(error)
+                    } else {
+                        setDownloadUrl(downloadUrl || null)
+                    }
+                } catch (error) {
+                    setFormMessage('Error fetching download URL')
                 }
+            } else {
+                setFormMessage('No valid token found')
             }
             setLoading(false)
         }
 
         fetchDownloadUrl()
-    }, [])
+    }, [token]) // Empty dependency array ensures this runs only on mount
 
     useEffect(() => {
         if (!success) {
