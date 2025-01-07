@@ -1,7 +1,6 @@
 'use client'
 import React, { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { downloadFile, getTokenBySession } from '@/actions'
 import DisplayMessage from '@/components/common/message'
 import { Button } from '@nextui-org/react'
 import { Image } from '@nextui-org/react'
@@ -28,7 +27,6 @@ const ConfirmationPage: React.FC = () => {
     const [downloadUrl, setDownloadUrl] = useState<string | null>(null)
     const [loading, setLoading] = useState(true)
     const [formMessage, setFormMessage] = useState('')
-    const [token, setToken] = useState('')
 
     useEffect(() => {
         // Fetch the token and download URL after session completion
@@ -66,9 +64,10 @@ const ConfirmationPage: React.FC = () => {
                 setLoading(false)
             }
         }
-
-        fetchDownloadUrl()
-    }, [sessionId])
+        if (encodedTimeSlot === '') {
+            fetchDownloadUrl()
+        }
+    }, [encodedTimeSlot, sessionId])
 
     useEffect(() => {
         if (!success) {
