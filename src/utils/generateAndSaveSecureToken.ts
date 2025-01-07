@@ -1,4 +1,3 @@
-//this is for ebook download token
 import { db } from '@/db'
 import crypto from 'crypto'
 
@@ -9,40 +8,43 @@ const generateToken = (): string => {
 
 // Unified function to generate and save/update a secure download token
 export const generateAndSaveSecureToken = async (
-    email: string
+    email: string,
+    sessionId: string
 ): Promise<string> => {
-    // Generate a secure token
-    const token = generateToken()
-
-    // Define the expiration date for the token
-    const expirationDate = new Date(Date.now() + 60 * 60 * 1000) // Token valid for 1 hour
-
     try {
-        // Check if a token for the given email already exists
-        const existingToken = await db.downloadToken.findUnique({
-            where: { email },
+        // Generate the new token and expiration date
+        const token = generateToken()
+        const expirationDate = new Date(Date.now() + 60 * 60 * 1000) // Token valid for 1 hour
+
+        // Check if an existing token for the email exists
+        const existingEmail = await db.downloadToken.findUnique({
+            where: { email }, // Find by email
         })
 
-        if (existingToken) {
-            // Update the existing token
+        if (existingEmail) {
+            // If the email exists, update the sessionId, token, and expirationDate
             await db.downloadToken.update({
-                where: { email },
+                where: { email }, // Update by email
                 data: {
-                    token,
-                    expirationDate,
+                    sessionId, // Update sessionId
+                    token, // Update token
+                    expirationDate, // Update expiration date
                 },
             })
-            console.log('Token updated successfully.')
+
+            console.log('Session ID and token updated for existing email.')
         } else {
-            // Create a new token record
+            // If the email doesn't exist, create a new record with sessionId, token, and expirationDate
             await db.downloadToken.create({
                 data: {
                     email,
-                    token,
-                    expirationDate,
+                    sessionId, // New sessionId
+                    token, // New token
+                    expirationDate, // New expiration date
                 },
             })
-            console.log('Token created successfully.')
+
+            console.log('Token created successfully for new email.')
         }
 
         return token

@@ -85,6 +85,8 @@ export async function GET(request: NextRequest) {
             'Content-Type': 'application/epub+zip', // Adjust if needed
         })
 
+        console.log('Download token set in cookie:', token)
+
         console.log('Returning response with file stream')
         // Return the response without closing the client
         return new NextResponse(webReadableStream, { headers })

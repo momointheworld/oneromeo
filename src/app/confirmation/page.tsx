@@ -1,16 +1,10 @@
 'use client'
 import React, { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { downloadFile, getCookie } from '@/actions'
+import { downloadFile, getTokenBySession } from '@/actions'
 import DisplayMessage from '@/components/common/message'
 import { Button } from '@nextui-org/react'
 import { Image } from '@nextui-org/react'
-import Cookies from 'js-cookie'
-
-interface DownloadResponse {
-    error?: string
-    downloadUrl?: string
-}
 
 const ConfirmationPage: React.FC = () => {
     const searchParams = useSearchParams()
@@ -34,42 +28,47 @@ const ConfirmationPage: React.FC = () => {
     const [downloadUrl, setDownloadUrl] = useState<string | null>(null)
     const [loading, setLoading] = useState(true)
     const [formMessage, setFormMessage] = useState('')
-    const [token, setToken] = useState<string | null>(null)
+    const [token, setToken] = useState('')
 
     useEffect(() => {
-        const tokenFromCookie = Cookies.get('downloadToken')
-        console.log('Token from cookie:', tokenFromCookie)
-        if (tokenFromCookie) {
-            setToken(tokenFromCookie)
-        } else {
-            setFormMessage('No valid token found')
-            setLoading(false)
-        }
-    }, [])
-
-    useEffect(() => {
-        // Only fetch the download URL if the token is available
+        // Fetch the token and download URL after session completion
         const fetchDownloadUrl = async () => {
-            if (token) {
-                try {
-                    const { error, downloadUrl }: DownloadResponse =
-                        await downloadFile(token)
-                    if (error) {
-                        setFormMessage(error)
-                    } else {
-                        setDownloadUrl(downloadUrl || null)
-                    }
-                } catch (error) {
-                    setFormMessage('Error fetching download URL')
+            try {
+                const response = await fetch(
+                    `/api/get-token-by-session?sessionId=${sessionId}`
+                )
+                if (!response.ok) {
+                    throw new Error('Failed to fetch the token')
                 }
-            } else {
-                setFormMessage('No valid token found')
+
+                const data = await response.json()
+                const token = data.token
+
+                if (!token) {
+                    throw new Error('Token not found')
+                }
+
+                // Now, you can fetch the download URL using the token
+                const downloadResponse = await fetch('/api/get-download-url', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token }),
+                })
+                if (!downloadResponse.ok) {
+                    throw new Error('Failed to fetch download URL')
+                }
+
+                const downloadData = await downloadResponse.json()
+                setDownloadUrl(downloadData.url)
+            } catch (err: any) {
+                setFormMessage(err.message)
+            } finally {
+                setLoading(false)
             }
-            setLoading(false)
         }
 
         fetchDownloadUrl()
-    }, [token]) // Empty dependency array ensures this runs only on mount
+    }, [sessionId])
 
     useEffect(() => {
         if (!success) {

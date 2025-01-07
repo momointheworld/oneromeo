@@ -51,7 +51,7 @@ export const POST = async (req: NextRequest) => {
         console.log('Writing file to temp directory...')
         await fs.promises.writeFile(
             filePath,
-            Buffer.from(await file.arrayBuffer())
+            new Uint8Array(await file.arrayBuffer())
         )
         console.log('File written to temp directory')
 

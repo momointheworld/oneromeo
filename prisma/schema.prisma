@@ -152,9 +152,12 @@ model Ebook {
 model DownloadToken {
   id             String  @id @default(auto()) @map("_id") @db.ObjectId 
   token          String   @unique
+  sessionId      String   @unique // New field for storing the session ID
   email          String   @unique
   expirationDate DateTime
   createdAt      DateTime @default(now())
+  @@unique([sessionId, token]) // Compound unique constraint
+
 }
 
 model ReviewLink {

@@ -1,13 +1,10 @@
 import Stripe from 'stripe'
 import { NextRequest, NextResponse } from 'next/server'
-import {
-    addAppointment,
-    saveCustomerDetailsToDatabase,
-    setDownloadToken,
-} from '@/actions'
+import { addAppointment, saveCustomerDetailsToDatabase } from '@/actions'
 import { isEventProcessed, logProcessedEvent } from '@/actions/eventHelper'
 import { findAppointmentByEmailAndDate } from '@/actions/findAppointmentByEmailAndDate'
 import { generateAndSaveSecureToken } from '@/utils/generateAndSaveSecureToken'
+import { get } from 'http'
 
 export const runtime = 'nodejs'
 export const preferredRegion = 'auto'
@@ -154,16 +151,14 @@ async function handleCheckoutSessionCompleted(
         })
     } else {
         console.warn('Required metadata not found in session')
-        // Generate a secure download token for the ebook
+        // // Generate a secure download token for the ebook
         const email = session.customer_details?.email || 'unknown email'
-        const token = await generateAndSaveSecureToken(email)
-        await setDownloadToken(token)
+        const sessionId = session.id
+        const token = await generateAndSaveSecureToken(email, session.id)
         console.log('Secure token generated:', token)
-
-        // Generate the download URL to send it to the frontend as a response
-        const downloadUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/confirmation?success=true&session_id=${session.id}`
-        console.log('Download URL:', downloadUrl)
-        return NextResponse.redirect(downloadUrl) // Redirect the client to the confirmation page
+        // Send user to the confirmation page
+        const downloadUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/confirmation?success=true&session_id=${sessionId}}`
+        return NextResponse.json({ downloadUrl })
     }
 
     const email = session.customer_details?.email
