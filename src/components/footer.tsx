@@ -90,8 +90,8 @@ const Footer = () => {
                             className="w-6 h-6 col-start-3" // Adjust the size as needed
                         />
                         <SocialIcon
-                            url="www.facebook.com"
-                            href="https://www.facebook.com/oneromeomedia"
+                            url="www.reddit.com"
+                            href="https://www.reddit.com/r/JustHereToListen/"
                             className="w-6 h-6 drop-shadow-xl row-start-2 col-start-2" // Adjust the size as needed
                         />
                         <SocialIcon
