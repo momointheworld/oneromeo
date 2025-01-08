@@ -88,7 +88,7 @@ const Footer = () => {
                         />
                         <SocialIcon
                             url="www.discord.com"
-                            href="https://discord.gg/FTMDwjSj"
+                            href="https://discord.gg/7WvwQbUhgR"
                             className="w-6 h-6 row-start-2 col-start-3" // Adjust the size as needed
                         />
                     </div>
