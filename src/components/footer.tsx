@@ -1,13 +1,5 @@
-import {
-    Button,
-    Card,
-    CardBody,
-    CardFooter,
-    Divider,
-    Link,
-} from '@nextui-org/react'
+import { Divider, Link } from '@nextui-org/react'
 import { SocialIcon } from 'react-social-icons'
-import Image, { StaticImageData } from 'next/image'
 
 // components/FooterSection.tsx
 
