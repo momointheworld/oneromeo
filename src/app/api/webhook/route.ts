@@ -150,17 +150,19 @@ async function handleCheckoutSessionCompleted(
             createdAt: utcCreatedAt,
         })
     } else {
-        console.warn('Required metadata not found in session')
+        console.warn(
+            'Required metadata not found in session for Appointment, skipping.'
+        )
         // // Generate a secure download token for the ebook
         const email = session.customer_details?.email || 'unknown email'
-        const sessionId = session.id
         const token = await generateAndSaveSecureToken(email, session.id)
         console.log('Secure token generated:', token)
-        // Send user to the confirmation page
-        const downloadUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/confirmation?success=true&session_id=${sessionId}}`
-        return NextResponse.json({ downloadUrl })
     }
+}
 
+const saveLintItems = async (session: Stripe.Checkout.Session) => {
+    // Retrieve line items for the session
+    const lineItems = await stripe.checkout.sessions.listLineItems(session.id)
     const email = session.customer_details?.email
     if (!email) {
         console.error('No email found in the session')
@@ -169,9 +171,6 @@ async function handleCheckoutSessionCompleted(
             { status: 400 }
         )
     }
-
-    // Retrieve line items for the session
-    const lineItems = await stripe.checkout.sessions.listLineItems(session.id)
 
     if (lineItems.data.length === 0) {
         console.error('No line items found for session')
@@ -182,13 +181,19 @@ async function handleCheckoutSessionCompleted(
     }
 
     const customerId = session.customer ? session.customer.toString() : null
-    const customerName = session.customer_details?.name
+    const customerName = session.customer_details?.name || null // Fallback to null if name is not available
     // Use the first line item for product details (adjust if needed)
     const productId = lineItems.data[0].price?.product || 'Unknown Product'
     const productName = lineItems.data[0].description || 'Unknown Product Name'
 
+    console.log('Customer ID:', customerId)
+    console.log('Customer Name:', customerName)
+    console.log('Product ID:', productId)
+    console.log('Product Name:', productName)
+    console.log('Email:', email)
+
     // Store customer details for later review
-    if (customerId && customerName) {
+    if (customerId) {
         await saveCustomerDetailsToDatabase(
             email,
             customerId,
@@ -257,6 +262,7 @@ export async function POST(req: NextRequest) {
             {
                 const session = event.data.object as Stripe.Checkout.Session
                 await handleCheckoutSessionCompleted(session)
+                await saveLintItems(session)
             }
             break
         // Add other cases as needed

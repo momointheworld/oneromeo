@@ -25,49 +25,84 @@ const ConfirmationPage: React.FC = () => {
     const email = encodedEmail ? decodeURIComponent(encodedEmail) : ''
 
     const [downloadUrl, setDownloadUrl] = useState<string | null>(null)
+    const [downloadText, setDownloadText] = useState<string>('Processing...')
     const [loading, setLoading] = useState(true)
     const [formMessage, setFormMessage] = useState('')
 
     useEffect(() => {
-        // Fetch the token and download URL after session completion
         const fetchDownloadUrl = async () => {
-            try {
-                const response = await fetch(
-                    `/api/get-token-by-session?sessionId=${sessionId}`
-                )
-                if (!response.ok) {
-                    throw new Error('Failed to fetch the token')
-                }
+            let token
+            const maxRetries = 5
+            const delay = 2000 // 2 seconds
+            let attempts = 0
 
-                const data = await response.json()
-                const token = data.token
+            setFormMessage('We are processing the eBook...')
+            setLoading(true)
+
+            while (!token && attempts < maxRetries) {
+                try {
+                    const response = await fetch(
+                        `/api/get-token-by-session?sessionId=${sessionId}`
+                    )
+                    if (response.ok) {
+                        const data = await response.json()
+                        token = data.token
+                    } else {
+                        setFormMessage('Please wait for the eBook to be ready.')
+                    }
+                } catch (err: any) {
+                    console.log(err.message)
+                }
 
                 if (!token) {
-                    throw new Error('Token not found')
+                    attempts++
+                    await new Promise((resolve) => setTimeout(resolve, delay))
                 }
+            }
 
-                // Now, you can fetch the download URL using the token
-                const downloadResponse = await fetch('/api/get-download-url', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token }),
-                })
-                if (!downloadResponse.ok) {
-                    throw new Error('Failed to fetch download URL')
+            if (token) {
+                try {
+                    const downloadResponse = await fetch(
+                        '/api/get-download-url',
+                        {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ token }),
+                        }
+                    )
+                    if (!downloadResponse.ok) {
+                        throw new Error('Failed to fetch download URL')
+                    }
+
+                    const downloadData = await downloadResponse.json()
+                    setDownloadUrl(downloadData.url)
+                    setFormMessage(
+                        'Your eBook is ready! You can download it now.'
+                    )
+                    setDownloadText('Download eBook')
+                    setLoading(false)
+                } catch (err: any) {
+                    setFormMessage(err.message)
+                } finally {
+                    setLoading(false)
                 }
-
-                const downloadData = await downloadResponse.json()
-                setDownloadUrl(downloadData.url)
-            } catch (err: any) {
-                setFormMessage(err.message)
-            } finally {
+            } else {
+                setFormMessage(
+                    'Token not found after multiple attempts. Please refresh the page and try again.'
+                )
                 setLoading(false)
             }
         }
-        if (encodedTimeSlot === '') {
+
+        const urlParams = new URLSearchParams(window.location.search)
+        const sessionId = urlParams.get('session_id')
+
+        if (sessionId && encodedTimeSlot === '' && encodedThDate === '') {
             fetchDownloadUrl()
+        } else {
+            setLoading(false)
         }
-    }, [encodedTimeSlot, sessionId])
+    }, [encodedThDate, encodedTimeSlot, sessionId])
 
     useEffect(() => {
         if (!success) {
@@ -169,8 +204,9 @@ const ConfirmationPage: React.FC = () => {
                         onClick={handleDownload}
                         variant="bordered"
                         color="primary"
+                        isLoading={loading}
                     >
-                        Download eBook
+                        {downloadText}
                     </Button>
                     <p className="text-slate-400">
                         This download link is valid for 1 hour.

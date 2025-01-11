@@ -36,8 +36,5 @@ export async function GET(request: NextRequest) {
     }
 }
 
-export const config = {
-    api: {
-        bodyParser: false, // Disable body parsing for GET requests
-    },
-}
+// The updated configuration export using the recommended syntax
+export const runtime = 'nodejs'

@@ -6,7 +6,7 @@ export async function saveCustomerDetailsToDatabase(
     productId: string,
     productName: string,
     stripeCustomerId: string,
-    name: string
+    name: string | null = null // Optional parameter with default null
 ) {
     try {
         // Check if the customer already exists
