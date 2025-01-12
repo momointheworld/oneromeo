@@ -3,6 +3,8 @@ import Link from 'next/link'
 import { db } from '@/db'
 import paths from '@/components/paths'
 import RenderAppointments from '@/components/renderAppointments'
+import { fetchCustomersWithReviewLinks } from '@/actions/fetchCustomersWithReviewLinks'
+import RenderCustomers from '@/components/renderCustomers'
 
 export const revalidate = 3 // re-render in every 3 seconds
 export default async function Dashboard() {
@@ -47,6 +49,29 @@ export default async function Dashboard() {
         orderBy: { createdAt: 'desc' },
     })
     const latestAppointments = appointments.slice(0, 5) // Get the latest 5 quizzes
+
+    const customers = await fetchCustomersWithReviewLinks()
+    const latestCustomers = customers.slice(-10)
+    const sortedCustomers = latestCustomers.sort(
+        (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+    )
+
+    // API handler for sending the review link
+    const handleSendReviewLink = async (customerId: any, reviewLinkId: any) => {
+        const response = await fetch('/api/send-review-link', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ customerId, reviewLinkId }),
+        })
+
+        if (!response.ok) {
+            throw new Error('Failed to send the review link')
+        }
+
+        return response.json()
+    }
 
     return (
         <div className="flex flex-col">
@@ -123,6 +148,26 @@ export default async function Dashboard() {
                     startIndex={1}
                     showDeleteButton={false}
                 />
+            </div>
+            <div className="flex flex-col">
+                <div className="flex justify-between items-center sm:flex-row mt-5">
+                    <p className="text-xl font-bold">Customer Reviews</p>
+                    <div className="flex sm:flex-row">
+                        <Link
+                            href={paths.showAllCustomers()}
+                            className="border p-2 mx-1 rounded bg-blue-200 hover:bg-blue-600 hover:text-zinc-200 no-underline"
+                        >
+                            View All Customers
+                        </Link>
+                    </div>
+                </div>
+                <div className="flex flex-col gap-2 mt-5">
+                    <RenderCustomers
+                        customers={sortedCustomers}
+                        handleSendReviewLink={handleSendReviewLink}
+                        startIndex={1}
+                    />
+                </div>
             </div>
         </div>
     )

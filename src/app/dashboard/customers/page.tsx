@@ -1,0 +1,128 @@
+'use client'
+
+import { fetchCustomersWithReviewLinks } from '@/actions'
+import RenderCustomers from '@/components/renderCustomers'
+import { useEffect, useState } from 'react'
+
+interface ReviewLink {
+    id: string
+    email: string
+    productId: string
+    productName: string
+    token: string
+    expiryDate: Date
+    status: string
+    createdAt: Date
+    updatedAt: Date
+}
+
+interface Customer {
+    id: string
+    name: string | null
+    email: string
+    stripeCustomerId: string
+    reviewLinks: ReviewLink[]
+    createdAt: Date
+    updatedAt: Date
+}
+
+export default function ShowAllCustomers() {
+    const [customers, setCustomers] = useState<Customer[]>([])
+    const [currentPage, setCurrentPage] = useState(1)
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState<string | null>(null)
+
+    const customersPerPage = 20
+
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true)
+            setError(null)
+            try {
+                const customers = await fetchCustomersWithReviewLinks()
+                // Sort customers by createdAt in descending order
+                const sortedCustomers = customers.sort(
+                    (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+                )
+                setCustomers(sortedCustomers)
+            } catch (err) {
+                setError('Failed to fetch customers')
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchData()
+    }, [])
+
+    const paginatedCustomers = customers.slice(
+        (currentPage - 1) * customersPerPage,
+        currentPage * customersPerPage
+    )
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page)
+    }
+
+    const totalPages = Math.ceil(customers.length / customersPerPage)
+
+    const handleSendReviewLink = async (
+        customerId: string,
+        reviewLinkId: string
+    ) => {
+        try {
+            const response = await fetch('/api/send-review-link', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ customerId, reviewLinkId }),
+            })
+
+            if (!response.ok) {
+                throw new Error('Failed to send the review link')
+            }
+
+            return response.json()
+        } catch (error) {
+            console.error('Error:', error)
+            alert('Failed to send the review link')
+        }
+    }
+
+    const startIndex = (currentPage - 1) * customersPerPage + 1
+
+    return (
+        <div>
+            {loading ? (
+                <p>Loading...</p>
+            ) : error ? (
+                <p>{error}</p>
+            ) : (
+                <RenderCustomers
+                    customers={paginatedCustomers}
+                    startIndex={startIndex}
+                    handleSendReviewLink={handleSendReviewLink}
+                />
+            )}
+
+            <div className="flex justify-center mt-4">
+                <button
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="px-4 py-2 bg-blue-500 text-white rounded mr-2"
+                >
+                    Previous
+                </button>
+                <span className="px-4 py-2">{`Page ${currentPage} of ${totalPages}`}</span>
+                <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="px-4 py-2 bg-blue-500 text-white rounded ml-2"
+                >
+                    Next
+                </button>
+            </div>
+        </div>
+    )
+}

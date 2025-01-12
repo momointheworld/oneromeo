@@ -29,6 +29,9 @@ const paths = {
     showAllCategories() {
         return `/dashboard/posts/categories`
     },
+    showAllCustomers() {
+        return `/dashboard/customers`
+    },
     showCategoryPosts(categorySlug: string) {
         return `/dashboard/posts/categories/${categorySlug}`
     },
