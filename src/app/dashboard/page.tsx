@@ -157,7 +157,7 @@ export default async function Dashboard() {
                             href={paths.showAllCustomers()}
                             className="border p-2 mx-1 rounded bg-blue-200 hover:bg-blue-600 hover:text-zinc-200 no-underline"
                         >
-                            View All Customers
+                            View All Customer Reviews
                         </Link>
                     </div>
                 </div>

@@ -16,7 +16,7 @@ export interface ReviewLink {
 export interface Customer {
     id: string
     email: string
-    name: string | null // Update here to allow null
+    name: string | null
     stripeCustomerId: string
     createdAt: Date
     updatedAt: Date
@@ -30,6 +30,7 @@ interface RenderCustomersProps {
         reviewLinkId: string
     ) => Promise<void>
 }
+
 const RenderCustomers: React.FC<
     RenderCustomersProps & { startIndex: number }
 > = ({ customers, startIndex, handleSendReviewLink }) => {
@@ -48,46 +49,54 @@ const RenderCustomers: React.FC<
                     </tr>
                 </thead>
                 <tbody>
-                    {customers.map((customer, index) => (
-                        <tr key={customer.id} className="border-t">
-                            <td className="px-4 py-2">{startIndex + index}</td>
-                            {/* Continuous index */}
-                            <td className="px-4 py-2">
-                                {customer.name || 'Unknown Name'}
-                            </td>
-                            <td className="px-4 py-2">{customer.email}</td>
-                            <td className="px-4 py-2">
-                                {customer.updatedAt.toLocaleDateString()}
-                            </td>
-                            <td className="px-4 py-2">
-                                {customer.reviewLinks.map((link) => (
-                                    <div key={link.id} className="mb-2">
-                                        <p className="text-sm">
-                                            {link.productName}
-                                        </p>
-                                    </div>
-                                ))}
-                            </td>
-                            <td className="px-4 py-2">
-                                {customer.reviewLinks.map((link) => (
-                                    <div key={link.id} className="mb-2">
+                    {customers.map((customer, index) => {
+                        // Pick the first review link for each customer
+                        const reviewLink = customer.reviewLinks[0]
+
+                        return (
+                            <tr key={customer.id} className="border-t">
+                                <td className="px-4">{startIndex + index}</td>
+                                {/* Continuous index */}
+                                <td className="px-4">
+                                    {customer.name || 'Unknown Name'}
+                                </td>
+                                <td className="px-4">{customer.email}</td>
+
+                                <td className="px-4">
+                                    {customer.updatedAt.toLocaleDateString()}
+                                </td>
+                                <td className="px-4">
+                                    {/* List all products for the customer */}
+                                    {customer.reviewLinks.map((link) => (
+                                        <div key={link.id} className="mb-2">
+                                            <p className="text-sm">
+                                                {link.productName}
+                                            </p>
+                                        </div>
+                                    ))}
+                                </td>
+                                <td className="px-4">
+                                    {/* Show status for the first review link */}
+                                    {reviewLink ? (
                                         <p className="text-xs text-gray-500">
-                                            Status: {link.status}
+                                            Status: {reviewLink.status}
                                         </p>
-                                    </div>
-                                ))}
-                            </td>
-                            <td className="px-4 py-2">
-                                {customer.reviewLinks.map((link) => (
-                                    <SendReviewButton
-                                        key={link.id}
-                                        customerId={customer.id}
-                                        linkId={link.id}
-                                    />
-                                ))}
-                            </td>
-                        </tr>
-                    ))}
+                                    ) : (
+                                        'No review link'
+                                    )}
+                                </td>
+                                <td className="px-4">
+                                    {/* Only show the Send Review Link button for the first review link */}
+                                    {reviewLink && (
+                                        <SendReviewButton
+                                            customerId={customer.id}
+                                            linkId={reviewLink.id}
+                                        />
+                                    )}
+                                </td>
+                            </tr>
+                        )
+                    })}
                 </tbody>
             </table>
         </div>

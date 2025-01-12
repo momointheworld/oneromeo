@@ -1,6 +1,7 @@
 'use client'
-
 import { fetchCustomersWithReviewLinks } from '@/actions'
+import PageBreadCrumbs from '@/components/common/breadcrumbs'
+import paths from '@/components/paths'
 import RenderCustomers from '@/components/renderCustomers'
 import { useEffect, useState } from 'react'
 
@@ -25,13 +26,20 @@ interface Customer {
     createdAt: Date
     updatedAt: Date
 }
+interface Breadcrumb {
+    href: string
+    text: string
+}
 
 export default function ShowAllCustomers() {
     const [customers, setCustomers] = useState<Customer[]>([])
     const [currentPage, setCurrentPage] = useState(1)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
-
+    const breadcrumbs: Breadcrumb[] = [
+        { href: paths.dashboard(), text: 'Dashboard' },
+        { href: paths.showAllCustomers(), text: 'Customers Reviews' },
+    ]
     const customersPerPage = 20
 
     useEffect(() => {
@@ -99,14 +107,17 @@ export default function ShowAllCustomers() {
             ) : error ? (
                 <p>{error}</p>
             ) : (
-                <RenderCustomers
-                    customers={paginatedCustomers}
-                    startIndex={startIndex}
-                    handleSendReviewLink={handleSendReviewLink}
-                />
+                <div>
+                    <PageBreadCrumbs items={breadcrumbs} />
+                    <RenderCustomers
+                        customers={paginatedCustomers}
+                        startIndex={startIndex}
+                        handleSendReviewLink={handleSendReviewLink}
+                    />
+                </div>
             )}
 
-            <div className="flex justify-center mt-4">
+            <div className="flex justify-center mt-5">
                 <button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
