@@ -164,7 +164,6 @@ export default async function Dashboard() {
                 <div className="flex flex-col gap-2 mt-5">
                     <RenderCustomers
                         customers={sortedCustomers}
-                        handleSendReviewLink={handleSendReviewLink}
                         startIndex={1}
                     />
                 </div>

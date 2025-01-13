@@ -1,20 +1,19 @@
-// SendReviewButton.js
 'use client'
 import { Button } from '@nextui-org/react'
 import { useState } from 'react'
 
 interface SendReviewButtonProps {
-    customerId: string
+    email: string
     linkId: string
+    productName: string
 }
 
 export default function SendReviewButton({
-    customerId,
+    email,
     linkId,
+    productName,
 }: SendReviewButtonProps) {
     const [loading, setLoading] = useState(false)
-    const [error, setError] = useState<string | null>(null)
-    const [success, setSuccess] = useState<boolean>(false)
     const [color, setColor] = useState<
         'success' | 'default' | 'primary' | 'secondary' | 'warning' | 'danger'
     >('primary')
@@ -22,17 +21,50 @@ export default function SendReviewButton({
 
     const handleClick = async () => {
         setLoading(true)
-        const response = await fetch('/api/sendReviewLink', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ customerId, linkId }),
+
+        // Log the data being sent to the server
+        console.log('Sending review link with:', {
+            email,
+            reviewLinkId: linkId,
+            productName,
         })
 
-        const data = await response.json()
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_SITE_URL}/api/sendReviewLink`,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email,
+                    reviewLinkId: linkId,
+                    productName,
+                }),
+            }
+        )
 
-        if (data.success) {
+        // Log the response status and body
+        console.log('Response status:', response.status)
+        const data = await response.json()
+        console.log('Response data:', data)
+
+        if (response.ok) {
+            // Update the status in the backend to "sent"
+            await fetch(
+                `${process.env.NEXT_PUBLIC_SITE_URL}/api/updateReviewLinkStatus`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        reviewLinkId: linkId,
+                        status: 'sent',
+                    }),
+                }
+            )
+
             setLoading(false)
             setColor('success')
             setButtonText('Sent')
@@ -41,7 +73,7 @@ export default function SendReviewButton({
             setLoading(false)
             setColor('danger')
             setButtonText('Failed')
-            console.error('Failed to send review link')
+            console.error('Failed to send review link:', data)
         }
     }
 
@@ -55,7 +87,8 @@ export default function SendReviewButton({
                             variant="flat"
                             color={color}
                             isLoading={loading}
-                            onClick={handleClick} // use the bound function
+                            onClick={handleClick}
+                            disabled={loading || buttonText === 'Sent'}
                         >
                             {buttonText}
                         </Button>

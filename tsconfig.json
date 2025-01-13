@@ -37,7 +37,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "src/app/old-page.bk"
-  ],
+, "src/actions/saveTokenToDatabase"  ],
   "exclude": [
     "node_modules"
   ]

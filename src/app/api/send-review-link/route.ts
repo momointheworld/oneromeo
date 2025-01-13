@@ -1,65 +1,43 @@
-// src/app/api/send-review-link/route.ts
+import { NextRequest, NextResponse } from 'next/server'
+import { sendEmail } from '@/utils/email' // Import sendEmail
+import { getReviewLinkByEmail } from '@/actions'
 
-import { NextResponse } from 'next/server'
-import { db } from '@/db'
-import { sendEmail } from '@/utils/email'
+export async function POST(request: NextRequest) {
+    const body = await request.json()
 
-export async function POST(req: Request) {
-    try {
-        const { customerId, reviewLinkId } = await req.json()
+    // Log the incoming request data
+    console.log('Received data for review link request:', body)
 
-        // Validate inputs
-        if (!customerId || !reviewLinkId) {
-            return NextResponse.json(
-                { error: 'Missing customerId or reviewLinkId' },
-                { status: 400 }
-            )
-        }
+    const { email, reviewLinkId } = body
 
-        // Fetch the review link details
-        const reviewLink = await db.reviewLink.findUnique({
-            where: { id: reviewLinkId },
-        })
-
-        if (!reviewLink) {
-            return NextResponse.json(
-                { error: 'Review link not found' },
-                { status: 404 }
-            )
-        }
-
-        // Logic to send the email with the review link
-        const emailSent = await sendEmail(
-            reviewLink.email,
-            `We'd love your feedback on ${reviewLink.productName}`,
-            `Hi,\n\nThank you for purchasing ${
-                reviewLink.productName
-            }. We'd appreciate your feedback!\n\nClick here to leave your review: ${
-                process.env.NEXT_PUBLIC_BASE_URL
-            }/review/${reviewLink.token}\n\nThis link will expire on ${new Date(
-                reviewLink.expiryDate
-            ).toLocaleDateString()}.`
-        )
-
-        if (!emailSent) {
-            return NextResponse.json(
-                { error: 'Failed to send email' },
-                { status: 500 }
-            )
-        }
-
-        // Update the status of the review link to 'sent'
-        await db.reviewLink.update({
-            where: { id: reviewLinkId },
-            data: { status: 'sent' },
-        })
-
-        return NextResponse.json({ message: 'Review link sent successfully' })
-    } catch (error) {
-        console.error('Error sending review link:', error)
+    // Validate input
+    if (!email || !reviewLinkId) {
+        console.log('Missing email or reviewLinkId')
         return NextResponse.json(
-            { error: 'Internal Server Error' },
-            { status: 500 }
+            { error: 'Email and reviewLinkId are required' },
+            { status: 400 }
         )
+    }
+
+    try {
+        // Fetch the review link by email and ID
+        const reviewLink = await getReviewLinkByEmail({ email, reviewLinkId })
+
+        // Log the fetched review link
+        console.log('Fetched review link:', reviewLink)
+
+        const reviewLinkUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/review/${reviewLink.token}`
+
+        const subject = `Leave a Review for ${reviewLink.productName}`
+        const text = `Thank you for purchasing ${reviewLink.productName}! Please leave a review using the following link: ${reviewLinkUrl}. This link will expire in 7 days.`
+
+        // Send the review link via email
+        await sendEmail(email, subject, text)
+
+        return NextResponse.json({ message: 'Review link email sent' })
+    } catch (err: any) {
+        // Log the error
+        console.log('Error sending review link:', err.message)
+        return NextResponse.json({ error: err.message }, { status: 500 })
     }
 }

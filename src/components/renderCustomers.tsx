@@ -1,5 +1,6 @@
 import React from 'react'
 import SendReviewButton from './sendReviewButton'
+import { GitHubEmail } from 'next-auth/providers/github'
 
 export interface ReviewLink {
     id: string
@@ -25,15 +26,11 @@ export interface Customer {
 
 interface RenderCustomersProps {
     customers: Customer[]
-    handleSendReviewLink: (
-        customerId: string,
-        reviewLinkId: string
-    ) => Promise<void>
 }
 
 const RenderCustomers: React.FC<
     RenderCustomersProps & { startIndex: number }
-> = ({ customers, startIndex, handleSendReviewLink }) => {
+> = ({ customers, startIndex }) => {
     return (
         <div className="overflow-x-auto">
             <table className="min-w-full table-auto border-collapse">
@@ -89,8 +86,9 @@ const RenderCustomers: React.FC<
                                     {/* Only show the Send Review Link button for the first review link */}
                                     {reviewLink && (
                                         <SendReviewButton
-                                            customerId={customer.id}
+                                            email={customer.email}
                                             linkId={reviewLink.id}
+                                            productName={reviewLink.productName}
                                         />
                                     )}
                                 </td>

@@ -74,30 +74,6 @@ export default function ShowAllCustomers() {
 
     const totalPages = Math.ceil(customers.length / customersPerPage)
 
-    const handleSendReviewLink = async (
-        customerId: string,
-        reviewLinkId: string
-    ) => {
-        try {
-            const response = await fetch('/api/send-review-link', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ customerId, reviewLinkId }),
-            })
-
-            if (!response.ok) {
-                throw new Error('Failed to send the review link')
-            }
-
-            return response.json()
-        } catch (error) {
-            console.error('Error:', error)
-            alert('Failed to send the review link')
-        }
-    }
-
     const startIndex = (currentPage - 1) * customersPerPage + 1
 
     return (
@@ -112,7 +88,6 @@ export default function ShowAllCustomers() {
                     <RenderCustomers
                         customers={paginatedCustomers}
                         startIndex={startIndex}
-                        handleSendReviewLink={handleSendReviewLink}
                     />
                 </div>
             )}
