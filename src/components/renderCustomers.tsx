@@ -1,6 +1,5 @@
 import React from 'react'
 import SendReviewButton from './sendReviewButton'
-import { GitHubEmail } from 'next-auth/providers/github'
 
 export interface ReviewLink {
     id: string
@@ -26,11 +25,25 @@ export interface Customer {
 
 interface RenderCustomersProps {
     customers: Customer[]
+    setCustomers: React.Dispatch<React.SetStateAction<Customer[]>>
 }
 
 const RenderCustomers: React.FC<
     RenderCustomersProps & { startIndex: number }
-> = ({ customers, startIndex }) => {
+> = ({ customers, startIndex, setCustomers }) => {
+    const updateReviewLinkStatus = (reviewLinkId: string, status: string) => {
+        setCustomers((prevCustomers) =>
+            prevCustomers.map((customer) => ({
+                ...customer,
+                reviewLinks: customer.reviewLinks.map((reviewLink) =>
+                    reviewLink.id === reviewLinkId
+                        ? { ...reviewLink, status }
+                        : reviewLink
+                ),
+            }))
+        )
+    }
+
     return (
         <div className="overflow-x-auto">
             <table className="min-w-full table-auto border-collapse">
@@ -72,16 +85,27 @@ const RenderCustomers: React.FC<
                                         </div>
                                     ))}
                                 </td>
-                                <td className="px-4">
+                                <td
+                                    className={`px-4 text-2xl ${
+                                        reviewLink
+                                            ? reviewLink.status === 'sent'
+                                                ? 'bg-green-100 text-green-800'
+                                                : reviewLink.status === 'failed'
+                                                ? 'bg-red-100 text-red-800'
+                                                : 'bg-gray-100 text-gray-800'
+                                            : 'bg-gray-50 text-gray-800'
+                                    }`}
+                                >
                                     {/* Show status for the first review link */}
                                     {reviewLink ? (
-                                        <p className="text-xs text-gray-500">
+                                        <p className="text-xs">
                                             Status: {reviewLink.status}
                                         </p>
                                     ) : (
                                         'No review link'
                                     )}
                                 </td>
+
                                 <td className="px-4">
                                     {/* Only show the Send Review Link button for the first review link */}
                                     {reviewLink && (
@@ -89,6 +113,18 @@ const RenderCustomers: React.FC<
                                             email={customer.email}
                                             linkId={reviewLink.id}
                                             productName={reviewLink.productName}
+                                            onSuccess={() =>
+                                                updateReviewLinkStatus(
+                                                    reviewLink.id,
+                                                    'sent'
+                                                )
+                                            }
+                                            onFail={() =>
+                                                updateReviewLinkStatus(
+                                                    reviewLink.id,
+                                                    'failed'
+                                                )
+                                            }
                                         />
                                     )}
                                 </td>

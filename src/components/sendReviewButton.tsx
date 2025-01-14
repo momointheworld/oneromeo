@@ -6,12 +6,16 @@ interface SendReviewButtonProps {
     email: string
     linkId: string
     productName: string
+    onSuccess: () => void
+    onFail: () => void
 }
 
 export default function SendReviewButton({
     email,
     linkId,
     productName,
+    onSuccess,
+    onFail,
 }: SendReviewButtonProps) {
     const [loading, setLoading] = useState(false)
     const [color, setColor] = useState<
@@ -30,7 +34,7 @@ export default function SendReviewButton({
         })
 
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_SITE_URL}/api/sendReviewLink`,
+            `${process.env.NEXT_PUBLIC_SITE_URL}/api/send-review-link`,
             {
                 method: 'POST',
                 headers: {
@@ -52,7 +56,7 @@ export default function SendReviewButton({
         if (response.ok) {
             // Update the status in the backend to "sent"
             await fetch(
-                `${process.env.NEXT_PUBLIC_SITE_URL}/api/updateReviewLinkStatus`,
+                `${process.env.NEXT_PUBLIC_SITE_URL}/api/update-review-link-status`,
                 {
                     method: 'PUT',
                     headers: {
@@ -68,11 +72,13 @@ export default function SendReviewButton({
             setLoading(false)
             setColor('success')
             setButtonText('Sent')
+            onSuccess() // Notify the parent about the status update
             console.log('Review link sent successfully')
         } else {
             setLoading(false)
             setColor('danger')
             setButtonText('Failed')
+            onFail() // Notify the parent about the status update
             console.error('Failed to send review link:', data)
         }
     }

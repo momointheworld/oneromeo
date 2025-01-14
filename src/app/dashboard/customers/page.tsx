@@ -88,6 +88,7 @@ export default function ShowAllCustomers() {
                     <RenderCustomers
                         customers={paginatedCustomers}
                         startIndex={startIndex}
+                        setCustomers={setCustomers}
                     />
                 </div>
             )}

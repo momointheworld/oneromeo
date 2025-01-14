@@ -4,7 +4,9 @@ import { db } from '@/db'
 import paths from '@/components/paths'
 import RenderAppointments from '@/components/renderAppointments'
 import { fetchCustomersWithReviewLinks } from '@/actions/fetchCustomersWithReviewLinks'
-import RenderCustomers from '@/components/renderCustomers'
+import RenderCustomers, { Customer } from '@/components/renderCustomers'
+import { updateReviewLinkStatus } from '@/actions/updateReviewLinkStatus'
+import { getReviewLinkByEmail } from '@/actions'
 
 export const revalidate = 3 // re-render in every 3 seconds
 export default async function Dashboard() {
@@ -48,30 +50,78 @@ export default async function Dashboard() {
     const appointments = await db.appointment.findMany({
         orderBy: { createdAt: 'desc' },
     })
-    const latestAppointments = appointments.slice(0, 5) // Get the latest 5 quizzes
-
+    const latestAppointments = appointments.slice(0, 5) // Get the latest 5 appointments
     const customers = await fetchCustomersWithReviewLinks()
-    const latestCustomers = customers.slice(-10)
+    const latestCustomers = customers.slice(-5) // Get the last 5 customers
     const sortedCustomers = latestCustomers.sort(
-        (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+        (a, b) => b.createdAt.getTime() - a.createdAt.getTime() // Sort in descending order (newer first)
     )
+    const startIndex = 1
 
-    // API handler for sending the review link
-    const handleSendReviewLink = async (customerId: any, reviewLinkId: any) => {
-        const response = await fetch('/api/send-review-link', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ customerId, reviewLinkId }),
-        })
+    // server component, cannot use the RenderCustomer component here, thus we need to re-implement the same logic
+    const renderCustomers = sortedCustomers.map((customer, index) => {
+        const reviewLink = customer.reviewLinks[0] // Pick the first review link for each customer
 
-        if (!response.ok) {
-            throw new Error('Failed to send the review link')
-        }
-
-        return response.json()
-    }
+        return (
+            <div className="overflow-x-auto" key={customer.id}>
+                <table className="min-w-full table-auto border-collapse">
+                    <thead>
+                        <tr className="bg-gray-100">
+                            <th className="px-4 py-2 text-left">#</th>
+                            <th className="px-4 py-2 text-left">
+                                Customer Name
+                            </th>
+                            <th className="px-4 py-2 text-left">Email</th>
+                            <th className="px-4 py-2 text-left">Updated At</th>
+                            <th className="px-4 py-2 text-left">Product</th>
+                            <th className="px-4 py-2 text-left">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr className="border-t">
+                            <td className="px-4">{startIndex + index}</td>
+                            {/* Continuous index */}
+                            <td className="px-4">
+                                {customer.name || 'Unknown Name'}
+                            </td>
+                            <td className="px-4">{customer.email}</td>
+                            <td className="px-4">
+                                {customer.updatedAt.toLocaleDateString()}
+                            </td>
+                            <td className="px-4">
+                                {customer.reviewLinks.map((link) => (
+                                    <div key={link.id} className="mb-2">
+                                        <p className="text-sm">
+                                            {link.productName}
+                                        </p>
+                                    </div>
+                                ))}
+                            </td>
+                            <td
+                                className={`px-4 text-2xl ${
+                                    reviewLink
+                                        ? reviewLink.status === 'sent'
+                                            ? 'bg-green-100 text-green-800'
+                                            : reviewLink.status === 'failed'
+                                            ? 'bg-red-100 text-red-800'
+                                            : 'bg-gray-100 text-gray-800'
+                                        : 'bg-gray-50 text-gray-800'
+                                }`}
+                            >
+                                {reviewLink ? (
+                                    <p className="text-xs">
+                                        Status: {reviewLink.status}
+                                    </p>
+                                ) : (
+                                    'No review link'
+                                )}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        )
+    })
 
     return (
         <div className="flex flex-col">
@@ -162,10 +212,7 @@ export default async function Dashboard() {
                     </div>
                 </div>
                 <div className="flex flex-col gap-2 mt-5">
-                    <RenderCustomers
-                        customers={sortedCustomers}
-                        startIndex={1}
-                    />
+                    {renderCustomers}
                 </div>
             </div>
         </div>

@@ -1,4 +1,3 @@
-// pages/api/updateReviewLinkStatus.ts
 import { db } from '@/db'
 import { NextRequest, NextResponse } from 'next/server'
 
