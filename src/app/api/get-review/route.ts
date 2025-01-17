@@ -37,9 +37,10 @@ export async function GET(req: NextRequest) {
                 review: reviewLink.review, // Send back the review data if it exists
             })
         } else {
-            console.log('No review submitted yet for token:', token)
+            console.log('No review submitted yet for token:', token, reviewLink)
             return NextResponse.json({
                 message: 'No review submitted yet for this link',
+                review: null,
             })
         }
     } catch (error) {

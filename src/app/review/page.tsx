@@ -5,20 +5,27 @@ import { useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { Icon } from '@iconify/react' // Import Icon from Iconify
 import { FullSkeleton } from '@/components/common/skeleton-loading'
+import ReviewComponent from '@/components/reviewComponent'
+
+interface ReviewData {
+    editLinkToken: string
+    rating: number
+    comment: string
+}
 
 export default function ReviewPage() {
     const searchParams = useSearchParams()
     const token = searchParams.get('token')
     console.log('Token from URL:', token)
-
-    const [rating, setRating] = useState(5)
     const [comment, setComment] = useState('')
+    const [isEditing, setIsEditing] = useState(false)
     const [errors, setErrors] = useState({})
     const [loading, setLoading] = useState(true) // Initially set loading to true
     const [submitted, setSubmitted] = useState(null)
     const [successMessage, setSuccessMessage] = useState('')
     const [errorMessage, setErrorMessage] = useState('')
-    const [reviewData, setReviewData] = useState<any>(null) // Store review or message
+
+    const [reviewData, setReviewData] = useState<ReviewData | null>(null)
 
     useEffect(() => {
         if (token) {
@@ -37,9 +44,11 @@ export default function ReviewPage() {
                     if (data.error) {
                         setErrorMessage(data.error)
                     } else if (data.review) {
+                        // If review exists, set reviewData with the actual review
                         setReviewData(data.review)
                     } else {
-                        setReviewData(data.message || 'No review found') // Provide fallback for missing messages
+                        // If no review, set reviewData to null (not a string)
+                        setReviewData(null)
                     }
                 })
                 .catch((error) => {
@@ -51,6 +60,8 @@ export default function ReviewPage() {
                 })
         }
     }, [token])
+
+    console.log(reviewData)
 
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -95,6 +106,7 @@ export default function ReviewPage() {
         }
     }
 
+    const [rating, setRating] = useState(5) // State for rating
     const [hoveredRating, setHoveredRating] = useState(0) // State for hover effect
 
     const handleStarClick = (rating: number) => {
@@ -109,18 +121,24 @@ export default function ReviewPage() {
         setHoveredRating(0) // Reset hover effect when the mouse leaves
     }
 
-    const renderStars = () => {
-        let stars = []
+    const renderStars = (isEditable: boolean, displayRating?: number) => {
+        const activeRating = isEditable
+            ? hoveredRating || rating
+            : displayRating ?? 0
+
+        const stars = []
         for (let i = 1; i <= 5; i++) {
-            const isFilled = i <= (hoveredRating || rating) // Use hovered rating if exists
+            const isFilled = i <= activeRating // Determine if the star should be filled
             stars.push(
                 <Icon
                     key={i}
                     icon="iconoir:star"
-                    className="cursor-pointer"
-                    onClick={() => handleStarClick(i)}
-                    onMouseEnter={() => handleStarHover(i)} // Update hovered rating on hover
-                    onMouseLeave={handleStarLeave} // Reset when mouse leaves
+                    className={isEditable ? 'cursor-pointer' : ''}
+                    onClick={isEditable ? () => handleStarClick(i) : undefined}
+                    onMouseEnter={
+                        isEditable ? () => handleStarHover(i) : undefined
+                    }
+                    onMouseLeave={isEditable ? handleStarLeave : undefined}
                     style={{
                         fontSize: '30px',
                         color: isFilled ? 'orange' : 'gray', // Change color based on rating or hover state
@@ -128,8 +146,38 @@ export default function ReviewPage() {
                 />
             )
         }
-        return stars
+        return <div className="flex star-container">{stars}</div>
     }
+
+    const handleEditReview = async () => {
+        try {
+            const response = await fetch('/api/edit-review', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    editLinkToken: reviewData?.editLinkToken ?? '', // Pass the correct token
+                    rating: reviewData?.rating ?? 0,
+                    comment: reviewData?.comment ?? '',
+                }),
+            })
+
+            const result = await response.json()
+
+            if (response.ok) {
+                alert('Review updated successfully')
+                setIsEditing(false) // Exit editing mode
+            } else {
+                console.error('Error updating review:', result.error)
+                alert('Failed to update review: ' + result.error)
+            }
+        } catch (error) {
+            console.error('Error:', error)
+            alert('An error occurred while updating the review.')
+        }
+    }
+
     return (
         <div className="flex flex-col max-w-md mx-auto">
             {/* Show success or error message */}
@@ -139,71 +187,23 @@ export default function ReviewPage() {
             {errorMessage && <p className="text-red-600">{errorMessage}</p>}
 
             {/* Show the loading skeleton while loading */}
-            {loading && !reviewData ? (
+            {loading ? (
                 <FullSkeleton /> // Display skeleton while loading
             ) : (
                 // Once loading is finished, show review data or the form
-                <>
-                    {reviewData ? (
-                        typeof reviewData === 'string' ? (
-                            <p>{reviewData}</p> // No review yet, show message
-                        ) : (
-                            <>
-                                <div>
-                                    <h2 className="font-semibold">
-                                        Your Review
-                                    </h2>
-                                    <div>Rating: {reviewData.rating}</div>
-                                    <div>Comment: {reviewData.comment}</div>
-                                </div>
-                                <Button
-                                    variant="flat"
-                                    onClick={() => alert('Edit functionality')}
-                                >
-                                    Edit Review
-                                </Button>
-                            </>
-                        )
-                    ) : (
-                        <div>
-                            <h1 className="text-2xl font-bold">
-                                Submit Your Review
-                            </h1>
-                            <Form
-                                validationBehavior="native"
-                                validationErrors={errors}
-                                onReset={() => setSubmitted(null)}
-                                onSubmit={onSubmit}
-                            >
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Rating
-                                </label>
-                                <div className="flex">{renderStars()}</div>
-
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Comment
-                                </label>
-                                <Textarea
-                                    id="comment"
-                                    value={comment}
-                                    onChange={(e) => setComment(e.target.value)}
-                                    className="mt-1 block w-full border-gray-300 rounded-md"
-                                    errorMessage="Comment is required. 5 words minimum."
-                                />
-
-                                <Button
-                                    type="submit"
-                                    isLoading={loading}
-                                    variant="solid"
-                                    color="primary"
-                                    className="self-end mt-1"
-                                >
-                                    Submit Review
-                                </Button>
-                            </Form>
-                        </div>
-                    )}
-                </>
+                <ReviewComponent
+                    reviewData={reviewData}
+                    errors={errors}
+                    setSubmitted={setSubmitted}
+                    onSubmit={onSubmit}
+                    comment={comment}
+                    setComment={setComment}
+                    isEditing={isEditing}
+                    setIsEditing={setIsEditing}
+                    handleSave={handleEditReview}
+                    renderStars={renderStars}
+                    loading={loading}
+                />
             )}
         </div>
     )

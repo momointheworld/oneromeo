@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
         // Log the fetched review link
         console.log('Fetched review link:', reviewLink)
 
-        const reviewLinkUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/reviews?token=${reviewLink.token}`
+        const reviewLinkUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/review?token=${reviewLink.token}`
 
         const subject = `Leave a Review for ${reviewLink.productName}`
         const text = `Thank you for purchasing ${reviewLink.productName}! Please leave a review using the following link: ${reviewLinkUrl}. This link will expire in 7 days.`
