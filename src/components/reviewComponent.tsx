@@ -42,85 +42,78 @@ const ReviewComponent = ({
     )
     const [rating, setRating] = useState(reviewData?.rating || 5)
 
-    return (
-        <div className="flex flex-col gap-5">
-            {reviewData ? (
-                isEditing ? (
-                    // Editing Mode
-                    <Form
-                        className="flex flex-col gap-3"
-                        validationErrors={errors}
-                        onSubmit={onSubmit}
+    return reviewData ? (
+        isEditing ? (
+            // Editing Mode
+            <Form validationErrors={errors} onSubmit={onSubmit}>
+                <h2>Edit Your Review</h2>
+                <label>
+                    Rating:
+                    {renderStars(true, undefined)} {/* Editable stars */}
+                </label>
+                <label>Comment:</label>
+                <Textarea
+                    value={currentComment}
+                    onChange={(e) => setCurrentComment(e.target.value)}
+                ></Textarea>
+
+                <div className="flex gap-2 self-end">
+                    <Button
+                        onPress={handleSave}
+                        isLoading={loading}
+                        variant="solid"
+                        color="primary"
                     >
-                        <h2>Edit Your Review</h2>
-                        <label>
-                            Rating:
-                            {renderStars(true, undefined)}{' '}
-                            {/* Editable stars */}
-                        </label>
-                        <label>
-                            Comment:
-                            <Textarea
-                                value={currentComment}
-                                onChange={(e) =>
-                                    setCurrentComment(e.target.value)
-                                }
-                                className="border p-1 rounded"
-                            ></Textarea>
-                        </label>
-                        <div className="flex gap-2">
-                            <Button onPress={handleSave} disabled={loading}>
-                                Save
-                            </Button>
-                            <Button onPress={() => setIsEditing(false)}>
-                                Cancel
-                            </Button>
-                        </div>
-                    </Form>
-                ) : (
-                    // View Mode
-                    <div className="flex flex-col gap-5">
-                        <h2>Your Review</h2>
-                        <div className="flex items-center gap-2">
-                            <label>
-                                Rating:
-                                {renderStars(false, reviewData.rating)}{' '}
-                                {/* Static stars */}
-                            </label>
-                        </div>
-                        Comment: {reviewData?.comment ? reviewData.comment : ''}
-                        <Button onPress={() => setIsEditing(true)}>
-                            Edit Review
-                        </Button>
-                    </div>
-                )
-            ) : (
-                // No Review Yet
-                <Form
-                    className="flex flex-col gap-3"
-                    validationErrors={errors}
-                    onSubmit={onSubmit}
-                >
-                    <h2>Leave a Review</h2>
+                        Save
+                    </Button>
+                    <Button variant="flat" onPress={() => setIsEditing(false)}>
+                        Cancel
+                    </Button>
+                </div>
+            </Form>
+        ) : (
+            // View Mode
+            <div className="flex flex-col gap-5">
+                <h2>Your Review</h2>
+                <div className="flex items-center gap-2">
                     <label>
                         Rating:
-                        {renderStars(true, undefined)} {/* Editable stars */}
+                        {renderStars(false, reviewData.rating)}{' '}
+                        {/* Static stars */}
                     </label>
-                    <label>
-                        Comment:
-                        <Textarea
-                            value={comment}
-                            onChange={(e) => setComment(e.target.value)}
-                            placeholder="Write your review"
-                            className="border p-1 rounded"
-                        ></Textarea>
-                    </label>
-                    <Button type="submit" disabled={loading}>
-                        {loading ? 'Submitting...' : 'Submit'}
-                    </Button>
-                </Form>
-            )}
-        </div>
+                </div>
+                <label>Comment: </label>
+                {reviewData?.comment ? reviewData.comment : ''}
+                <Button
+                    variant="bordered"
+                    color="success"
+                    onPress={() => setIsEditing(true)}
+                >
+                    Edit Review
+                </Button>
+            </div>
+        )
+    ) : (
+        // No Review Yet
+        <Form validationErrors={errors} onSubmit={onSubmit} className="w-full">
+            <h2>Leave a Review</h2>
+            <label>
+                Rating:
+                {renderStars(true, undefined)} {/* Editable stars */}
+            </label>
+            <label>Comment:</label>
+            <Textarea
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                placeholder="Write your review"
+            ></Textarea>
+            <Button
+                type="submit"
+                variant="bordered"
+                color="primary"
+                className="self-end"
+            ></Button>
+        </Form>
     )
 }
 
