@@ -1,68 +1,90 @@
 import { Form } from '@nextui-org/form'
-import { Button, Input, Textarea } from '@nextui-org/react'
-import { useState } from 'react'
+import { Button, Textarea } from '@nextui-org/react'
+import { log } from 'console'
+import { useEffect, useState } from 'react'
 
-type ValidationErrors = {
-    [key: string]: string
-}
+type ValidationErrors = { [key: string]: string }
 
 interface ReviewData {
     rating: number
     comment: string
+    editLinkToken: string
 }
 
 interface ReviewFormProps {
-    reviewData: ReviewData | null
-    errors: ValidationErrors
-    setSubmitted: (value: any) => void
-    onSubmit: (event: React.FormEvent<HTMLFormElement>) => void
-    renderStars: (isEditable: boolean, rating?: number) => JSX.Element
-    comment: string
-    setComment: (value: string) => void
-    handleSave: () => void
-    loading: boolean
+    reviewData?: ReviewData | null
+    errors?: ValidationErrors
+    onReviewSubmit: (reviewData: ReviewData) => void
+    onUpdateSubmit: (reviewData: ReviewData) => void
+    renderStars: (
+        isEditable: boolean,
+        rating?: number,
+        onRatingChange?: (rating: number) => void
+    ) => JSX.Element
+    loading?: boolean
     isEditing: boolean
     setIsEditing: (value: boolean) => void
 }
+
 const ReviewComponent = ({
-    reviewData,
-    errors,
-    onSubmit,
+    reviewData = null,
+    errors = {},
+    onReviewSubmit,
+    onUpdateSubmit,
     renderStars,
-    comment,
-    setComment,
-    handleSave,
     isEditing,
     setIsEditing,
-    loading,
+    loading = false,
 }: ReviewFormProps) => {
-    // Initialize the comment state with reviewData.comment when entering edit mode
-    const [currentComment, setCurrentComment] = useState(
-        reviewData?.comment || ''
+    const [rating, setRating] = useState<number>(reviewData?.rating || 5)
+    const [comment, setComment] = useState<string>(reviewData?.comment || '')
+    const [editLinkToken, setEditLinkToken] = useState<string>(
+        reviewData?.editLinkToken || ''
     )
-    const [rating, setRating] = useState(reviewData?.rating || 5)
+
+    const handleRatingChange = (newRating: number) => setRating(newRating)
+
+    const handleCommentChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    ) => {
+        console.log(e.target.value)
+        setComment(e.target.value)
+    }
+    console.log(comment)
 
     return reviewData ? (
         isEditing ? (
             // Editing Mode
-            <Form validationErrors={errors} onSubmit={onSubmit}>
+            <Form
+                validationErrors={errors}
+                onSubmit={(e) => {
+                    e.preventDefault()
+                    onUpdateSubmit({
+                        rating,
+                        comment,
+                        editLinkToken,
+                    }) // Pass the updated values
+                }}
+                className="flex flex-col gap-5"
+            >
                 <h2>Edit Your Review</h2>
                 <label>
                     Rating:
-                    {renderStars(true, undefined)} {/* Editable stars */}
+                    {renderStars(true, rating, handleRatingChange)}{' '}
+                    {/* Editable stars */}
                 </label>
                 <label>Comment:</label>
                 <Textarea
-                    value={currentComment}
-                    onChange={(e) => setCurrentComment(e.target.value)}
-                ></Textarea>
-
+                    value={comment}
+                    onChange={handleCommentChange}
+                    placeholder="Edit your comment"
+                />
                 <div className="flex gap-2 self-end">
                     <Button
-                        onPress={handleSave}
                         isLoading={loading}
                         variant="solid"
                         color="primary"
+                        type="submit"
                     >
                         Save
                     </Button>
@@ -75,15 +97,15 @@ const ReviewComponent = ({
             // View Mode
             <div className="flex flex-col gap-5">
                 <h2>Your Review</h2>
-                <div className="flex items-center gap-2">
-                    <label>
+                <div className="flex items-center">
+                    <label className="font-bold">
                         Rating:
                         {renderStars(false, reviewData.rating)}{' '}
                         {/* Static stars */}
                     </label>
                 </div>
-                <label>Comment: </label>
-                {reviewData?.comment ? reviewData.comment : ''}
+                <label className="font-bold">Comment:</label>
+                <div>{reviewData.comment || 'No comment provided.'}</div>
                 <Button
                     variant="bordered"
                     color="success"
@@ -94,25 +116,35 @@ const ReviewComponent = ({
             </div>
         )
     ) : (
-        // No Review Yet
-        <Form validationErrors={errors} onSubmit={onSubmit} className="w-full">
+        // New Review Mode
+        <Form
+            validationErrors={errors}
+            onSubmit={(e) => {
+                e.preventDefault()
+                onReviewSubmit({ rating, comment, editLinkToken }) // Pass the updated values
+            }}
+            className="flex flex-col gap-5"
+        >
             <h2>Leave a Review</h2>
             <label>
                 Rating:
-                {renderStars(true, undefined)} {/* Editable stars */}
+                {renderStars(true, rating, handleRatingChange)}{' '}
+                {/* Editable stars */}
             </label>
             <label>Comment:</label>
             <Textarea
                 value={comment}
-                onChange={(e) => setComment(e.target.value)}
+                onChange={handleCommentChange}
                 placeholder="Write your review"
-            ></Textarea>
+            />
             <Button
                 type="submit"
                 variant="bordered"
                 color="primary"
                 className="self-end"
-            ></Button>
+            >
+                Submit
+            </Button>
         </Form>
     )
 }

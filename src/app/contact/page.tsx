@@ -1,10 +1,11 @@
 'use client'
 import React, { useState, FormEvent } from 'react'
-import { Button, Input, Textarea } from '@nextui-org/react'
+import { Button, Form, Input, Textarea } from '@nextui-org/react'
 
 export default function ContactPage() {
     const [isLoading, setIsLoading] = useState<boolean>(false)
-    const [errors, setErrors] = useState<{ [key: string]: string | null }>({})
+    // const [errors, setErrors] = useState<{ [key: string]: string | null }>({})
+    const [errors, setErrors] = useState({})
     const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
     async function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -12,12 +13,14 @@ export default function ContactPage() {
         setIsLoading(true)
 
         try {
-            const formData = new FormData(event.currentTarget)
-            const email = formData.get('email') as string
-            const name = formData.get('name') as string
-            const description = formData.get('description') as string
+            const formData = Object.fromEntries(
+                new FormData(event.currentTarget)
+            )
 
-            console.log({ email, name, description }) // Debugging log
+            // const formData = new FormData(event.currentTarget)
+            const email = formData.email as string
+            const name = formData.name as string
+            const description = formData.description as string
 
             const response = await fetch('/api/email', {
                 method: 'POST',
@@ -34,13 +37,13 @@ export default function ContactPage() {
 
             if (!response.ok) {
                 if (data.errors) {
-                    const newErrors: { [key: string]: string } = {}
-                    for (const key in data.errors) {
-                        if (data.errors[key]) {
-                            newErrors[key] = data.errors[key].join(', ')
-                        }
-                    }
-                    setErrors(newErrors)
+                    // const newErrors: { [key: string]: string } = {}
+                    // for (const key in data.errors) {
+                    //     if (data.errors[key]) {
+                    //         newErrors[key] = data.errors[key].join(', ')
+                    //     }
+                    // }
+                    setErrors(data.errors)
                 } else {
                     setErrors({
                         general:
@@ -91,35 +94,31 @@ export default function ContactPage() {
                 <div>
                     <h1>{`Say hello :)`} </h1>
                     {/* contact-bg class added for styling the background in global.css */}
-                    <div className="grid grid-cols-1 sm:grid-cols-5 px-2 contact-bg">
+                    <div className="grid grid-cols-1 sm:grid-cols-5 px-5 contact-bg">
                         {/* Display general error message */}
 
-                        <form
+                        <Form
                             onSubmit={onSubmit}
                             className="flex flex-col gap-4 col-span-1 sm:col-start-2 sm:col-span-3 w-full"
+                            validationBehavior="native"
+                            validationErrors={errors}
                         >
                             <Input
                                 type="email"
                                 name="email"
                                 label="Email"
-                                isInvalid={!!errors.email}
-                                errorMessage={errors.email}
                                 required
                             />
                             <Input
                                 type="text"
                                 name="name"
                                 label="Name"
-                                isInvalid={!!errors.name}
-                                errorMessage={errors.name}
                                 required
                             />
-                            <div className="base/inputWrapper">
+                            <div className="base/inputWrapper w-full">
                                 <Textarea
                                     name="description"
                                     label="What's on your mind?"
-                                    isInvalid={!!errors.description}
-                                    errorMessage={errors.description}
                                     required
                                 />
                             </div>
@@ -127,10 +126,12 @@ export default function ContactPage() {
                                 type="submit"
                                 disabled={isLoading}
                                 color="primary"
+                                isLoading={isLoading}
+                                className="w-full"
                             >
-                                {isLoading ? 'Loading...' : 'Submit'}
+                                {isLoading ? 'Submitting...' : 'Submit'}
                             </Button>
-                        </form>
+                        </Form>
                     </div>
                     <h2 className="mt-10">
                         And/or join the conversation on{' '}
@@ -142,11 +143,6 @@ export default function ContactPage() {
                             Discord
                         </a>{' '}
                     </h2>
-                    {errors.general && (
-                        <div className="text-red-500 text-sm mt-5">
-                            {errors.general}
-                        </div>
-                    )}
                 </div>
             )}
         </div>

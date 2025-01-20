@@ -1,11 +1,11 @@
 'use client'
 import React, { useEffect } from 'react'
-import { Button, Textarea, Form } from '@nextui-org/react'
 import { useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { Icon } from '@iconify/react' // Import Icon from Iconify
 import { FullSkeleton } from '@/components/common/skeleton-loading'
 import ReviewComponent from '@/components/reviewComponent'
+import { log } from 'node:console'
 
 interface ReviewData {
     editLinkToken: string
@@ -17,15 +17,15 @@ export default function ReviewPage() {
     const searchParams = useSearchParams()
     const token = searchParams.get('token')
     console.log('Token from URL:', token)
-    const [comment, setComment] = useState('')
+    // const [comment, setComment] = useState('')
     const [isEditing, setIsEditing] = useState(false)
     const [errors, setErrors] = useState({})
     const [loading, setLoading] = useState(true) // Initially set loading to true
-    const [submitted, setSubmitted] = useState(null)
+    // const [submitted, setSubmitted] = useState<boolean | null>(null)
     const [successMessage, setSuccessMessage] = useState('')
     const [errorMessage, setErrorMessage] = useState('')
-
     const [reviewData, setReviewData] = useState<ReviewData | null>(null)
+    const [comment, setComment] = useState<string>(reviewData?.comment || '')
 
     useEffect(() => {
         if (token) {
@@ -63,8 +63,7 @@ export default function ReviewPage() {
 
     console.log(reviewData)
 
-    const onSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
+    const handleReviewSubmit = async (updatedReviewData: ReviewData) => {
         setLoading(true)
         if (!token) {
             const error =
@@ -82,13 +81,15 @@ export default function ReviewPage() {
             const response = await fetch('/api/submit-review', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ token, rating, comment }),
+                body: JSON.stringify({
+                    editLinkToken: reviewData?.editLinkToken ?? '',
+                    rating: updatedReviewData.rating,
+                    comment: updatedReviewData.comment,
+                }),
             })
-
             // Log the raw response for debugging
             const rawResponse = await response.json()
             console.log('Raw response:', rawResponse.error)
-
             if (!response.ok) {
                 throw new Error(`${rawResponse.error || 'Unexpected error'}`)
             }
@@ -121,7 +122,11 @@ export default function ReviewPage() {
         setHoveredRating(0) // Reset hover effect when the mouse leaves
     }
 
-    const renderStars = (isEditable: boolean, displayRating?: number) => {
+    const renderStars = (
+        isEditable: boolean,
+        displayRating?: number,
+        onRatingChange?: (rating: number) => void
+    ) => {
         const activeRating = isEditable
             ? hoveredRating || rating
             : displayRating ?? 0
@@ -134,7 +139,14 @@ export default function ReviewPage() {
                     key={i}
                     icon="iconoir:star"
                     className={isEditable ? 'cursor-pointer' : ''}
-                    onClick={isEditable ? () => handleStarClick(i) : undefined}
+                    onClick={
+                        isEditable
+                            ? () => {
+                                  handleStarClick(i) // Update internal rating
+                                  if (onRatingChange) onRatingChange(i) // Notify parent of rating change
+                              }
+                            : undefined
+                    }
                     onMouseEnter={
                         isEditable ? () => handleStarHover(i) : undefined
                     }
@@ -149,33 +161,40 @@ export default function ReviewPage() {
         return <div className="flex star-container">{stars}</div>
     }
 
-    const handleEditReview = async () => {
-        try {
-            const response = await fetch('/api/edit-review', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    editLinkToken: reviewData?.editLinkToken ?? '', // Pass the correct token
-                    rating: reviewData?.rating ?? 0,
-                    comment: reviewData?.comment ?? '',
-                }),
+    const handleUpdateSubmit = (reviewData: ReviewData) => {
+        fetch('/api/edit-review', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                editLinkToken: reviewData?.editLinkToken ?? '',
+                rating: reviewData.rating,
+                comment: reviewData.comment,
+            }),
+        })
+            .then((response) => response.json())
+            .then((result) => {
+                console.log(result)
+
+                if (result.ok) {
+                    alert('Review updated successfully')
+                    setIsEditing(false) // Exit editing mode
+                    // Update the state with the latest review data
+                    setReviewData({
+                        ...reviewData,
+                        rating: reviewData.rating,
+                        comment: reviewData.comment,
+                        editLinkToken: reviewData?.editLinkToken ?? '',
+                    })
+                } else {
+                    console.error('Error updating review:', result.error)
+                }
             })
-
-            const result = await response.json()
-
-            if (response.ok) {
-                alert('Review updated successfully')
-                setIsEditing(false) // Exit editing mode
-            } else {
-                console.error('Error updating review:', result.error)
-                alert('Failed to update review: ' + result.error)
-            }
-        } catch (error) {
-            console.error('Error:', error)
-            alert('An error occurred while updating the review.')
-        }
+            .catch((error) => {
+                console.error('Error:', error)
+                setErrorMessage('An error occurred while updating the review.')
+            })
     }
 
     return (
@@ -191,19 +210,18 @@ export default function ReviewPage() {
                 <FullSkeleton /> // Display skeleton while loading
             ) : (
                 // Once loading is finished, show review data or the form
-                <ReviewComponent
-                    reviewData={reviewData}
-                    errors={errors}
-                    setSubmitted={setSubmitted}
-                    onSubmit={onSubmit}
-                    comment={comment}
-                    setComment={setComment}
-                    isEditing={isEditing}
-                    setIsEditing={setIsEditing}
-                    handleSave={handleEditReview}
-                    renderStars={renderStars}
-                    loading={loading}
-                />
+                <div className=" md:w-full p-5">
+                    <ReviewComponent
+                        reviewData={reviewData}
+                        errors={errors}
+                        onReviewSubmit={handleReviewSubmit}
+                        isEditing={isEditing}
+                        setIsEditing={setIsEditing}
+                        onUpdateSubmit={handleUpdateSubmit}
+                        renderStars={renderStars}
+                        loading={loading}
+                    />
+                </div>
             )}
         </div>
     )
