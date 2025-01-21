@@ -3,6 +3,7 @@ import { fetchCustomersWithReviewLinks } from '@/actions'
 import PageBreadCrumbs from '@/components/common/breadcrumbs'
 import paths from '@/components/paths'
 import RenderCustomers from '@/components/renderCustomers'
+import { Button } from '@nextui-org/react'
 import { useEffect, useState } from 'react'
 
 interface ReviewLink {
@@ -94,21 +95,21 @@ export default function ShowAllCustomers() {
             )}
 
             <div className="flex justify-center mt-5">
-                <button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
+                <Button
+                    onPress={() => handlePageChange(currentPage - 1)}
+                    isDisabled={currentPage === 1}
                     className="px-4 py-2 bg-blue-500 text-white rounded mr-2"
                 >
                     Previous
-                </button>
+                </Button>
                 <span className="px-4 py-2">{`Page ${currentPage} of ${totalPages}`}</span>
-                <button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages}
+                <Button
+                    onPress={() => handlePageChange(currentPage + 1)}
+                    isDisabled={currentPage === totalPages}
                     className="px-4 py-2 bg-blue-500 text-white rounded ml-2"
                 >
                     Next
-                </button>
+                </Button>
             </div>
         </div>
     )

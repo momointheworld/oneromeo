@@ -1,7 +1,6 @@
 import { Form } from '@nextui-org/form'
 import { Button, Textarea } from '@nextui-org/react'
-import { log } from 'console'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 type ValidationErrors = { [key: string]: string }
 
@@ -9,6 +8,7 @@ interface ReviewData {
     rating: number
     comment: string
     editLinkToken: string
+    isFinalized?: boolean
 }
 
 interface ReviewFormProps {
@@ -82,6 +82,7 @@ const ReviewComponent = ({
                 <div className="flex gap-2 self-end">
                     <Button
                         isLoading={loading}
+                        disabled={loading}
                         variant="solid"
                         color="primary"
                         type="submit"
@@ -110,6 +111,7 @@ const ReviewComponent = ({
                     variant="bordered"
                     color="success"
                     onPress={() => setIsEditing(true)}
+                    isDisabled={reviewData.isFinalized}
                 >
                     Edit Review
                 </Button>
@@ -121,7 +123,11 @@ const ReviewComponent = ({
             validationErrors={errors}
             onSubmit={(e) => {
                 e.preventDefault()
-                onReviewSubmit({ rating, comment, editLinkToken }) // Pass the updated values
+                onReviewSubmit({
+                    rating,
+                    comment,
+                    editLinkToken,
+                }) // Pass the updated values
             }}
             className="flex flex-col gap-5"
         >

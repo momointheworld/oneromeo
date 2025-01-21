@@ -66,10 +66,13 @@ export async function POST(req: NextRequest) {
         // Update the ReviewLink status
         await db.reviewLink.update({
             where: { id: reviewLink.id },
-            data: { status: 'done' },
+            data: { status: 'review submitted' },
         })
 
-        console.log('Review link status updated to "done" for token:', token)
+        console.log(
+            'Review link status updated to "submited" for token:',
+            token
+        )
 
         return NextResponse.json({
             message: 'Review submitted successfully',

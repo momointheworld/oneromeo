@@ -88,11 +88,13 @@ const RenderCustomers: React.FC<
                                 <td
                                     className={`px-4 text-2xl ${
                                         reviewLink
-                                            ? reviewLink.status === 'sent'
-                                                ? 'bg-green-100 text-green-800'
-                                                : reviewLink.status === 'failed'
-                                                ? 'bg-red-100 text-red-800'
-                                                : 'bg-gray-100 text-gray-800'
+                                            ? {
+                                                  sent: 'bg-green-100 text-green-800',
+                                                  failed: 'bg-red-100 text-red-800',
+                                                  'review submitted':
+                                                      'bg-yellow-100 text-yellow-800',
+                                              }[reviewLink.status] ||
+                                              'bg-gray-50 text-gray-800'
                                             : 'bg-gray-50 text-gray-800'
                                     }`}
                                 >

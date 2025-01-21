@@ -93,7 +93,7 @@ export default function SendReviewButton({
                             variant="flat"
                             color={color}
                             isLoading={loading}
-                            onClick={handleClick}
+                            onPress={handleClick}
                             disabled={loading || buttonText === 'Sent'}
                         >
                             {buttonText}

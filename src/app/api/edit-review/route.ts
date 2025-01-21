@@ -82,22 +82,36 @@ export async function PUT(request: NextRequest) {
             )
         }
 
+        if (review.isFinalized) {
+            return NextResponse.json(
+                {
+                    error: 'Review cannot be updated as it is already finalized.',
+                },
+                { status: 400 }
+            )
+        }
+
         // Update the review
         const updatedReview = await db.review.update({
-            where: { editLinkToken },
+            where: { editLinkToken, isFinalized: false },
             data: {
                 rating,
                 comment,
+                isFinalized: true,
                 updatedAt: new Date(),
             },
         })
 
         console.log('Review updated successfully:', updatedReview)
 
-        return NextResponse.json({
-            message: 'Review updated successfully',
-            review: updatedReview,
-        })
+        return NextResponse.json(
+            {
+                ok: true,
+                message: 'Review updated successfully',
+                review: updatedReview,
+            },
+            { status: 200 }
+        )
     } catch (error: any) {
         console.error('Error updating review:', error.message)
         return NextResponse.json(

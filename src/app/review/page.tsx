@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { Icon } from '@iconify/react' // Import Icon from Iconify
 import { FullSkeleton } from '@/components/common/skeleton-loading'
 import ReviewComponent from '@/components/reviewComponent'
-import { log } from 'node:console'
+import { Alert } from '@nextui-org/react'
 
 interface ReviewData {
     editLinkToken: string
@@ -17,15 +17,12 @@ export default function ReviewPage() {
     const searchParams = useSearchParams()
     const token = searchParams.get('token')
     console.log('Token from URL:', token)
-    // const [comment, setComment] = useState('')
     const [isEditing, setIsEditing] = useState(false)
     const [errors, setErrors] = useState({})
     const [loading, setLoading] = useState(true) // Initially set loading to true
-    // const [submitted, setSubmitted] = useState<boolean | null>(null)
     const [successMessage, setSuccessMessage] = useState('')
     const [errorMessage, setErrorMessage] = useState('')
     const [reviewData, setReviewData] = useState<ReviewData | null>(null)
-    const [comment, setComment] = useState<string>(reviewData?.comment || '')
 
     useEffect(() => {
         if (token) {
@@ -82,23 +79,23 @@ export default function ReviewPage() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    editLinkToken: reviewData?.editLinkToken ?? '',
+                    token: token,
                     rating: updatedReviewData.rating,
                     comment: updatedReviewData.comment,
                 }),
             })
             // Log the raw response for debugging
             const rawResponse = await response.json()
-            console.log('Raw response:', rawResponse.error)
+            console.log('Raw response:', rawResponse)
+
             if (!response.ok) {
-                throw new Error(`${rawResponse.error || 'Unexpected error'}`)
+                throw new Error(rawResponse.error || 'Unexpected error')
             }
 
-            // Parse JSON only if the response body is not empty
-            const data = rawResponse ? JSON.parse(rawResponse) : null
-            console.log('Parsed response data:', data)
-            setLoading(false)
+            // Use rawResponse directly instead of parsing again
             setSuccessMessage('Review submitted successfully!')
+            setReviewData(rawResponse.review)
+            setLoading(false)
         } catch (error: any) {
             console.error('Error submitting review:', error)
             setErrorMessage(error.message || 'Unexpected error occurred')
@@ -161,50 +158,59 @@ export default function ReviewPage() {
         return <div className="flex star-container">{stars}</div>
     }
 
-    const handleUpdateSubmit = (reviewData: ReviewData) => {
-        fetch('/api/edit-review', {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                editLinkToken: reviewData?.editLinkToken ?? '',
-                rating: reviewData.rating,
-                comment: reviewData.comment,
-            }),
-        })
-            .then((response) => response.json())
-            .then((result) => {
-                console.log(result)
+    const handleUpdateSubmit = async (reviewData: ReviewData) => {
+        setLoading(true)
 
-                if (result.ok) {
-                    alert('Review updated successfully')
-                    setIsEditing(false) // Exit editing mode
-                    // Update the state with the latest review data
-                    setReviewData({
-                        ...reviewData,
-                        rating: reviewData.rating,
-                        comment: reviewData.comment,
-                        editLinkToken: reviewData?.editLinkToken ?? '',
-                    })
-                } else {
-                    console.error('Error updating review:', result.error)
-                }
+        try {
+            const response = await fetch('/api/edit-review', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    editLinkToken: reviewData?.editLinkToken ?? '',
+                    rating: reviewData.rating,
+                    comment: reviewData.comment,
+                }),
             })
-            .catch((error) => {
-                console.error('Error:', error)
-                setErrorMessage('An error occurred while updating the review.')
-            })
+
+            if (!response.ok) {
+                // Handle non-200 responses
+                const errorResult = await response.json()
+                throw new Error(
+                    errorResult.error || 'Failed to update the review'
+                )
+            }
+
+            const result = await response.json()
+            console.log('API Response:', result)
+
+            if (result.ok) {
+                setIsEditing(false) // Exit editing mode
+                setSuccessMessage(
+                    result.message || 'Review updated successfully!'
+                )
+                setReviewData(result.review) // Update the state with the latest review data
+            } else {
+                throw new Error(result.error || 'Failed to update the review')
+            }
+        } catch (error: any) {
+            console.error('Error:', error)
+            setErrorMessage(
+                error.message || 'An error occurred while updating the review.'
+            )
+        } finally {
+            setLoading(false)
+        }
     }
 
     return (
         <div className="flex flex-col max-w-md mx-auto">
             {/* Show success or error message */}
             {successMessage && (
-                <p className="text-green-600">{successMessage}</p>
+                <Alert color={'success'}>{successMessage}</Alert>
             )}
-            {errorMessage && <p className="text-red-600">{errorMessage}</p>}
-
+            {errorMessage && <Alert color={'danger'}>{errorMessage}</Alert>}
             {/* Show the loading skeleton while loading */}
             {loading ? (
                 <FullSkeleton /> // Display skeleton while loading
