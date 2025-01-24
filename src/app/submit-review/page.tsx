@@ -1,6 +1,6 @@
 'use client'
 import React, { useEffect } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { Icon } from '@iconify/react' // Import Icon from Iconify
 import { FullSkeleton } from '@/components/common/skeleton-loading'
@@ -23,6 +23,9 @@ export default function ReviewPage() {
     const [successMessage, setSuccessMessage] = useState('')
     const [errorMessage, setErrorMessage] = useState('')
     const [reviewData, setReviewData] = useState<ReviewData | null>(null)
+    const [rating, setRating] = useState(5) // State for rating
+    const [hoveredRating, setHoveredRating] = useState(0) // State for hover effect
+    const router = useRouter()
 
     useEffect(() => {
         if (token) {
@@ -40,6 +43,7 @@ export default function ReviewPage() {
                 .then((data) => {
                     if (data.error) {
                         setErrorMessage(data.error)
+                        router.push('/review') // Redirect to the review page on error
                     } else if (data.review) {
                         // If review exists, set reviewData with the actual review
                         setReviewData(data.review)
@@ -51,12 +55,27 @@ export default function ReviewPage() {
                 .catch((error) => {
                     console.error('Error fetching review:', error)
                     setErrorMessage('Failed to fetch review data')
+                    router.push('/submit-review')
                 })
                 .finally(() => {
                     setLoading(false) // Set loading to false once the request is complete
                 })
+        } else {
+            router.push('/submit-review') // Redirect to the review page if there's no token
         }
-    }, [token])
+    }, [router, token])
+
+    // Handle case when token is missing
+    if (!token) {
+        return (
+            <div className="flex flex-col max-w-md mx-auto p-5">
+                <Alert color={'warning'}>
+                    Invalid review link. Please double-check your link for
+                    review submission.
+                </Alert>
+            </div>
+        )
+    }
 
     console.log(reviewData)
 
@@ -103,9 +122,6 @@ export default function ReviewPage() {
             setLoading(false)
         }
     }
-
-    const [rating, setRating] = useState(5) // State for rating
-    const [hoveredRating, setHoveredRating] = useState(0) // State for hover effect
 
     const handleStarClick = (rating: number) => {
         setRating(rating) // Set the rating when clicked

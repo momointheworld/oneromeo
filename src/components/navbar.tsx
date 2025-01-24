@@ -50,6 +50,7 @@ const menuItems = [
         ],
     },
     { title: 'FAQ', href: '/faq' },
+    { title: 'Testimonials', href: '/testimonials' },
     { title: 'Contact', href: '/contact' },
 ]
 
