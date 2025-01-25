@@ -3,9 +3,9 @@ import { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
 export async function GET(req: NextRequest) {
+    const token = req.nextUrl.searchParams.get('token')
+    // moving it outside of the try catch for dynamic server error handling
     try {
-        const token = req.nextUrl.searchParams.get('token')
-
         if (!token) {
             console.log('Missing token in request')
             return NextResponse.json(

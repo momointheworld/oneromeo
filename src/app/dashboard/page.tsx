@@ -4,9 +4,6 @@ import { db } from '@/db'
 import paths from '@/components/paths'
 import RenderAppointments from '@/components/renderAppointments'
 import { fetchCustomersWithReviewLinks } from '@/actions/fetchCustomersWithReviewLinks'
-import RenderCustomers, { Customer } from '@/components/renderCustomers'
-import { updateReviewLinkStatus } from '@/actions/updateReviewLinkStatus'
-import { getReviewLinkByEmail } from '@/actions'
 
 export const revalidate = 3 // re-render in every 3 seconds
 export default async function Dashboard() {

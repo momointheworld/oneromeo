@@ -3,9 +3,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { ObjectId } from 'mongodb'
 
 export async function GET(req: NextRequest) {
+    const { searchParams } = new URL(req.url)
+    // moving it outside of the try catch for dynamic server error handling
     try {
         // Extract search parameters
-        const { searchParams } = new URL(req.url)
         const id = searchParams.get('id')
 
         if (!id) {

@@ -1,9 +1,6 @@
 'use client'
 
-import {
-    CardSkeleton,
-    FullSkeleton,
-} from '@/components/common/skeleton-loading'
+import { CardSkeleton } from '@/components/common/skeleton-loading'
 import TestimonialsComponent from '@/components/testimonialsComponent'
 import { Skeleton } from '@nextui-org/react'
 import { useEffect, useState } from 'react'
