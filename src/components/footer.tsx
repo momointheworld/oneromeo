@@ -44,6 +44,7 @@ const footerLinks = {
         { href: '/about/me', label: 'About Me' },
         { href: '/about/my-ebook', label: 'My eBook' },
         { href: '/about/animation-bits', label: 'Animation Bits' },
+        { href: '/testimonials', label: 'Testimonials' },
         { href: '/privacy-policy', label: 'Privacy Policy' },
         { href: '/terms-of-use', label: 'Terms of Use' },
     ],

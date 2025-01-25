@@ -126,9 +126,6 @@ function TestimonialsPage({ customers }: TestimonialsComponentProps) {
 
     return (
         <div className="testimonials max-w-7xl mx-auto p-6">
-            <h2 className="text-3xl font-semibold text-center mb-6 text-gray-800">
-                Testimonials
-            </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
                 {reviews.map((review, index) => (
                     <div

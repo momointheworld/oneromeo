@@ -69,6 +69,9 @@ function TestimonialsPage() {
 
     return (
         <div className="testimonials-container">
+            <h1 className="text-3xl font-semibold text-center mb-6 text-gray-800">
+                Testimonials
+            </h1>
             <TestimonialsComponent customers={customers} />
         </div>
     )
