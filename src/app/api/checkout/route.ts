@@ -1,4 +1,3 @@
-import { generateAndSaveSecureToken } from '@/utils/generateAndSaveSecureToken'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { DateTime } from 'luxon'

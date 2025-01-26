@@ -4,7 +4,6 @@ import { addAppointment, saveCustomerDetailsToDatabase } from '@/actions'
 import { isEventProcessed, logProcessedEvent } from '@/actions/eventHelper'
 import { findAppointmentByEmailAndDate } from '@/actions/findAppointmentByEmailAndDate'
 import { generateAndSaveSecureToken } from '@/utils/generateAndSaveSecureToken'
-import { get } from 'http'
 
 export const runtime = 'nodejs'
 export const preferredRegion = 'auto'

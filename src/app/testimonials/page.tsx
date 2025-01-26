@@ -24,7 +24,7 @@ function TestimonialsPage() {
     useEffect(() => {
         const fetchCustomers = async () => {
             try {
-                const response = await fetch('/api/get-customers') // Replace with your actual API endpoint
+                const response = await fetch('/api/get-customers')
                 if (!response.ok) {
                     throw new Error('Failed to fetch customers')
                 }

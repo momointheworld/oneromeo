@@ -11,3 +11,5 @@ export default function ReviewPage() {
         </Suspense>
     )
 }
+
+//wrap the component with Suspense due to useSearchparams for the token

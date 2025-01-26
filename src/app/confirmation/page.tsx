@@ -42,7 +42,7 @@ const ConfirmationPage: React.FC = () => {
             while (!token && attempts < maxRetries) {
                 try {
                     const response = await fetch(
-                        `/api/get-token-by-session?sessionId=${sessionId}`
+                        `/api/get-token-by-session?session_id=${sessionId}`
                     )
                     if (response.ok) {
                         const data = await response.json()
@@ -201,7 +201,7 @@ const ConfirmationPage: React.FC = () => {
                 <div className="p-2">
                     <h1>Thanks, it&apos;s much appreciated. Enjoy the read!</h1>
                     <Button
-                        onClick={handleDownload}
+                        onPress={handleDownload}
                         variant="bordered"
                         color="primary"
                         isLoading={loading}
