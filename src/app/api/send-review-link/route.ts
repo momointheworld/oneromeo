@@ -28,10 +28,18 @@ export async function POST(request: NextRequest) {
 
         const reviewLinkUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/submit-review?token=${reviewLink.token}`
 
-        const subject = `Leave a Review for ${reviewLink.productName}`
-        const text = `Thank you for purchasing ${reviewLink.productName}! Please leave a review using the following link: ${reviewLinkUrl}. This link will expire in 7 days.`
+        const eBookSubject = 'Please help me out! Did you enjoy my eBook?'
+        const sessionSubject = 'Please help me out! Did you enjoy your session?'
+
+        const eBookText = `Thank you for purchasing my eBook, Not in a Million Years! \n\nIf you don't mind, please have a quick look and leave a review using the following link: \n${reviewLinkUrl} \n\nNote that this link will expire in 7 days. You know, without your amazing reviews, I can’t pull this off. Like, really. \n\nThank you so much! \n\nArnold`
+
+        const sessionText = `Thank you for using my listening service! \n\nIf you found it helpful, I’d really appreciate it if you could take a moment to leave a review using the following link: \n${reviewLinkUrl} \n\nThis link will expire in 7 days. Your kind words will help me continue offering this service and reach more people who need a listening ear. \n\nThank you times a 1000!\n\nArnold`
 
         // Send the review link via email
+        const subject =
+            reviewLink.productName === 'E-book' ? eBookSubject : sessionSubject
+        const text =
+            reviewLink.productName === 'E-book' ? eBookText : sessionText
         await sendEmail(email, subject, text)
 
         return NextResponse.json({ message: 'Review link email sent' })

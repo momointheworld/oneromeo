@@ -24,7 +24,7 @@ export async function sendEmail(to: string, subject: string, text: string) {
     const transport = createMailer()
 
     const mailOptions = {
-        from: process.env.MAIL,
+        from: `"${process.env.MAIL_DISPLAY_NAME}" <${process.env.MAIL}>`,
         to,
         subject,
         text,
