@@ -112,7 +112,7 @@ export default function ReviewPageContent() {
             }
 
             // Use rawResponse directly instead of parsing again
-            setSuccessMessage('Review submitted successfully!')
+            setSuccessMessage('Thanks! Your review is in.')
             setReviewData(rawResponse.review)
             setLoading(false)
         } catch (error: any) {

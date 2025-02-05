@@ -36,7 +36,7 @@ const ConfirmationPage: React.FC = () => {
             const delay = 2000 // 2 seconds
             let attempts = 0
 
-            setFormMessage('We are processing the eBook...')
+            setFormMessage('Hang tight! Your eBook is being prepared.')
             setLoading(true)
 
             while (!token && attempts < maxRetries) {
@@ -48,7 +48,9 @@ const ConfirmationPage: React.FC = () => {
                         const data = await response.json()
                         token = data.token
                     } else {
-                        setFormMessage('Please wait for the eBook to be ready.')
+                        setFormMessage(
+                            'Just a moment, please! Your eBook is on its way.'
+                        )
                     }
                 } catch (err: any) {
                     console.log(err.message)
@@ -77,7 +79,7 @@ const ConfirmationPage: React.FC = () => {
                     const downloadData = await downloadResponse.json()
                     setDownloadUrl(downloadData.url)
                     setFormMessage(
-                        'Your eBook is ready! You can download it now.'
+                        ' Your eBook is ready! You can download it now.'
                     )
                     setDownloadText('Download eBook')
                     setLoading(false)

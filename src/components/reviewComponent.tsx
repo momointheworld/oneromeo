@@ -1,3 +1,4 @@
+import { Icon } from '@iconify/react/dist/iconify.js'
 import { Form } from '@nextui-org/form'
 import { Button, Textarea } from '@nextui-org/react'
 import { useState } from 'react'
@@ -67,7 +68,7 @@ const ReviewComponent = ({
                 }}
                 className="flex flex-col gap-5"
             >
-                <h2>Edit Your Review</h2>
+                <h2 className="self-center">Edit Your Review</h2>
                 <label>
                     Rating:
                     {renderStars(true, rating, handleRatingChange)}{' '}
@@ -97,7 +98,7 @@ const ReviewComponent = ({
         ) : (
             // View Mode
             <div className="flex flex-col gap-5">
-                <h2>Your Review</h2>
+                <h2 className="self-center">Your Review</h2>
                 <div className="flex items-center">
                     <label className="font-bold">
                         Rating:
@@ -131,7 +132,15 @@ const ReviewComponent = ({
             }}
             className="flex flex-col gap-5"
         >
-            <h2>Leave a Review</h2>
+            <h2 className="self-center">
+                A quick review, please!{' '}
+                <Icon
+                    icon="emojione-v1:smiling-face-with-smiling-eyes"
+                    width="32"
+                    height="32"
+                    className="inline-block"
+                />
+            </h2>
             <label>
                 Rating:
                 {renderStars(true, rating, handleRatingChange)}{' '}
@@ -141,7 +150,7 @@ const ReviewComponent = ({
             <Textarea
                 value={comment}
                 onChange={handleCommentChange}
-                placeholder="Write your review"
+                placeholder="Start typing here!"
             />
             <Button
                 type="submit"
