@@ -14,8 +14,10 @@ interface Item {
     buttonText: string
 }
 
+import { PressEvent } from '@react-types/shared'
+
 interface OrderItemsProps {
-    handleItemClick: MouseEventHandler<HTMLButtonElement>
+    handleItemClick: (e: PressEvent) => void
     items: Item[]
 }
 
@@ -75,7 +77,7 @@ const OrderItems: React.FC<OrderItemsProps> = ({ handleItemClick, items }) => {
                                 key={product.priceId}
                                 className={`group relative flex flex-col h-30 px-4 ${bgColor}`}
                                 data-price-id={product.priceId}
-                                onClick={handleItemClick}
+                                onPress={handleItemClick}
                             >
                                 <Image
                                     alt={product.imgAlt}

@@ -3,7 +3,6 @@ import { Icon } from '@iconify/react/dist/iconify.js'
 import { Skeleton } from '@nextui-org/react'
 import { Suspense, useEffect, useState } from 'react'
 import { CardSkeleton } from './common/skeleton-loading'
-import { isDynamicServerError } from 'next/dist/client/components/hooks-server-context'
 
 type Review = {
     comment: string
@@ -115,7 +114,7 @@ function TestimonialsPage({ customers }: TestimonialsComponentProps) {
                         icon="iconoir:star-outline" // Empty star icon
                         style={{
                             fontSize: '30px',
-                            color: 'grey', // Empty stars color
+                            color: 'lightgray', // Empty stars color
                         }}
                     />
                 )
@@ -136,7 +135,7 @@ function TestimonialsPage({ customers }: TestimonialsComponentProps) {
                         >
                             <div className="flex items-center space-x-4 mb-4">
                                 <div className="flex-shrink-0">
-                                    <span className="text-xl font-semibold text-gray-800">
+                                    <span className="text-xl font-semibold text-gray-800 custom-font">
                                         {review.name
                                             ? `${review.name.split(' ')[0]}${
                                                   review.name.split(' ')[1]
@@ -159,9 +158,9 @@ function TestimonialsPage({ customers }: TestimonialsComponentProps) {
                                 {review.comment}
                             </p>
 
-                            <p className="text-gray-500 text-sm float-right">
+                            <p className="text-gray-700 text-sm float-right">
                                 <small>
-                                    Submitted on{' '}
+                                    {' '}
                                     {new Date(
                                         review.submittedAt
                                     ).toLocaleDateString()}

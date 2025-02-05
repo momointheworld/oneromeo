@@ -166,7 +166,7 @@ export default function ReviewPageContent() {
                     onMouseLeave={isEditable ? handleStarLeave : undefined}
                     style={{
                         fontSize: '30px',
-                        color: isFilled ? 'orange' : 'gray', // Change color based on rating or hover state
+                        color: isFilled ? 'orange' : 'lightgray', // Change color based on rating or hover state
                     }}
                 />
             )

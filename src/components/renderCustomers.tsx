@@ -1,3 +1,4 @@
+'use client'
 import React, { useEffect, useState } from 'react'
 import SendReviewButton from './sendReviewButton'
 import { Button } from '@nextui-org/react'
@@ -64,6 +65,18 @@ const RenderCustomers: React.FC<
 > = ({ customers, setCustomers }) => {
     const [loadingReviewId, setLoadingReviewId] = useState<string | null>(null)
     const [reviews, setReviews] = useState<Review[]>([])
+    const [filteredReviews, setFilteredReviews] = useState<Review[]>([])
+    const [filters, setFilters] = useState<{
+        email: string
+        productName: string
+        status: string
+        reviewStatus: string
+    }>({
+        email: '',
+        productName: '',
+        status: '',
+        reviewStatus: '',
+    })
 
     useEffect(() => {
         const fetchReviews = async () => {
@@ -81,6 +94,7 @@ const RenderCustomers: React.FC<
                 const data = await response.json()
                 console.log('Fetched reviews:', data.reviews)
                 setReviews(data.reviews)
+                setFilteredReviews(data.reviews) // Initialize filteredReviews with all reviews
             } catch (error) {
                 console.error('Error fetching reviews:', error)
             }
@@ -88,6 +102,33 @@ const RenderCustomers: React.FC<
 
         fetchReviews()
     }, [customers])
+
+    useEffect(() => {
+        // Apply filters whenever `filters` or `reviews` change
+        const filtered = reviews.filter((review) => {
+            const matchesEmail = review.email
+                .toLowerCase()
+                .includes(filters.email.toLowerCase())
+            const matchesProductName = review.productName
+                .toLowerCase()
+                .includes(filters.productName.toLowerCase())
+            const matchesStatus = filters.status
+                ? review.status === filters.status
+                : true
+            const matchesReviewStatus = filters.reviewStatus
+                ? review.review?.status === filters.reviewStatus
+                : true
+
+            return (
+                matchesEmail &&
+                matchesProductName &&
+                matchesStatus &&
+                matchesReviewStatus
+            )
+        })
+
+        setFilteredReviews(filtered)
+    }, [filters, reviews])
 
     interface UpdateReviewStatusFunction {
         (reviewId: string, status: 'approved' | 'declined'): Promise<void>
@@ -148,8 +189,62 @@ const RenderCustomers: React.FC<
         console.log('Updated reviews:', reviews) // Log reviews to check the state
     }
 
+    const handleFilterChange = (key: keyof typeof filters, value: string) => {
+        setFilters((prevFilters) => ({
+            ...prevFilters,
+            [key]: value,
+        }))
+    }
+
     return (
         <div className="overflow-x-auto">
+            {/* Filter Inputs */}
+            <div className="flex gap-4 mb-4">
+                <input
+                    type="text"
+                    placeholder="Filter by Email"
+                    value={filters.email}
+                    onChange={(e) =>
+                        handleFilterChange('email', e.target.value)
+                    }
+                    className="p-2 border rounded"
+                />
+                <input
+                    type="text"
+                    placeholder="Filter by Product Name"
+                    value={filters.productName}
+                    onChange={(e) =>
+                        handleFilterChange('productName', e.target.value)
+                    }
+                    className="p-2 border rounded"
+                />
+                <select
+                    value={filters.status}
+                    onChange={(e) =>
+                        handleFilterChange('status', e.target.value)
+                    }
+                    className="p-2 border rounded"
+                >
+                    <option value="">All Statuses</option>
+                    <option value="pending">Pending</option>
+                    <option value="sent">Sent</option>
+                    <option value="failed">Failed</option>
+                    <option value="review submitted">Review Submitted</option>
+                </select>
+                <select
+                    value={filters.reviewStatus}
+                    onChange={(e) =>
+                        handleFilterChange('reviewStatus', e.target.value)
+                    }
+                    className="p-2 border rounded"
+                >
+                    <option value="">All Review Statuses</option>
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="declined">Declined</option>
+                </select>
+            </div>
+
             <table className="min-w-full table-auto border-collapse">
                 <thead>
                     <tr className="bg-gray-100">
@@ -164,7 +259,7 @@ const RenderCustomers: React.FC<
                     </tr>
                 </thead>
                 <tbody>
-                    {reviews
+                    {filteredReviews
                         .sort(
                             (a, b) =>
                                 new Date(b.createdAt).getTime() -
