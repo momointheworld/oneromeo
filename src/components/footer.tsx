@@ -1,5 +1,6 @@
 import { Divider, Link } from '@nextui-org/react'
 import { SocialIcon } from 'react-social-icons'
+import { object } from 'zod'
 
 // components/FooterSection.tsx
 
@@ -13,15 +14,23 @@ interface FooterSectionProps {
 const FooterSection: React.FC<FooterSectionProps> = ({
     title,
     links,
-    color,
-    fontSize,
+    color = '',
+    fontSize = '',
 }) => {
+    const isSingleColumn = title.toLowerCase() === 'fun.' || links.length <= 4
+
     return (
         <div className="md:col-span-1 text-center space-y-4 mb-5">
-            <h3 className={`text-xl font-semibold uppercase`}>{title}</h3>
-            <ul className="space-y-2">
+            <h3 className="text-xl font-semibold uppercase">{title}</h3>
+            <ul
+                className={`${
+                    isSingleColumn
+                        ? 'grid grid-cols-1 gap-4 justify-items-center'
+                        : 'grid grid-cols-2 gap-4 justify-items-center'
+                }`}
+            >
                 {links.map((link, index) => (
-                    <li key={index}>
+                    <li key={index} className="text-left">
                         <Link
                             href={link.href}
                             className={`${fontSize} ${color}`}
@@ -40,7 +49,6 @@ const footerLinks = {
     explore: [
         { href: '/faq', label: 'FAQ' },
         { href: '/contact', label: 'Contact' },
-
         { href: '/about/me', label: 'About Me' },
         { href: '/about/my-ebook', label: 'My eBook' },
         { href: '/about/animation-bits', label: 'Animation Bits' },
@@ -94,13 +102,13 @@ const Footer = () => {
                         />
                     </div>
                 </div>
-                <div className="md:col-start-4 md:col-span-1 text-center space-y-4 mb-5 p-3 rounded-md shadow-xl bg-orange-100 origin-left rotate-12 shrink-1">
+                <div className="md:col-start-4 md:col-span-1 text-center space-y-4 mb-5 p-3 rounded-md shadow-xl bg-orange-50/20 origin-left rotate-12 shrink-1">
                     <div className="flex flex-col items-center gap-5">
-                        <p className="text-2xl text-orange-600">
+                        <p className="text-2xl text-orange-300">
                             No Catch, <br />
                             Just You and Me.
                         </p>
-                        <p className="text-xl text-blue-900">
+                        <p className="text-xl text-blue-300">
                             What happens on One Romeo, stays on One Romeo.
                             <br /> All you share is confidential.
                         </p>
@@ -110,7 +118,7 @@ const Footer = () => {
                             viewBox="0 0 24 24"
                             strokeWidth="1.5"
                             stroke="currentColor"
-                            className="size-12 text-green-700"
+                            className="size-12 text-green-300"
                         >
                             <path
                                 strokeLinecap="round"
