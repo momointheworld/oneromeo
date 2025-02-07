@@ -1,11 +1,9 @@
 module.exports = {
-  siteUrl: 'https://oneromeo.com',
+  siteUrl: 'https://oneromeo.com', 
   generateRobotsTxt: true,
-  exclude: ['/login', '/dashboard', '/dashboard/*'],  // Exclude both /dashboard and any sub-pages
+  exclude: ['/login', '/dashboard', '/dashboard/*' ,'/api', '/api/*'],  // Exclude both /dashboard and any sub-pages
   additionalPaths: async (config) => {
     const quizSlugs = await fetchQuizSlugs();
-    console.log('Quiz Slugs:', quizSlugs);
-
     // Create a URL for each quiz slug
     return quizSlugs.map((slug) => ({
       loc: `/quiz/${slug}`, // Add the correct path here for your quizzes
@@ -32,15 +30,12 @@ async function fetchQuizSlugs() {
 
   try {
     const quizzes = await response.json();
-    console.log('Fetched quizzes:', quizzes);  // Log the entire response to inspect the structure
-
     // Access quizzes from the 'quizzes' key in the response
     if (!quizzes.quizzes || !Array.isArray(quizzes.quizzes)) {
       throw new Error('Invalid data format received.');
     }
 
     const quizSlugs = quizzes.quizzes.map((quiz) => quiz.slug); // Return an array of slugs
-    console.log('Quiz slugs:', quizSlugs);  // Log the slugs to verify
     return quizSlugs;
   } catch (error) {
     console.error('Failed to parse JSON:', error);
