@@ -28,12 +28,12 @@ export async function POST(request: NextRequest) {
 
         const reviewLinkUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/submit-review?token=${reviewLink.token}`
 
-        const eBookSubject = 'Please help me out! Did you enjoy my eBook?'
-        const sessionSubject = 'Please help me out! Did you enjoy your session?'
+        const eBookSubject = 'Enjoyed My eBook?'
+        const sessionSubject = 'Enjoyed Our Chat?'
 
-        const eBookText = `Thank you for purchasing my eBook, Not in a Million Years! \n\nIf you don't mind, please have a quick look and leave a review using the following link: \n${reviewLinkUrl} \n\nNote that this link will expire in 7 days. You know, without your amazing reviews, I can’t pull this off. Like, really. \n\nThank you so much! \n\nArnold`
+        const eBookText = `Hey there!\n\nDid you enjoy your session?\n\nIf it was helpful, I’d love your review!\n\nJust use this link (expires in 7 days): \n${reviewLinkUrl}\n\nYour feedback helps me keep this service going and support more people.\n\nHuge thanks!\n\nArnold`
 
-        const sessionText = `Thank you for using my listening service! \n\nIf you found it helpful, I’d really appreciate it if you could take a moment to leave a review using the following link: \n${reviewLinkUrl} \n\nThis link will expire in 7 days. Your kind words will help me continue offering this service and reach more people who need a listening ear. \n\nThank you times a 1000!\n\nArnold`
+        const sessionText = `Hey there!\n\nDid you enjoy Not in a Million Years?\n\nIf so, I’d love your quick review!\n\nJust use this link (expires in 7 days):\n${reviewLinkUrl}\n\nYour support means the world — couldn’t do this without you!\n\nThanks a ton!\n\nArnold`
 
         // Send the review link via email
         const subject =
