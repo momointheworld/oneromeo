@@ -31,15 +31,15 @@ export async function POST(request: NextRequest) {
         const eBookSubject = 'Enjoyed My eBook?'
         const sessionSubject = 'Enjoyed Our Chat?'
 
-        const eBookText = `Hey there!\n\nDid you enjoy your session?\n\nIf it was helpful, I’d love your review!\n\nJust use this link (expires in 7 days): \n${reviewLinkUrl}\n\nYour feedback helps me keep this service going and support more people.\n\nHuge thanks!\n\nArnold`
+        const sessionText = `Hey there!\n\nDid you enjoy your session?\n\nIf it was helpful, I’d love your review!\n\nJust use this link (expires in 7 days): \n${reviewLinkUrl}\n\nYour feedback helps me keep this service going and support more people.\n\nHuge thanks!\n\nArnold`
 
-        const sessionText = `Hey there!\n\nDid you enjoy Not in a Million Years?\n\nIf so, I’d love your quick review!\n\nJust use this link (expires in 7 days):\n${reviewLinkUrl}\n\nYour support means the world — couldn’t do this without you!\n\nThanks a ton!\n\nArnold`
+        const eBookText = `Hey there!\n\nDid you enjoy Not in a Million Years?\n\nIf so, I’d love your quick review!\n\nJust use this link (expires in 7 days):\n${reviewLinkUrl}\n\nYour support means the world — couldn’t do this without you!\n\nThanks a ton!\n\nArnold`
 
         // Send the review link via email
-        const subject =
-            reviewLink.productName === 'E-book' ? eBookSubject : sessionSubject
-        const text =
-            reviewLink.productName === 'E-book' ? eBookText : sessionText
+        const isEbook = /book/i.test(reviewLink.productName)
+
+        const subject = isEbook ? eBookSubject : sessionSubject
+        const text = isEbook ? eBookText : sessionText
         await sendEmail(email, subject, text)
 
         return NextResponse.json({ message: 'Review link email sent' })
