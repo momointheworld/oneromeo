@@ -14,6 +14,7 @@ import { useSelectedItem } from '@/hooks/useSelectedItem'
 import checkout from '@/actions/checkout'
 import { StaticImageData } from 'next/image'
 import { DateTime } from 'luxon'
+import { PressEvent } from '@react-types/shared'
 
 const OrderForm = () => {
     interface Item {
@@ -95,9 +96,8 @@ const OrderForm = () => {
     const resetAppointment = () => {
         setSelectedDate(null), setPickedTime('')
     }
-    // get the product information
-    const handleItemClick: React.MouseEventHandler<HTMLButtonElement> = (e) => {
-        const priceId = e.currentTarget.getAttribute('data-price-id')
+    const handleItemClick = (e: PressEvent) => {
+        const priceId = (e.target as HTMLElement).getAttribute('data-price-id')
         const item = items.find((item) => item.priceId === priceId) || null
         setSelectedItem(item)
         setSelectedPriceId(priceId)

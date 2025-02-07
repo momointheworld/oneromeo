@@ -3,6 +3,7 @@ import { Button, Chip } from '@nextui-org/react'
 import Image, { StaticImageData } from 'next/image'
 import { useSelectedItem } from '@/hooks/useSelectedItem'
 import EmbedVideo from './embedVideo'
+import { PressEvent } from '@react-types/shared'
 
 interface Item {
     imgSrc: StaticImageData
@@ -13,8 +14,6 @@ interface Item {
     description: string
     buttonText: string
 }
-
-import { PressEvent } from '@react-types/shared'
 
 interface OrderItemsProps {
     handleItemClick: (e: PressEvent) => void
