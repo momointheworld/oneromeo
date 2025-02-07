@@ -29,7 +29,6 @@ function TestimonialsPage() {
                     throw new Error('Failed to fetch customers')
                 }
                 const data = await response.json()
-                console.log('Fetched customers:', data)
                 setCustomers(data.customers || [])
             } catch (error: any) {
                 console.error('Error fetching customers:', error.message)

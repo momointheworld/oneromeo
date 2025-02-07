@@ -8,7 +8,8 @@ type Review = {
     comment: string
     rating: number
     submittedAt: string
-    name: string
+    customerName: string
+    productName: string
 }
 
 type Customer = {
@@ -36,7 +37,6 @@ function TestimonialsPage({ customers }: TestimonialsComponentProps) {
 
             // Extract IDs from customers to query reviews
             const customerIds = customers.map((customer) => customer.id)
-
             if (customerIds.length === 0) {
                 setLoading(false)
                 setError('Customer IDs are missing.')
@@ -47,16 +47,13 @@ function TestimonialsPage({ customers }: TestimonialsComponentProps) {
                 const response = await fetch(
                     `/api/get-reviews-by-status?id=${customerIds.join(',')}`
                 )
-
                 if (!response.ok) {
                     const errorMessage = await response.text()
                     throw new Error(
                         `Failed to fetch reviews: ${response.status} - ${errorMessage}`
                     )
                 }
-
                 const data = await response.json()
-                console.log('Fetched reviews:', data.reviews)
                 setReviews(data.reviews || [])
             } catch (error: any) {
                 console.error('Error fetching reviews:', error)
@@ -65,7 +62,6 @@ function TestimonialsPage({ customers }: TestimonialsComponentProps) {
                 setLoading(false)
             }
         }
-
         fetchReviews()
     }, [customers])
 
@@ -136,18 +132,29 @@ function TestimonialsPage({ customers }: TestimonialsComponentProps) {
                             <div className="flex items-center space-x-4 mb-4">
                                 <div className="flex-shrink-0">
                                     <span className="text-xl font-semibold text-gray-800 custom-font">
-                                        {review.name
-                                            ? `${review.name.split(' ')[0]}${
-                                                  review.name.split(' ')[1]
-                                                      ? ` ${review.name
+                                        {review.customerName
+                                            ? `${
+                                                  review.customerName.split(
+                                                      ' '
+                                                  )[0]
+                                              }${
+                                                  review.customerName.split(
+                                                      ' '
+                                                  )[1]
+                                                      ? ` ${review.customerName
                                                             .split(' ')[1]
                                                             .charAt(0)}.`
                                                       : ''
                                               }`
                                             : 'Anonymous'}
-                                    </span>
+                                    </span>{' '}
                                 </div>
-                                <div className="flex-grow border-t border-gray-300"></div>
+                                <div className="flex-grow border-t border-gray-300">
+                                    {' '}
+                                </div>
+                                <span className="custom-font">
+                                    {review.productName}
+                                </span>
                             </div>
                             <div className="flex items-center space-x-3 mb-4">
                                 <span className="text-yellow-500 font-semibold">

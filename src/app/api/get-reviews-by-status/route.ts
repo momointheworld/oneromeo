@@ -4,25 +4,33 @@ import { ObjectId } from 'mongodb'
 
 export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url)
-    // moving it outside of the try catch for dynamic server error handling
-    try {
-        // Extract search parameters
-        const id = searchParams.get('id')
 
-        if (!id) {
+    try {
+        // Extract and parse the ID parameter
+        const idParam = searchParams.get('id')
+        if (!idParam) {
             return NextResponse.json(
                 { error: 'ID is required' },
                 { status: 400 }
             )
         }
 
-        // Check if the provided ID is a valid ObjectId
-        const isValidObjectId = ObjectId.isValid(id)
+        // Convert comma-separated IDs into an array
+        const idList = idParam.split(',')
 
-        // Fetch reviews based on the id (whether it's an ObjectId or token)
+        // Validate and filter valid ObjectIds
+        const validIds = idList.filter((id) => ObjectId.isValid(id))
+
+        if (validIds.length === 0) {
+            return NextResponse.json(
+                { error: 'No valid IDs provided' },
+                { status: 400 }
+            )
+        }
+
         const reviews = await db.review.findMany({
             where: {
-                status: 'approved', // Only fetch approved reviews (optional based on your use case)
+                status: 'approved', // Fetch only approved reviews
             },
             select: {
                 rating: true,
@@ -30,9 +38,10 @@ export async function GET(req: NextRequest) {
                 submittedAt: true,
                 reviewLink: {
                     select: {
+                        productName: true, // Fetch product name from ReviewLink
                         customer: {
                             select: {
-                                name: true,
+                                name: true, // Fetch customer name
                             },
                         },
                     },
@@ -40,33 +49,14 @@ export async function GET(req: NextRequest) {
             },
         })
 
-        // Transform the result to the desired format
-        interface Review {
-            rating: number
-            comment: string
-            submittedAt: Date | null
-            reviewLink: {
-                customer: {
-                    name: string | null
-                } | null
-            }
-        }
-
-        interface FormattedReview {
-            name: string
-            rating: number
-            comment: string
-            submittedAt?: string
-        }
-
-        const formattedReviews: FormattedReview[] = reviews.map(
-            (review: Review) => ({
-                name: review.reviewLink?.customer?.name || 'Anonymous', // Fallback for customers without a name
-                rating: review.rating,
-                comment: review.comment,
-                submittedAt: review.submittedAt?.toISOString(),
-            })
-        )
+        // Transform the result into the desired format
+        const formattedReviews = reviews.map((review) => ({
+            productName: review.reviewLink?.productName || 'Unknown Product', // Use productName from reviewLink
+            customerName: review.reviewLink?.customer?.name || 'Anonymous',
+            rating: review.rating,
+            comment: review.comment,
+            submittedAt: review.submittedAt?.toISOString(),
+        }))
 
         console.log(formattedReviews)
 
