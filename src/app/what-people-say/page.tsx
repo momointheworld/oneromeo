@@ -2,7 +2,7 @@
 
 import { CardSkeleton } from '@/components/common/skeleton-loading'
 import TestimonialsComponent from '@/components/testimonialsComponent'
-import { Skeleton } from '@nextui-org/react'
+import { Alert, Skeleton } from '@nextui-org/react'
 import { useEffect, useState } from 'react'
 
 interface Customer {
@@ -26,13 +26,17 @@ function TestimonialsPage() {
             try {
                 const response = await fetch('/api/get-customers')
                 if (!response.ok) {
-                    throw new Error('Failed to fetch customers')
+                    throw new Error(
+                        'Failed to fetch customers. Check your network connection and try again.'
+                    )
                 }
                 const data = await response.json()
                 setCustomers(data.customers || [])
             } catch (error: any) {
                 console.error('Error fetching customers:', error.message)
-                setError('Failed to fetch customers')
+                setError(
+                    'Failed to fetch customers. Check your network connection and try again.'
+                )
             } finally {
                 setLoading(false)
             }
@@ -56,11 +60,20 @@ function TestimonialsPage() {
     }
 
     if (error) {
-        return <p>{error}</p>
+        return (
+            <Alert color="warning" className="flex justify-items-center">
+                {error}
+            </Alert>
+        )
     }
 
     if (customers.length === 0) {
-        return <p>No customers available</p>
+        return (
+            <Alert color="warning" className="flex justify-items-center">
+                No customers available. Check your network connection and try
+                again.
+            </Alert>
+        )
     }
 
     return (

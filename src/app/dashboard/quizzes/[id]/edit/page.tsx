@@ -644,7 +644,10 @@ export default function ModifyQuizzes() {
                     </Button>
 
                     {/* Form State Message */}
-                    <DisplayMessage formStateMessage={formStateMessage} />
+                    <DisplayMessage
+                        formStateMessage={formStateMessage}
+                        color="warning"
+                    />
                 </div>
             </div>
         </>

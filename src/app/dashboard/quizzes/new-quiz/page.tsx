@@ -475,7 +475,10 @@ export default function NewQuiz() {
                         </Button>
                     </form>
                     <div className="my-5">
-                        <DisplayMessage formStateMessage={formStateMessage} />
+                        <DisplayMessage
+                            formStateMessage={formStateMessage}
+                            color="warning"
+                        />
                     </div>
                 </div>
             </div>

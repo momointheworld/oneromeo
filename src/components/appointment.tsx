@@ -198,7 +198,10 @@ const AddAppointment: React.FC<AddAppointmentProps> = ({
                     errorMessage={emailError}
                 />
             </div>
-            <DisplayMessage formStateMessage={formStateMessage} />
+            <DisplayMessage
+                formStateMessage={formStateMessage}
+                color="warning"
+            />
         </div>
     )
 }

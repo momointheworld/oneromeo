@@ -1,6 +1,7 @@
 'use client'
 import React, { useState, FormEvent } from 'react'
 import { Button, Form, Input, Textarea } from '@nextui-org/react'
+import DisplayMessage from '@/components/common/message'
 
 export default function ContactPage() {
     const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -88,7 +89,10 @@ export default function ContactPage() {
                         />
                     </svg>
 
-                    <div style={{ color: 'green' }}>{successMessage}</div>
+                    <DisplayMessage
+                        formStateMessage={successMessage}
+                        color="success"
+                    />
                 </div>
             ) : (
                 <div>

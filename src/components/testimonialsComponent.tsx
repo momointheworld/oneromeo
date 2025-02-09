@@ -1,6 +1,6 @@
 'use client'
 import { Icon } from '@iconify/react/dist/iconify.js'
-import { Skeleton } from '@nextui-org/react'
+import { Alert, Skeleton } from '@nextui-org/react'
 import { Suspense, useEffect, useState } from 'react'
 import { CardSkeleton } from './common/skeleton-loading'
 
@@ -80,11 +80,19 @@ function TestimonialsPage({ customers }: TestimonialsComponentProps) {
     }
 
     if (error) {
-        return <p className="error">{error}</p>
+        return (
+            <Alert color="warning" className="flex justify-items-center">
+                {error}
+            </Alert>
+        )
     }
 
     if (reviews.length === 0) {
-        return <p>No reviews available for display.</p>
+        return (
+            <Alert color="warning" className="flex justify-items-center">
+                No reviews available at this time.
+            </Alert>
+        )
     }
 
     const renderStars = (rating: number) => {

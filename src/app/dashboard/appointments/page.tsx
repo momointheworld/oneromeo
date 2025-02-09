@@ -152,7 +152,10 @@ const AllAppointmentsPage = () => {
                     <div>{error}</div>
                 ) : (
                     <>
-                        <DisplayMessage formStateMessage={formMessage} />
+                        <DisplayMessage
+                            formStateMessage={formMessage}
+                            color="warning"
+                        />
                         <RenderAppointments
                             latestAppointments={currentAppointments}
                             startIndex={indexOfFirstAppointment + 1}

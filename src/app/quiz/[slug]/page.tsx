@@ -313,7 +313,7 @@ const SingleQuizPage = () => {
                                 </div>
                                 <Spacer y={2} />
                                 <Button
-                                    onClick={handleNextClick}
+                                    onPress={handleNextClick}
                                     size="lg"
                                     color="primary"
                                     className="w-full mt-5"

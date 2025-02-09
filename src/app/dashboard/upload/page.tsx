@@ -75,7 +75,10 @@ const UploadPage = () => {
                 >
                     Upload
                 </Button>
-                <DisplayMessage formStateMessage={formMessage} />
+                <DisplayMessage
+                    formStateMessage={formMessage}
+                    color="warning"
+                />
             </div>
         </div>
     )

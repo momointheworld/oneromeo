@@ -27,7 +27,17 @@ const ConfirmationPage: React.FC = () => {
     const [downloadUrl, setDownloadUrl] = useState<string | null>(null)
     const [downloadText, setDownloadText] = useState<string>('Processing...')
     const [loading, setLoading] = useState(true)
-    const [formMessage, setFormMessage] = useState('')
+    const [formMessage, setFormMessage] = useState<{
+        message: string
+        color:
+            | 'default'
+            | 'primary'
+            | 'secondary'
+            | 'success'
+            | 'warning'
+            | 'danger'
+            | undefined
+    }>({ message: '', color: 'warning' })
 
     useEffect(() => {
         const fetchDownloadUrl = async () => {
@@ -36,7 +46,10 @@ const ConfirmationPage: React.FC = () => {
             const delay = 2000 // 2 seconds
             let attempts = 0
 
-            setFormMessage('Hang tight! Your eBook is being prepared.')
+            setFormMessage({
+                message: 'Hang tight! Your eBook is being prepared.',
+                color: 'warning',
+            })
             setLoading(true)
 
             while (!token && attempts < maxRetries) {
@@ -48,9 +61,11 @@ const ConfirmationPage: React.FC = () => {
                         const data = await response.json()
                         token = data.token
                     } else {
-                        setFormMessage(
-                            'Just a moment, please! Your eBook is on its way.'
-                        )
+                        setFormMessage({
+                            message:
+                                'Just a moment, please! Your eBook is on its way.',
+                            color: 'warning',
+                        })
                     }
                 } catch (err: any) {
                     console.log(err.message)
@@ -78,9 +93,11 @@ const ConfirmationPage: React.FC = () => {
 
                     const downloadData = await downloadResponse.json()
                     setDownloadUrl(downloadData.url)
-                    setFormMessage(
-                        ' Your eBook is ready! You can download it now.'
-                    )
+                    setFormMessage({
+                        message:
+                            ' Your eBook is ready! You can download it now.',
+                        color: 'success',
+                    })
                     setDownloadText('Download eBook')
                     setLoading(false)
                 } catch (err: any) {
@@ -89,9 +106,11 @@ const ConfirmationPage: React.FC = () => {
                     setLoading(false)
                 }
             } else {
-                setFormMessage(
-                    'Token not found after multiple attempts. Please refresh the page and try again.'
-                )
+                setFormMessage({
+                    message:
+                        'Token not found after multiple attempts. Please refresh the page and try again.',
+                    color: 'danger',
+                })
                 setLoading(false)
             }
         }
@@ -149,17 +168,25 @@ const ConfirmationPage: React.FC = () => {
             a.href = downloadUrl
             a.download = 'Not-in-a-Million-Years-by-Arnold-Meindertsma.epub'
             a.click()
-            setFormMessage(
-                'Just a moment, your eBook is on its way and will be ready in a few seconds.'
-            )
+            setFormMessage({
+                message:
+                    'Just a moment, your eBook is on its way and will be ready in a few seconds.',
+                color: 'warning',
+            })
         } else {
-            setFormMessage('Download URL is not available.')
+            setFormMessage({
+                message: 'Download URL is not available.',
+                color: 'danger',
+            })
         }
     }
 
     return (
         <div className="text-center">
-            <DisplayMessage formStateMessage={formMessage} />
+            <DisplayMessage
+                formStateMessage={formMessage.message}
+                color={formMessage.color}
+            />
             {hasAppointment ? (
                 <>
                     <div>
