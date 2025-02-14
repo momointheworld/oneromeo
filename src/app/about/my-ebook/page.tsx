@@ -6,6 +6,7 @@ export default function EbookPage() {
     return (
         <GridLayout>
             <PostsByCategory categoryName="Ebook" />
+            <h2>Reader feedback:</h2>
             <TestimonialsComponent productName="book" />
         </GridLayout>
     )

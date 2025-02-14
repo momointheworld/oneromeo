@@ -21,6 +21,9 @@ export async function GET(req: NextRequest) {
                 productName: true,
             },
         })
+        //the "productName" is only within reviewlink schema, so it needs to filter from that
+        // and then select its id and productname so we can select the reviews related to that reviewLink
+
         // Get reviews linked to found reviewLinks
         const reviews = await db.review.findMany({
             where: {

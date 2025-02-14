@@ -2,7 +2,7 @@
 import { Icon } from '@iconify/react/dist/iconify.js'
 import { Alert } from '@nextui-org/react'
 import { Suspense, useEffect, useState } from 'react'
-import { CardSkeleton } from './common/skeleton-loading'
+import { CardSkeleton, FullSkeleton } from './common/skeleton-loading'
 
 type Review = {
     comment: string
@@ -114,9 +114,9 @@ function TestimonialsPage({ productName }: TestimonialsPageProps) {
     }
 
     return (
-        <Suspense fallback={<div>Loading...</div>}>
-            <div className="testimonials max-w-7xl mx-auto p-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+        <Suspense fallback={<FullSkeleton />}>
+            <div className="testimonials max-w-7xl mx-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 p-6">
                     {reviews.map((review, index) => (
                         <div
                             key={index}
