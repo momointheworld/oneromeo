@@ -1,6 +1,6 @@
 'use client'
 import { Icon } from '@iconify/react/dist/iconify.js'
-import { Alert, Skeleton } from '@nextui-org/react'
+import { Alert } from '@nextui-org/react'
 import { Suspense, useEffect, useState } from 'react'
 import { CardSkeleton } from './common/skeleton-loading'
 
