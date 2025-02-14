@@ -12,40 +12,25 @@ type Review = {
     productName: string
 }
 
-type Customer = {
-    id: string
-    name: string
-    email: string
+type TestimonialsPageProps = {
+    productName?: string // Optional product name for filtering
 }
 
-interface TestimonialsComponentProps {
-    customers: Customer[]
-}
-
-function TestimonialsPage({ customers }: TestimonialsComponentProps) {
+function TestimonialsPage({ productName }: TestimonialsPageProps) {
     const [reviews, setReviews] = useState<Review[]>([])
     const [error, setError] = useState<string | null>(null)
     const [loading, setLoading] = useState<boolean>(true)
 
     useEffect(() => {
         const fetchReviews = async () => {
-            if (!customers || customers.length === 0) {
-                setLoading(false)
-                setError('No customers available to fetch reviews.')
-                return
-            }
-
-            // Extract IDs from customers to query reviews
-            const customerIds = customers.map((customer) => customer.id)
-            if (customerIds.length === 0) {
-                setLoading(false)
-                setError('Customer IDs are missing.')
-                return
-            }
-
             try {
+                // Fetch reviews with optional productName filter
                 const response = await fetch(
-                    `/api/get-reviews-by-status?id=${customerIds.join(',')}`
+                    `/api/get-reviews-by-status${
+                        productName
+                            ? `?product-name=${encodeURIComponent(productName)}`
+                            : ''
+                    }`
                 )
                 if (!response.ok) {
                     const errorMessage = await response.text()
@@ -62,14 +47,15 @@ function TestimonialsPage({ customers }: TestimonialsComponentProps) {
                 setLoading(false)
             }
         }
+
         fetchReviews()
-    }, [customers])
+    }, [productName]) // Re-fetch reviews when productName changes
 
     if (loading) {
         return (
             <div className="flex flex-col items-center space-y-6">
-                <Skeleton className="h-3 w-1/3 rounded-lg" />
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+                {' '}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 mt-6">
                     <CardSkeleton />
                     <CardSkeleton />
                     <CardSkeleton />
@@ -90,7 +76,7 @@ function TestimonialsPage({ customers }: TestimonialsComponentProps) {
     if (reviews.length === 0) {
         return (
             <Alert color="warning" className="flex justify-items-center">
-                No reviews available at this time.
+                No reviews available for the selected product.
             </Alert>
         )
     }
@@ -98,7 +84,6 @@ function TestimonialsPage({ customers }: TestimonialsComponentProps) {
     const renderStars = (rating: number) => {
         const stars = []
 
-        // Render filled stars based on rating
         for (let i = 1; i <= 5; i++) {
             if (i <= rating) {
                 stars.push(
@@ -107,7 +92,7 @@ function TestimonialsPage({ customers }: TestimonialsComponentProps) {
                         icon="iconoir:star"
                         style={{
                             fontSize: '30px',
-                            color: 'orange', // Filled stars color
+                            color: 'orange',
                         }}
                     />
                 )
@@ -115,10 +100,10 @@ function TestimonialsPage({ customers }: TestimonialsComponentProps) {
                 stars.push(
                     <Icon
                         key={`empty-${i}`}
-                        icon="iconoir:star-outline" // Empty star icon
+                        icon="iconoir:star-outline"
                         style={{
                             fontSize: '30px',
-                            color: 'lightgray', // Empty stars color
+                            color: 'lightgray',
                         }}
                     />
                 )
@@ -155,11 +140,9 @@ function TestimonialsPage({ customers }: TestimonialsComponentProps) {
                                                       : ''
                                               }`
                                             : 'Anonymous'}
-                                    </span>{' '}
+                                    </span>
                                 </div>
-                                <div className="flex-grow border-t border-gray-300">
-                                    {' '}
-                                </div>
+                                <div className="flex-grow border-t border-gray-300"></div>
                                 <span className="custom-font">
                                     {review.productName}
                                 </span>
@@ -172,10 +155,8 @@ function TestimonialsPage({ customers }: TestimonialsComponentProps) {
                             <p className="text-gray-700 mb-3">
                                 {review.comment}
                             </p>
-
                             <p className="text-gray-700 text-sm float-right">
                                 <small>
-                                    {' '}
                                     {new Date(
                                         review.submittedAt
                                     ).toLocaleDateString()}
