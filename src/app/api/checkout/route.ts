@@ -205,8 +205,8 @@ export async function POST(req: NextRequest, res: NextResponse) {
             customer_email: email,
             customer_creation: 'always',
             success_url: successUrl,
-            // cancel_url: 'https://oneromeo.com/',
-            cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}`,
+            cancel_url: 'https://oneromeo.com/',
+            // cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}`,
         })
         return NextResponse.json({ url: session.url })
     } catch (err: any) {
