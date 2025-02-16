@@ -187,8 +187,8 @@ export async function POST(req: NextRequest, res: NextResponse) {
         const encodedTimeZone = encodeURIComponent(timeZone)
         const encodedEmail = encodeURIComponent(email)
 
-        // let successUrl = `https://oneromeo.com/confirmation?success=true&session_id={CHECKOUT_SESSION_ID}&appointment_date_time=${encodedCsrDate}&th_date_time=${encodedThDate}&utc_date_time=${encodedUtcDate}&csrTimeZone=${encodedTimeZone}&email=${encodedEmail}`
-        let successUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/confirmation?success=true&session_id={CHECKOUT_SESSION_ID}&appointment_date_time=${encodedCsrDate}&th_date_time=${encodedThDate}&utc_date_time=${encodedUtcDate}&csrTimeZone=${encodedTimeZone}&email=${encodedEmail}`
+        let successUrl = `https://oneromeo.com/confirmation?success=true&session_id={CHECKOUT_SESSION_ID}&appointment_date_time=${encodedCsrDate}&th_date_time=${encodedThDate}&utc_date_time=${encodedUtcDate}&csrTimeZone=${encodedTimeZone}&email=${encodedEmail}`
+        // let successUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/confirmation?success=true&session_id={CHECKOUT_SESSION_ID}&appointment_date_time=${encodedCsrDate}&th_date_time=${encodedThDate}&utc_date_time=${encodedUtcDate}&csrTimeZone=${encodedTimeZone}&email=${encodedEmail}`
 
         const session = await stripeInstance.checkout.sessions.create({
             payment_method_types: ['card', 'alipay', 'wechat_pay'],
