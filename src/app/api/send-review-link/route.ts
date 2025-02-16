@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
         // Log the fetched review link
         console.log('Fetched review link:', reviewLink)
 
-        const siteUrl = `${process.env.NEXT_PUBLIC_SITE_URL}.replace(/\/$/, '')` // Remove trailing slash if it exists
+        const siteUrl = `${process.env.NEXT_PUBLIC_SITE_URL}`.replace(/\/$/, '') // Remove trailing slash if it exists
         const reviewLinkUrl = `${siteUrl}/submit-review?token=${reviewLink.token}`
 
         const eBookSubject = 'Enjoyed My eBook?'
