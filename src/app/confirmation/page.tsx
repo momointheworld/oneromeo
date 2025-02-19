@@ -4,6 +4,10 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import DisplayMessage from '@/components/common/message'
 import { Button } from '@nextui-org/react'
 import { Image } from '@nextui-org/react'
+import {
+    CardSkeleton,
+    FullSkeleton,
+} from '@/components/common/skeleton-loading'
 
 const ConfirmationPage: React.FC = () => {
     const searchParams = useSearchParams()
@@ -257,7 +261,14 @@ const ConfirmationPage: React.FC = () => {
 
 export default function ConfirmationPageWrapper() {
     return (
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense
+            fallback={
+                <div className="flex flex-col">
+                    <FullSkeleton />
+                    <CardSkeleton />
+                </div>
+            }
+        >
             <ConfirmationPage />
         </Suspense>
     )
