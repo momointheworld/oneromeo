@@ -261,14 +261,7 @@ const ConfirmationPage: React.FC = () => {
 
 export default function ConfirmationPageWrapper() {
     return (
-        <Suspense
-            fallback={
-                <div className="flex flex-col">
-                    <FullSkeleton />
-                    <CardSkeleton />
-                </div>
-            }
-        >
+        <Suspense fallback={<CardSkeleton />}>
             <ConfirmationPage />
         </Suspense>
     )
