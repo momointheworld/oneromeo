@@ -1,8 +1,9 @@
 'use client'
 import { Icon } from '@iconify/react/dist/iconify.js'
-import { Alert } from '@nextui-org/react'
-import { Suspense, useEffect, useState } from 'react'
+import { Alert, Button } from '@nextui-org/react'
+import { Suspense, useCallback, useEffect, useState } from 'react'
 import { CardSkeleton, FullSkeleton } from './common/skeleton-loading'
+import { set } from 'zod'
 
 type Review = {
     comment: string
@@ -20,15 +21,26 @@ function TestimonialsPage({ productName }: TestimonialsPageProps) {
     const [reviews, setReviews] = useState<Review[]>([])
     const [error, setError] = useState<string | null>(null)
     const [loading, setLoading] = useState<boolean>(true)
+    const [isLoading, setIsLoading] = useState<boolean>(true)
+    const [page, setPage] = useState(1)
+    const [hasMore, setHasMore] = useState<boolean>(true)
 
-    useEffect(() => {
-        const fetchReviews = async () => {
+    const fetchReviews = useCallback(
+        async (currentPage: number) => {
+            const isFirstLoad = currentPage === 1
+            const limit = isFirstLoad ? 6 : 4 // First load: 6, subsequent: 4
+
+            if (isFirstLoad) {
+                setLoading(true) // Initial loading state
+            } else {
+                setIsLoading(true) // Loading state for "More Reviews"
+            }
+
             try {
-                // Fetch reviews with optional productName filter
                 const response = await fetch(
-                    `/api/get-reviews-by-status${
+                    `/api/get-reviews-by-status?limit=6&page=${currentPage}${
                         productName
-                            ? `?product-name=${encodeURIComponent(productName)}`
+                            ? `&product-name=${encodeURIComponent(productName)}`
                             : ''
                     }`
                 )
@@ -39,22 +51,42 @@ function TestimonialsPage({ productName }: TestimonialsPageProps) {
                     )
                 }
                 const data = await response.json()
-                setReviews(data.reviews || [])
+
+                setReviews((prev) =>
+                    currentPage === 1
+                        ? data.reviews
+                        : [...prev, ...data.reviews]
+                )
+                setHasMore(data.reviews.length === limit) // Check if more reviews exist
+                setError(null)
             } catch (error: any) {
                 console.error('Error fetching reviews:', error)
                 setError(error.message || 'Failed to fetch reviews.')
             } finally {
-                setLoading(false)
+                setLoading(false) // Only affects initial load
+                setIsLoading(false) // Only affects "More Reviews"
             }
-        }
+        },
+        [productName]
+    )
 
-        fetchReviews()
-    }, [productName]) // Re-fetch reviews when productName changes
+    useEffect(() => {
+        // Reset state when product changes
+        setPage(1)
+        setHasMore(true)
+        setLoading(true)
+        fetchReviews(1) // No need to reset reviews here, as fetchReviews will replace them for page 1
+    }, [productName, fetchReviews])
 
-    if (loading) {
+    const loadMoreReviews = () => {
+        const nextPage = page + 1
+        setPage(nextPage)
+        fetchReviews(nextPage)
+    }
+
+    if (loading && reviews.length === 0) {
         return (
             <div className="flex flex-col items-center space-y-6">
-                {' '}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 mt-6">
                     <CardSkeleton />
                     <CardSkeleton />
@@ -82,35 +114,22 @@ function TestimonialsPage({ productName }: TestimonialsPageProps) {
     }
 
     const renderStars = (rating: number) => {
-        const stars = []
-
-        for (let i = 1; i <= 5; i++) {
-            if (i <= rating) {
-                stars.push(
+        return (
+            <div className="flex">
+                {Array.from({ length: 5 }, (_, i) => (
                     <Icon
-                        key={`filled-${i}`}
-                        icon="iconoir:star"
+                        key={i}
+                        icon={
+                            i < rating ? 'iconoir:star' : 'iconoir:star-outline'
+                        }
                         style={{
                             fontSize: '30px',
-                            color: 'orange',
+                            color: i < rating ? 'orange' : 'lightgray',
                         }}
                     />
-                )
-            } else {
-                stars.push(
-                    <Icon
-                        key={`empty-${i}`}
-                        icon="iconoir:star-outline"
-                        style={{
-                            fontSize: '30px',
-                            color: 'lightgray',
-                        }}
-                    />
-                )
-            }
-        }
-
-        return <div className="flex">{stars}</div>
+                ))}
+            </div>
+        )
     }
 
     return (
@@ -165,6 +184,19 @@ function TestimonialsPage({ productName }: TestimonialsPageProps) {
                         </div>
                     ))}
                 </div>
+
+                {hasMore && (
+                    <div className="flex justify-center mt-6">
+                        <Button
+                            color="primary"
+                            onPress={loadMoreReviews}
+                            isLoading={isLoading}
+                            disabled={isLoading}
+                        >
+                            {isLoading ? 'Loading...' : 'More Reviews'}
+                        </Button>
+                    </div>
+                )}
             </div>
         </Suspense>
     )

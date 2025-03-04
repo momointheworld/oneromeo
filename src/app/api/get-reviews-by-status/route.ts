@@ -6,6 +6,10 @@ export async function GET(req: NextRequest) {
 
     try {
         const productName = searchParams.get('product-name')
+        const limit = parseInt(searchParams.get('limit') || '10', 10) // Default: 10 per page
+        const page = parseInt(searchParams.get('page') || '1', 10) // Default: page 1
+        const skip = (page - 1) * limit // Calculate offset
+
         // Fetch matching ReviewLinks using regex-like filtering
         const reviewLinks = await db.reviewLink.findMany({
             where: productName
@@ -21,16 +25,16 @@ export async function GET(req: NextRequest) {
                 productName: true,
             },
         })
-        //the "productName" is only within reviewlink schema, so it needs to filter from that
-        // and then select its id and productname so we can select the reviews related to that reviewLink
 
-        // Get reviews linked to found reviewLinks
+        if (reviewLinks.length === 0) {
+            return NextResponse.json({ reviews: [], hasMore: false })
+        }
+
+        // Get paginated reviews linked to found reviewLinks
         const reviews = await db.review.findMany({
             where: {
                 status: 'approved',
-                ...(reviewLinks.length > 0 && {
-                    reviewLinkId: { in: reviewLinks.map((rl) => rl.id) },
-                }),
+                reviewLinkId: { in: reviewLinks.map((rl) => rl.id) },
             },
             select: {
                 rating: true,
@@ -43,7 +47,20 @@ export async function GET(req: NextRequest) {
                     },
                 },
             },
+            orderBy: { submittedAt: 'desc' }, // Latest reviews first
+            skip,
+            take: limit,
         })
+
+        // Get total review count for pagination
+        const totalReviews = await db.review.count({
+            where: {
+                status: 'approved',
+                reviewLinkId: { in: reviewLinks.map((rl) => rl.id) },
+            },
+        })
+
+        const hasMore = skip + limit < totalReviews // Check if more reviews exist
 
         const formattedReviews = reviews.map((review) => ({
             productName: review.reviewLink?.productName || 'Unknown Product',
@@ -53,7 +70,7 @@ export async function GET(req: NextRequest) {
             submittedAt: review.submittedAt?.toISOString(),
         }))
 
-        return NextResponse.json({ reviews: formattedReviews })
+        return NextResponse.json({ reviews: formattedReviews, hasMore })
     } catch (error) {
         console.error('Error fetching approved reviews:', error)
         return NextResponse.json(
